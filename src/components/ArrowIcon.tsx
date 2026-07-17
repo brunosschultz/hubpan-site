@@ -1,0 +1,16 @@
+interface ArrowIconProps {
+  color?: string;
+  size?: number;
+}
+
+/** Seta arrow-up-right exata do Figma (viewBox 0 0 13 13). */
+export default function ArrowIcon({ color = '#ffffff', size = 13 }: ArrowIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
+      <path
+        d="M10.4763 3.68308L1.47809 12.9766L-5.74104e-05 11.45L8.99818 2.15642L0.720541 2.15642L0.739018 1.16825e-05H12.5642V12.2133L10.4763 12.2324L10.4763 3.68308Z"
+        fill={color}
+      />
+    </svg>
+  );
+}

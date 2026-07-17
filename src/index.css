@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Luxenta';
+  src: url('/fonts/Luxenta-Regular.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Luxenta';
+  src: url('/fonts/Luxenta-Medium.woff2') format('woff2');
+  font-weight: 500; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Luxenta';
+  src: url('/fonts/Luxenta-SemiBold.woff2') format('woff2');
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #ffffff;
+  color: #152852;
+  overflow-x: hidden;
+}
+* { box-sizing: border-box; }
+button { font-synthesis: none; cursor: pointer; }
+
+/* Sanga global 160px → responsivo */
+.gutter { padding-left: clamp(24px, 8.333vw, 160px); padding-right: clamp(24px, 8.333vw, 160px); }
+
+/* Rótulo olho */
+.eyebrow {
+  font-family: 'Inter', sans-serif; font-weight: 400; font-size: 16px;
+  letter-spacing: 3.2px; text-transform: uppercase;
+}
+
+/* Carrossel logos S10 */
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marquee-track { animation: marquee 38s linear infinite; }
+.marquee-track:hover { animation-play-state: paused; }
+.marquee-mask {
+  mask-image: linear-gradient(to right, transparent 0, black 66px, black calc(100% - 66px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, black 66px, black calc(100% - 66px), transparent 100%);
+}
+
+/* Selo rotativo S2 */
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.spin-slow { animation: spin-slow 25s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track, .spin-slow { animation: none; }
+  html { scroll-behavior: auto; }
+}
