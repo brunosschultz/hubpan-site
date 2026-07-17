@@ -60,7 +60,7 @@ export default function S1Hero() {
         <p data-hero-text className="text-[13px] font-medium uppercase mb-6" style={{ letterSpacing: '5.85px', color: 'rgba(255,255,255,0.5)' }}>
           Plataforma Internacional
         </p>
-        <h1 data-hero-text className="mb-8" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(34px, 4.4vw, 60px)', lineHeight: 1.05, letterSpacing: '-1.5px', color: '#f5f4f4', maxWidth: 620 }}>
+        <h1 data-hero-text className="mb-8" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(34px, 3.4vw, 52px)', lineHeight: 1.1, letterSpacing: '-1.2px', color: '#f5f4f4', maxWidth: 600 }}>
           Unimos as Américas e África ao <span style={{ color: '#fff' }}>ecossistema</span> <span style={{ color: '#d2e718' }}>global de inovação.</span>
         </h1>
         <p data-hero-text className="mb-12" style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: 18, lineHeight: '36px', letterSpacing: '-0.18px', color: '#d6d6d6', maxWidth: 593 }}>
