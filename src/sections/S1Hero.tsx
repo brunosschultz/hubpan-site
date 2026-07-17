@@ -56,11 +56,11 @@ export default function S1Hero() {
       <NavBar />
 
       {/* Conteúdo */}
-      <div className="absolute inset-0 z-10 flex flex-col justify-center gutter pt-[120px] max-w-[860px]">
+      <div className="absolute inset-0 z-10 flex flex-col justify-center gutter pt-[120px]">
         <p data-hero-text className="text-[13px] font-medium uppercase mb-6" style={{ letterSpacing: '5.85px', color: 'rgba(255,255,255,0.5)' }}>
           Plataforma Internacional
         </p>
-        <h1 data-hero-text className="mb-8" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(34px, 3.4vw, 52px)', lineHeight: 1.1, letterSpacing: '-1.2px', color: '#f5f4f4', maxWidth: 600 }}>
+        <h1 data-hero-text className="mb-8" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 65, lineHeight: '65px', letterSpacing: '-1.95px', color: '#f5f4f4', maxWidth: 720 }}>
           Unimos as Américas e África ao <span style={{ color: '#fff' }}>ecossistema</span> <span style={{ color: '#d2e718' }}>global de inovação.</span>
         </h1>
         <p data-hero-text className="mb-12" style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: 18, lineHeight: '36px', letterSpacing: '-0.18px', color: '#d6d6d6', maxWidth: 593 }}>
