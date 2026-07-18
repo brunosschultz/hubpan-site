@@ -10,7 +10,7 @@ export default function S11Newsletter() {
       <div className="grid lg:grid-cols-2 gap-10 items-center">
         <div>
           <p className="eyebrow text-muted mb-6" data-animate>HUB PAN INSIGHTS · NEWSLETTER</p>
-          <h2 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', color: '#152852' }} data-animate>
+          <h2 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', lineHeight: 1, color: '#152852' }} data-animate>
             Fique conectado ao ecossistema.
           </h2>
           <p style={{ fontFamily: 'Inter', fontSize: 16, color: '#152852', maxWidth: 527 }} data-animate>

@@ -4,12 +4,13 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import {
-  Landmark, GraduationCap, Building2, Scale, BrainCircuit, Globe2, ShieldCheck, HeartHandshake, FileCheck2, MapPin,
+  Landmark, GraduationCap, Building2, Scale, BrainCircuit, Globe2, ShieldCheck, HeartHandshake, FileCheck2, MapPin, Rocket,
 } from 'lucide-react';
 import FAQAccordion from '../../components/FAQAccordion';
 import CTABanner from '../../components/CTABanner';
 import HubButton from '../../components/HubButton';
 import { useReveal, useRevealBidirectional } from '../../components/useReveal';
+import { useTilt } from '../../components/useTilt';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -48,7 +49,7 @@ const FUNDADORAS = [
 type Tile = {
   img: string; tag: string; nome: string; desc: string;
   kind: 'photocard' | 'image' | 'typo';
-  color?: 'navy' | 'blue' | 'lime';
+  color?: 'navy' | 'blue' | 'lime' | 'white';
   Icon?: typeof MapPin;
 };
 
@@ -70,7 +71,7 @@ const TERRITORIOS: Tile[] = [
     desc: 'Sede brasileira ancorada na Avenida Paulista — centro econômico e institucional do Brasil.',
   },
   {
-    kind: 'image', img: 's6-numero-4', tag: 'INOVAÇÃO · TECH', nome: 'Boston',
+    kind: 'typo', color: 'white', Icon: Rocket, img: 's6-numero-4', tag: 'INOVAÇÃO · TECH', nome: 'Boston',
     desc: 'Sede da 1ª Expo Boston (maio 2026) e futuro host do Fórum Mundial de IA em 2027.',
   },
   {
@@ -144,12 +145,10 @@ function HeroInst() {
         <div className="absolute inset-x-0 bottom-0 h-40" style={{ background: 'linear-gradient(to top, rgba(6,9,25,0.9), transparent)' }} />
 
         <div className="relative gutter w-full pt-[150px] lg:pt-[190px] pb-12">
-          <p className="mb-7" style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(255,255,255,0.4)' }} data-animate>
-            <Link to="/" className="hover:text-lime transition-colors">Início</Link>
-            <span className="mx-2" style={{ color: 'rgba(255,255,255,0.25)' }}>/</span>
-            <span style={{ color: 'rgba(255,255,255,0.75)' }}>O HUB PAN</span>
+          {/* Rótulo no padrão do hero da home: Inter 500 13px, tracking 5.85px, branco 50% */}
+          <p className="text-[13px] font-medium uppercase mb-6" style={{ fontFamily: 'Inter', letterSpacing: '5.85px', color: 'rgba(255,255,255,0.5)' }} data-animate>
+            QUEM SOMOS · LEGADO · PROPÓSITO · PRESENÇA GLOBAL
           </p>
-          <p className="eyebrow mb-6" style={{ color: 'rgba(255,255,255,0.69)' }} data-animate>QUEM SOMOS · LEGADO · PROPÓSITO · PRESENÇA GLOBAL</p>
           {/* Quebras manuais de melhor encaixe — padrão para os H1 das páginas internas */}
           <h1 className="mb-7 text-white" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 3vw + 18px, 62px)', lineHeight: 1, letterSpacing: '-1.2px' }} data-animate>
             Uma narrativa global<br />
@@ -161,7 +160,7 @@ function HeroInst() {
           </p>
           <div className="flex flex-wrap gap-4" data-animate>
             <Link to="/contato"><HubButton size="lg" variant="lime">Fale com nossa equipe</HubButton></Link>
-            <HubButton size="lg" variant="outline-light" onClick={() => ScrollSmoother.get()?.scrollTo('#inst-manifesto', true)}>
+            <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#inst-manifesto', true)}>
               Leia o manifesto
             </HubButton>
           </div>
@@ -321,6 +320,7 @@ const TILE_COLORS = {
   navy: { bg: '#152852', text: '#fff', sub: 'rgba(255,255,255,0.78)', tagBorder: 'rgba(255,255,255,0.3)', tagText: '#fff', iconBg: 'rgba(255,255,255,0.1)', iconColor: '#d2e718' },
   blue: { bg: '#2d4ebf', text: '#fff', sub: 'rgba(255,255,255,0.82)', tagBorder: 'rgba(255,255,255,0.35)', tagText: '#fff', iconBg: 'rgba(255,255,255,0.12)', iconColor: '#d2e718' },
   lime: { bg: '#d2e718', text: '#152852', sub: 'rgba(21,40,82,0.85)', tagBorder: 'rgba(21,40,82,0.35)', tagText: '#152852', iconBg: 'rgba(21,40,82,0.08)', iconColor: '#152852' },
+  white: { bg: '#fff', text: '#152852', sub: '#797979', tagBorder: 'rgba(21,40,82,0.2)', tagText: '#152852', iconBg: '#f5f5f5', iconColor: '#2d4ebf' },
 } as const;
 
 function TerritorioTile({ t, className = '' }: { t: Tile; className?: string }) {
@@ -366,9 +366,14 @@ function TerritorioTile({ t, className = '' }: { t: Tile; className?: string }) 
   /* Tile tipográfico — cor do DS; no hover a foto surge com camada preta e o texto ganha contraste */
   const c = TILE_COLORS[t.color ?? 'navy'];
   const Icon = t.Icon ?? MapPin;
-  const isLime = t.color === 'lime';
+  /* Cards claros (texto escuro no repouso) precisam virar branco no hover — a foto + camada preta escurecem o fundo */
+  const isLight = t.color === 'lime' || t.color === 'white';
   return (
-    <div className={`group relative rounded-[20px] overflow-hidden ${className}`} style={{ background: c.bg }} data-animate>
+    <div
+      className={`group relative rounded-[20px] overflow-hidden ${className}`}
+      style={{ background: c.bg, border: t.color === 'white' ? '1px solid #ecedf0' : undefined }}
+      data-animate
+    >
       {/* Foto revelada no hover */}
       <img
         src={`/images/${t.img}.webp`}
@@ -387,7 +392,7 @@ function TerritorioTile({ t, className = '' }: { t: Tile; className?: string }) 
         </div>
 
         <span
-          className={`inline-flex self-start items-center px-3 py-[6px] rounded-full mb-3 transition-colors duration-300 ${isLime ? 'group-hover:!text-white group-hover:!border-white/40' : ''}`}
+          className={`inline-flex self-start items-center px-3 py-[6px] rounded-full mb-3 transition-colors duration-300 ${isLight ? 'group-hover:!text-white group-hover:!border-white/40' : ''}`}
           style={{
             border: `1px solid ${c.tagBorder}`,
             fontFamily: 'Inter', fontWeight: 500, fontSize: 10, letterSpacing: '1.6px', textTransform: 'uppercase', color: c.tagText,
@@ -396,13 +401,13 @@ function TerritorioTile({ t, className = '' }: { t: Tile; className?: string }) 
           {t.tag}
         </span>
         <h3
-          className={`mb-2 transition-colors duration-300 ${isLime ? 'group-hover:!text-white' : ''}`}
+          className={`mb-2 transition-colors duration-300 ${isLight ? 'group-hover:!text-white' : ''}`}
           style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 24, lineHeight: 1.15, color: c.text }}
         >
           {t.nome}
         </h3>
         <p
-          className={`transition-colors duration-300 ${isLime ? 'group-hover:!text-white/90' : ''}`}
+          className={`transition-colors duration-300 ${isLight ? 'group-hover:!text-white/90' : ''}`}
           style={{ fontFamily: 'Inter', fontSize: 13, lineHeight: '20px', color: c.sub }}
         >
           {t.desc}
@@ -501,7 +506,7 @@ function SecTimeline() {
 
   return (
     <section
-      className="py-24 lg:py-32 gutter overflow-hidden"
+      className="pt-24 lg:pt-32 gutter overflow-hidden"
       style={{ background: 'linear-gradient(39.8deg, #ffffff 65.3%, #d2e718 99%)' }}
     >
       <div ref={headRef} className="mb-16 max-w-[680px]">
@@ -514,10 +519,11 @@ function SecTimeline() {
         </p>
       </div>
 
-      <div ref={wrapRef} className="relative">
+      {/* pb aqui (em vez de no <section>) faz o trilho ir até a borda real da seção, encostando na seção seguinte */}
+      <div ref={wrapRef} className="relative pb-24 lg:pb-32">
         {/* Trilho central + linha de progresso animada (atrás dos anos) */}
-        <div className="absolute top-1 bottom-2 w-px" style={{ left: 'calc(50% - 0.5px)', background: '#dcdcdc' }} />
-        <div ref={progRef} className="absolute top-1 bottom-2 w-[2px] bg-lime" style={{ left: 'calc(50% - 1px)', transform: 'scaleY(0)' }} />
+        <div className="absolute top-1 bottom-0 w-px" style={{ left: 'calc(50% - 0.5px)', background: '#dcdcdc' }} />
+        <div ref={progRef} className="absolute top-1 bottom-0 w-[2px] bg-lime" style={{ left: 'calc(50% - 1px)', transform: 'scaleY(0)' }} />
         {TIMELINE.map((item, i) => (
           <TimelineItem key={i} item={item} side={i % 2 === 0 ? 'left' : 'right'} />
         ))}
@@ -587,6 +593,57 @@ function SecMipad() {
 
 /* ═══════════ Governança — glass cards sobre hubblue ═══════════ */
 
+/** Card com tilt 3D guiado pelo cursor + recolorização fluida no hover (GSAP):
+    card fica branco, título navy, texto cinza, círculo lime e ícone navy. */
+function GovCard({ g }: { g: (typeof GOVERNANCA)[number] }) {
+  const tiltRef = useTilt<HTMLDivElement>(8, 10);
+
+  useLayoutEffect(() => {
+    const el = tiltRef.current;
+    if (!el) return;
+    const q = gsap.utils.selector(el);
+    const D = 0.35;
+    const enter = () => {
+      gsap.to(el, { backgroundColor: '#ffffff', borderColor: '#ecedf0', duration: D, ease: 'power2.out' });
+      gsap.to(q('.gov-title'), { color: '#152852', duration: D, ease: 'power2.out' });
+      gsap.to(q('.gov-desc'), { color: '#797979', duration: D, ease: 'power2.out' });
+      gsap.to(q('.gov-circle'), { backgroundColor: '#d2e718', borderColor: 'rgba(210,231,24,0)', color: '#152852', duration: D, ease: 'power2.out' });
+    };
+    const leave = () => {
+      gsap.to(el, { backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.1)', duration: 0.45, ease: 'power2.out' });
+      gsap.to(q('.gov-title'), { color: '#ffffff', duration: 0.45, ease: 'power2.out' });
+      gsap.to(q('.gov-desc'), { color: 'rgba(255,255,255,0.8)', duration: 0.45, ease: 'power2.out' });
+      gsap.to(q('.gov-circle'), { backgroundColor: 'rgba(255,255,255,0.18)', borderColor: 'rgba(210,231,24,0.5)', color: '#ffffff', duration: 0.45, ease: 'power2.out' });
+    };
+    el.addEventListener('mouseenter', enter);
+    el.addEventListener('mouseleave', leave);
+    return () => {
+      el.removeEventListener('mouseenter', enter);
+      el.removeEventListener('mouseleave', leave);
+      gsap.killTweensOf([el, ...q('.gov-title'), ...q('.gov-desc'), ...q('.gov-circle')]);
+    };
+  }, [tiltRef]);
+
+  return (
+    <div
+      ref={tiltRef}
+      className="rounded-[20px] p-7 cursor-default"
+      style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}
+      data-animate
+    >
+      {/* Ícone herda a cor do círculo (currentColor) pra animar junto */}
+      <div
+        className="gov-circle flex items-center justify-center rounded-full mb-6"
+        style={{ width: 64, height: 64, backdropFilter: 'blur(30px)', WebkitBackdropFilter: 'blur(30px)', background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(210,231,24,0.5)', color: '#fff' }}
+      >
+        <g.Icon size={28} strokeWidth={2} />
+      </div>
+      <h3 className="gov-title mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 20, color: '#fff' }}>{g.titulo}</h3>
+      <p className="gov-desc" style={{ fontFamily: 'Inter', fontSize: 13.5, lineHeight: '22px', color: 'rgba(255,255,255,0.8)' }}>{g.desc}</p>
+    </div>
+  );
+}
+
 function SecGovernanca() {
   const ref = useReveal<HTMLElement>();
   return (
@@ -603,21 +660,7 @@ function SecGovernanca() {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
         {GOVERNANCA.map((g) => (
-          <div
-            key={g.titulo}
-            className="rounded-[20px] p-7"
-            style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.1)' }}
-            data-animate
-          >
-            <div
-              className="flex items-center justify-center rounded-full mb-6"
-              style={{ width: 64, height: 64, backdropFilter: 'blur(30px)', WebkitBackdropFilter: 'blur(30px)', background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(210,231,24,0.5)' }}
-            >
-              <g.Icon size={28} strokeWidth={2} color="#fff" />
-            </div>
-            <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 20, color: '#fff' }}>{g.titulo}</h3>
-            <p style={{ fontFamily: 'Inter', fontSize: 13.5, lineHeight: '22px', color: 'rgba(255,255,255,0.8)' }}>{g.desc}</p>
-          </div>
+          <GovCard key={g.titulo} g={g} />
         ))}
       </div>
 

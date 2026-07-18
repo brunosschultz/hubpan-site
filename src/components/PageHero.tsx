@@ -1,15 +1,7 @@
 import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
 import { useReveal } from './useReveal';
 
-interface Crumb {
-  label: string;
-  to?: string;
-}
-
 interface PageHeroProps {
-  /** Trilha de navegação — o último item é a página atual (sem link) */
-  breadcrumb: Crumb[];
   eyebrow: string;
   /** Título — use <span> com cor lime (#d2e718) para os trechos de destaque */
   title: ReactNode;
@@ -22,10 +14,10 @@ interface PageHeroProps {
 
 /**
  * Hero escuro padrão das páginas internas: fundo navy900 + grade sutil,
- * breadcrumb, rótulo, título Luxenta 65px e CTAs. A NavBar global (absoluta)
+ * rótulo, título Luxenta 65px e CTAs. A NavBar global (absoluta)
  * fica por cima — por isso o padding-top alto.
  */
-export default function PageHero({ breadcrumb, eyebrow, title, sub, actions, aside }: PageHeroProps) {
+export default function PageHero({ eyebrow, title, sub, actions, aside }: PageHeroProps) {
   const ref = useReveal<HTMLElement>();
 
   return (
@@ -40,23 +32,10 @@ export default function PageHero({ breadcrumb, eyebrow, title, sub, actions, asi
         }}
       />
       <div className="relative gutter pt-[180px] lg:pt-[240px] pb-16 lg:pb-20">
-        {/* Breadcrumb */}
-        <p className="mb-8" style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(255,255,255,0.4)' }} data-animate>
-          {breadcrumb.map((c, i) => (
-            <span key={i}>
-              {c.to ? (
-                <Link to={c.to} className="hover:text-lime transition-colors">{c.label}</Link>
-              ) : (
-                <span style={{ color: 'rgba(255,255,255,0.75)' }}>{c.label}</span>
-              )}
-              {i < breadcrumb.length - 1 && <span className="mx-2" style={{ color: 'rgba(255,255,255,0.25)' }}>/</span>}
-            </span>
-          ))}
-        </p>
-
         <div className="flex flex-col lg:flex-row lg:items-center gap-12">
           <div className="max-w-[820px]">
-            <p className="eyebrow mb-6" style={{ color: 'rgba(255,255,255,0.69)' }} data-animate>{eyebrow}</p>
+            {/* Rótulo no padrão do hero da home: Inter 500 13px, tracking 5.85px, branco 50% */}
+            <p className="text-[13px] font-medium uppercase mb-6" style={{ fontFamily: 'Inter', letterSpacing: '5.85px', color: 'rgba(255,255,255,0.5)' }} data-animate>{eyebrow}</p>
             <h1
               className="mb-7 text-white"
               style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 3vw + 18px, 60px)', lineHeight: 1, letterSpacing: '-1px' }}
