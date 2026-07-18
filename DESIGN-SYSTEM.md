@@ -387,12 +387,105 @@ Todos pill (border-radius: 100px). Ícone à direita dentro de círculo.
 
 # 4. MAPA DO SITE (páginas a gerar)
 
-- **Institucional:** O HUB PAN · Manifesto · Legado · Governança · Imprensa
+- **Institucional:** O HUB PAN ✅ · Manifesto · Legado · Governança · Imprensa
 - **Plataformas:** PROINTER · Fórum Mundial de IA · GovIA · Academy · Alliance
 - **Conteúdo:** Insights / Newsletter
 - **Contato / Conecte-se**
 
 Cada página reutiliza: nav, rodapé, tokens, catálogo de cards, ritmo de seção.
+
+---
+
+# 5.5 PADRÃO DE PÁGINAS INTERNAS (validado em O HUB PAN — replicar nas próximas)
+
+A página **O HUB PAN** (`src/pages/institucional/index.tsx`) é a referência de
+qualidade/consistência pra todas as páginas internas seguintes (PROINTER, GovIA,
+Fórum Mundial de IA, Insights, Contato). Antes de criar uma página nova, releia
+este bloco e o arquivo inteiro dessa página como exemplo vivo.
+
+## 5.5.1 Hero 80vh + faixa de números 20vh
+- Seção única dividida em duas partes: imagem de fundo full-bleed ocupando **80vh**
+  (`h-[80vh] min-h-[560px]`) + faixa de estatísticas em destaque ocupando os
+  **20vh** restantes (`h-[20vh] min-h-[150px]`) logo abaixo, sem gap entre elas.
+- Fundo da imagem: overlay em degradê horizontal escuro→transparente
+  (`linear-gradient(90deg, rgba(6,9,25,0.93) 0%, ... 0.35% 100%)`) + máscara
+  inferior suave pra transicionar pra faixa de números.
+- **Sem breadcrumb no topo** — decisão explícita do cliente, não usar em nenhuma
+  página (nem a home nem as internas). O `PageHero.tsx` reutilizável já não tem
+  mais essa prop.
+- Rótulo "olho" do hero: sempre o padrão inline do hero da home — Inter 500 13px,
+  tracking 5.85px, branco 50% (`color: rgba(255,255,255,0.5)`) — **não usar** a
+  classe `.eyebrow` genérica aqui (essa é maior, 16px, feita pra rótulos de seção).
+- H1: Luxenta 400, `clamp(32px, 3vw + 18px, 62px)`, `lineHeight: 1`, quebras de
+  linha manuais (`<br />`) pra melhor encaixe — não depender de quebra automática.
+- CTAs: 1 botão `lime` (ação principal) + 1 botão `blue` (ação secundária, ex.
+  "Leia o manifesto") — nunca `outline-light` como secundário nesse contexto,
+  fica sem contraste suficiente sobre foto.
+- **Faixa de números (20vh):** grid 3/6 colunas, números `Counter` animado
+  (conta de 0 até o valor ao entrar na viewport), Luxenta `clamp(34px,3vw,56px)`
+  `lineHeight:1`, um dos valores em lime pra destaque (ex. "ONU"), rótulo Inter
+  10.5px tracking 1.6px caps cinza (#a7a4a4), separador vertical entre colunas
+  (`border-l border-white/10` a partir da 2ª coluna).
+- **Cor de fundo da faixa de números — variar por página** (identidade visual por
+  seção do site, evita repetir sempre navy900): ver tabela de atribuição em
+  §5.5.5. Ajustar cor do texto/números/separadores pra manter contraste em cada
+  fundo (ver §5.5.5).
+
+## 5.5.2 Bento grid de presença/território (tiles mistos)
+- Tipo `Tile` com 3 variantes de `kind`: `photocard` (foto em cima + card branco
+  com infos embaixo — usar pra 2 tiles "âncora", maiores), `image` (foto full
+  com overlay gradiente — usar pra tiles de destaque fotográfico simples) e
+  `typo` (tile colorido tipográfico com ícone Lucide, que revela a foto no hover).
+- Tiles `typo` usam `TILE_COLORS` (navy/blue/lime/white) — objeto com
+  `bg/text/sub/tagBorder/tagText/iconBg/iconColor` por cor. Ao adicionar uma cor
+  nova, sempre definir os 7 campos, senão a variante quebra.
+- **Cards claros** (`lime`, `white`) precisam de `isLight` → no hover (foto +
+  camada preta 55%), texto e borda da tag viram brancos, senão o texto escuro
+  some sobre o fundo escurecido. Cards escuros (`navy`, `blue`) não precisam
+  dessa troca, já têm contraste.
+- Tile `white` leva borda sutil `1px solid #ecedf0` (senão some no fundo
+  `gray-100` da seção).
+- Hover: ícone (56px, círculo, `iconBg`) some, foto aparece (`opacity 0→100,
+  scale 110→100`, 500ms ease-out), camada preta 55% garante contraste do texto.
+
+## 5.5.3 Timeline de trajetória (scroll-linked)
+- Ano gigante centralizado + infos em ziguezague (uma de cada lado) + trilho
+  vertical central com linha de progresso lime que "desenha" conforme o scroll
+  (`gsap.fromTo(scaleY 0→1)`, `scrollTrigger: { scrub: 0.6 }`, `transformOrigin:
+  'top center'`).
+- **Trilho e linha de progresso vão até a borda real da seção** — o padding
+  inferior da seção deve estar no wrapper do trilho (`pb-24 lg:pb-32` no div
+  `relative` que envolve o trilho), não no `<section>`, senão a linha para antes
+  do fim visual da seção e "flutua" sem encostar na próxima.
+- Reveal bidirecional (`useRevealBidirectional`) nos itens — aparecem ao descer,
+  desaparecem ao subir. Bolinhas do trilho sempre sem preenchimento (outline).
+
+## 5.5.4 Cards com hover GSAP (Governança e similares)
+- Hover recolore o glass card inteiro (fundo transparente→branco, título→navy,
+  texto→cinza, círculo do ícone→lime, ícone→navy) via GSAP `.to()`, não CSS
+  transition simples — permite orquestrar múltiplas propriedades com timing
+  único e reverter suavemente no mouseleave.
+- Tilt de perspectiva (`useTilt` hook, `src/components/useTilt.ts`) — inclinação
+  3D seguindo o cursor via `gsap.quickTo('rotationX'/'rotationY')`,
+  `transformPerspective: 900`, reset suave no mouseleave. Usar em qualquer grid
+  de cards "premium" (governança, cards de plataforma, etc.) pra dar
+  sofisticação sem jank.
+
+## 5.5.5 Cor da faixa de números (20vh) por página — variar identidade
+Fundo padrão é `navy900` (usado em O HUB PAN). Nas próximas páginas, variar
+conforme o tema, mantendo números em Luxenta branco (ou navy se o fundo for
+claro) e 1 valor em destaque:
+
+| Página | Fundo sugerido | Números | Detalhe/destaque |
+|---|---|---|---|
+| O HUB PAN | navy900 `#060919` | branco | 1 valor em lime |
+| PROINTER | blue-500 `#2d4ebf` | branco | 1 valor em lime |
+| GovIA | navy-700 `#152852` | branco | 1 valor em cyan `#00e4ff` |
+| Fórum Mundial de IA | lime-400 `#d2e718` | navy `#152852` | 1 valor em navy com peso maior, sem "cor de destaque" separada (lime já é o destaque) |
+| Insights | gray-100 `#f5f5f5` | navy `#152852` | 1 valor em blue-500 |
+
+**Confirmar com o cliente antes de aplicar** — essa tabela é uma proposta, não
+regra fechada; ajustar conforme feedback específico de cada página.
 
 ---
 

@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Fotos originais do cliente (brutas, alta resolução) — não versionar, só os webp otimizados em public/images
+assets-cliente
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -190,10 +190,15 @@ public/
 
 ## Pendências gerais do projeto
 
-- [ ] Outras páginas do site: Institucional (O HUB PAN, Manifesto, Legado, Governança,
+- [x] Página O HUB PAN — referência de qualidade/consistência pras próximas
+      páginas internas. Padrão completo documentado em `DESIGN-SYSTEM.md`,
+      seção "5.5 PADRÃO DE PÁGINAS INTERNAS" (hero 80vh+20vh, bento grid de
+      tiles, timeline com scroll-link, cards com hover+tilt GSAP). **Sempre
+      consultar essa seção antes de começar uma página interna nova.**
+- [ ] Outras páginas do site: Institucional (Manifesto, Legado, Governança,
       Imprensa), Plataformas (PROINTER, Fórum Mundial IA, GovIA, Academy, Alliance),
-      Insights/Newsletter, Contato — todas devem reutilizar NavBar, Footer, tokens e
-      componentes já existentes.
+      Insights/Newsletter, Contato — todas devem reutilizar NavBar, Footer, tokens,
+      componentes já existentes E o padrão de página interna (DESIGN-SYSTEM.md §5.5).
 - [ ] Ajustes finos de alinhamento em várias seções (em andamento, seção por seção).
 - [ ] Conectar o domínio do cliente na Vercel quando o site for aprovado.
 - [ ] Revogar/rotacionar qualquer token do GitHub que tenha sido exposto durante setup.

@@ -55,7 +55,7 @@ type Tile = {
 
 const TERRITORIOS: Tile[] = [
   {
-    kind: 'photocard', img: 's3-accordion-prointer', tag: 'SEDE GLOBAL · AUTORIDADE', nome: 'Cambridge / Harvard Square',
+    kind: 'photocard', img: 'inst-cambridge-harvard', tag: 'SEDE GLOBAL · AUTORIDADE', nome: 'Cambridge / Harvard Square',
     desc: 'Sede global do HUB PAN. O metro quadrado de inovação mais disputado das Américas, no entorno de Harvard e MIT. Ancoragem de autoridade máxima em um único endereço.',
   },
   {
@@ -67,15 +67,15 @@ const TERRITORIOS: Tile[] = [
     desc: 'Marco zero do ecossistema. Primeira cidade brasileira a conectar ODS com Smart Cities em um fórum estruturado.',
   },
   {
-    kind: 'typo', color: 'blue', Icon: Building2, img: 's9-insight-2', tag: 'SEDE BRASIL · 2026', nome: 'São Paulo',
+    kind: 'typo', color: 'blue', Icon: Building2, img: 'inst-sao-paulo', tag: 'SEDE BRASIL · 2026', nome: 'São Paulo',
     desc: 'Sede brasileira ancorada na Avenida Paulista — centro econômico e institucional do Brasil.',
   },
   {
-    kind: 'typo', color: 'white', Icon: Rocket, img: 's6-numero-4', tag: 'INOVAÇÃO · TECH', nome: 'Boston',
+    kind: 'typo', color: 'white', Icon: Rocket, img: 'inst-boston-mit', tag: 'INOVAÇÃO · TECH', nome: 'Boston',
     desc: 'Sede da 1ª Expo Boston (maio 2026) e futuro host do Fórum Mundial de IA em 2027.',
   },
   {
-    kind: 'typo', color: 'lime', Icon: Landmark, img: 's6-numero-2', tag: 'DIPLOMACIA · ONU', nome: 'Nova York',
+    kind: 'typo', color: 'lime', Icon: Landmark, img: 'inst-nyc-onu', tag: 'DIPLOMACIA · ONU', nome: 'Nova York',
     desc: 'Quatro edições realizadas. Em novembro de 2026, o 4º andar inteiro das Nações Unidas — no Delegates Dining Room.',
   },
 ];
@@ -140,7 +140,7 @@ function HeroInst() {
   return (
     <section ref={ref} className="relative w-full">
       <div className="relative w-full h-[80vh] min-h-[560px] flex items-center overflow-hidden">
-        <img src="/images/s8-governanca-bg.webp" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <img src="/images/inst-hero-onu.webp" alt="Delegação do HUB PAN na sede da ONU em Nova York" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(6,9,25,0.93) 0%, rgba(6,9,25,0.72) 45%, rgba(6,9,25,0.35) 100%)' }} />
         <div className="absolute inset-x-0 bottom-0 h-40" style={{ background: 'linear-gradient(to top, rgba(6,9,25,0.9), transparent)' }} />
 
