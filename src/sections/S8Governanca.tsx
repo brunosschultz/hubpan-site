@@ -24,7 +24,6 @@ export default function S8Governanca() {
       {/* Esquerda: imagem + overlay + cards glass */}
       <div className="relative overflow-hidden py-20 gutter">
         <img src="/images/s8-governanca-bg.webp" alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-black/[0.69]" style={{ mixBlendMode: 'multiply' }} />
         <div className="relative z-10">
           <p className="eyebrow mb-6" style={{ color: 'rgba(255,255,255,0.6)' }} data-animate>GOVERNANÇA GLOBAL</p>
           <h2 className="mb-6" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(36px,4vw,60px)', lineHeight: 1, letterSpacing: '-1.2px', maxWidth: 568 }} data-animate>
@@ -46,22 +45,31 @@ export default function S8Governanca() {
         </div>
       </div>
 
-      {/* Direita: fundo blue + lista numerada */}
-      <div className="relative bg-hubblue py-20 gutter lg:pl-16 flex flex-col justify-center">
-        <h2 className="mb-8" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(36px,4vw,60px)', lineHeight: 1, letterSpacing: '-1.2px' }} data-animate>
-          <span className="text-white">Ecossistema</span>
-          <span style={{ color: '#d2e718' }}> Fundador</span>
-        </h2>
+      {/* Direita: fundo blue + lista numerada — alinhado ao topo, como a esquerda (não mais centralizado) */}
+      <div className="relative bg-hubblue py-20 flex flex-col">
+        <div className="gutter lg:pl-16">
+          {/* Espaçador invisível — mesma altura do eyebrow da esquerda, pra alinhar a base dos 2 títulos */}
+          <div aria-hidden style={{ height: 48 }} />
+          <h2 className="mb-6" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(36px,4vw,60px)', lineHeight: 1, letterSpacing: '-1.2px' }} data-animate>
+            <span className="text-white">Ecossistema</span>
+            <span style={{ color: '#d2e718' }}> Fundador</span>
+          </h2>
+          {/* Espaçador invisível — mesma altura do parágrafo de descrição da esquerda, pra alinhar linhas com os cards */}
+          <div aria-hidden style={{ height: 74 }} />
+        </div>
+        {/* Linhas divisórias — full-bleed na coluna azul, igual ao Figma (texto continua alinhado à sanga) */}
         <div className="mb-10" data-animate>
           {ECOSSISTEMA.map((item, i) => (
-            <div key={i} className="flex items-center justify-between border-t border-white/30" style={{ minHeight: 64 }}>
-              <span style={{ fontFamily: 'Inter', fontSize: 16, color: '#fff' }}>{item}</span>
-              <span style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 30, color: '#fff', letterSpacing: '-0.6px' }}>{String(i + 1).padStart(2, '0')}</span>
+            <div key={i} className="border-t border-white/30">
+              <div className="flex items-center justify-between gutter lg:pl-16" style={{ minHeight: 64 }}>
+                <span style={{ fontFamily: 'Inter', fontSize: 16, color: '#fff' }}>{item}</span>
+                <span style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 30, color: '#fff', letterSpacing: '-0.6px' }}>{String(i + 1).padStart(2, '0')}</span>
+              </div>
             </div>
           ))}
           <div className="border-t border-white/30" />
         </div>
-        <div data-animate>
+        <div className="gutter lg:pl-16" data-animate>
           <HubButton size="lg" variant="lime" circleColor="rgba(0,0,0,0.1)" arrowColor="#2d4ebf">
             <span style={{ color: '#2d4ebf' }}>Ver governança completa</span>
           </HubButton>

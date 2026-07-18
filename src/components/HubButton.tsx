@@ -13,6 +13,12 @@ interface HubButtonProps {
   circleColor?: string;
   /** Sobrescreve a cor da seta */
   arrowColor?: string;
+  /** Sobrescreve a cor do texto do botão */
+  textColor?: string;
+  /** Sobrescreve o diâmetro do círculo (px) — ex: botões "Explorar" dos cards de plataforma têm círculo maior que o padrão da escala */
+  circleSize?: number;
+  /** Sobrescreve o tamanho da seta (px) */
+  arrowSize?: number;
   /** Ícone customizado no lugar da seta (ex: Play) */
   icon?: ReactNode;
   className?: string;
@@ -49,6 +55,9 @@ export default function HubButton({
   withIcon = true,
   circleColor,
   arrowColor,
+  textColor,
+  circleSize,
+  arrowSize,
   icon,
   className = '',
   onClick,
@@ -70,15 +79,15 @@ export default function HubButton({
     paddingLeft: s.pl,
     paddingRight: withIcon ? s.pr : s.pl,
     background: v.bg,
-    color: v.text,
+    color: textColor ?? v.text,
     border: v.border ?? 'none',
     whiteSpace: 'nowrap',
     transition: 'filter 200ms ease-out, transform 200ms ease-out',
   };
 
   const circle: React.CSSProperties = {
-    width: s.circle,
-    height: s.circle,
+    width: circleSize ?? s.circle,
+    height: circleSize ?? s.circle,
     borderRadius: '50%',
     background: circleColor ?? 'rgba(0,0,0,0.1)',
     display: 'flex',
@@ -92,7 +101,7 @@ export default function HubButton({
       <span>{children}</span>
       {withIcon && (
         <span style={circle}>
-          {icon ?? <ArrowIcon color={arrowColor ?? v.arrow} size={s.arrow} />}
+          {icon ?? <ArrowIcon color={arrowColor ?? v.arrow} size={arrowSize ?? s.arrow} />}
         </span>
       )}
     </>

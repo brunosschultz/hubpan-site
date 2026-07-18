@@ -8,51 +8,53 @@ interface AccItem {
   icon: string;
   iconSize: number;
   label: string;
-  title: string;
+  titleLines: string[];
   desc: string;
   image: string;
-  hasButton?: boolean;
-  buttonText?: string;
+  buttonText: string;
 }
 
 const ACC: AccItem[] = [
   {
     id: 'prointer', icon: '/icons/s3-icon-pi.svg', iconSize: 73,
-    label: 'INTERCÂMBIO · IMPACTO · ESG', title: 'ProInter',
+    label: 'INTERCÂMBIO · IMPACTO · ESG', titleLines: ['ProInter'],
     desc: 'Programa de intercâmbio de alto impacto para professores da rede pública e afroempreendedores. Harvard Square, ONU, Nova York, Boston.',
-    image: '/images/s3-accordion-prointer.webp', hasButton: true, buttonText: 'Conheça o PROINTER',
+    image: '/images/s3-accordion-prointer.webp', buttonText: 'Conheça o PROINTER',
   },
   {
     id: 'forum', icon: '/icons/s3-icon-ia.svg', iconSize: 68,
-    label: 'IA GLOBAL · CAMBRIDGE 2027', title: 'Fórum Mundial de IA',
+    label: 'IA GLOBAL · CAMBRIDGE 2027', titleLines: ['Fórum', 'Mundial de IA'],
     desc: 'O maior ativo proprietário do HUB PAN. Autoridade, patrocínio, relacionamento e geração de negócios em inteligência artificial.',
-    image: '/images/s3-accordion-forum.webp',
+    image: '/images/s3-accordion-forum.webp', buttonText: 'Conheça o Fórum',
   },
   {
     id: 'govia', icon: '/icons/s3-icon-gv.svg', iconSize: 68,
-    label: 'ASSINATURA · GOVERNOS', title: 'GovIA',
+    label: 'ASSINATURA · GOVERNOS', titleLines: ['GovIA'],
     desc: 'Plataforma de assinatura de IA para municípios e consórcios públicos. Ferramentas, formação e Observatório de IA.',
-    image: '/images/s3-accordion-govia.webp',
+    image: '/images/s3-accordion-govia.webp', buttonText: 'Conheça a GovIA',
   },
 ];
 
+/* Largura fixa do texto — não recalcula/reflow ao abrir. Só o card e a foto crescem. */
 function AccordionCard({ item, active, onHover }: { item: AccItem; active: boolean; onHover: () => void }) {
   return (
     <div
       onMouseEnter={onHover}
-      className="relative bg-white border border-gray200 flex overflow-hidden transition-[flex-grow] duration-[400ms] ease-out cursor-pointer"
-      style={{ borderRadius: 17, flexGrow: active ? 2 : 1, flexBasis: 0, minWidth: 0, height: 454 }}
+      className={`relative bg-white border border-gray200 flex overflow-hidden transition-[flex-grow] duration-[400ms] ease-out cursor-pointer lg:min-w-0 lg:basis-0 ${active ? 'lg:grow-[2]' : 'lg:grow'}`}
+      style={{ borderRadius: 17, height: 454 }}
       data-animate
     >
-      {/* Conteúdo */}
-      <div className="flex flex-col shrink-0" style={{ padding: '32px 24px 28px 32px', width: active ? '50%' : '100%' }}>
+      {/* Conteúdo — largura fixa no desktop (nunca recalcula com a abertura do card); fluida no mobile */}
+      <div className="flex flex-col shrink-0 w-full lg:w-[331px]" style={{ padding: '36px 24px 26px 36px' }}>
         <img src={item.icon} alt="" style={{ width: item.iconSize, height: item.iconSize, flexShrink: 0 }} />
         <div style={{ height: 16, flexShrink: 0 }} />
         <p style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '40px', letterSpacing: '1.4px', color: '#a7a4a4', flexShrink: 0 }}>{item.label}</p>
-        <p style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 35, lineHeight: '40px', color: '#000', flexShrink: 0, whiteSpace: active ? 'normal' : 'normal' }}>{item.title}</p>
+        <p style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 35, lineHeight: '36px', color: '#000', flexShrink: 0 }}>
+          {item.titleLines.map((line, i) => <span key={i}>{line}{i < item.titleLines.length - 1 && <br />}</span>)}
+        </p>
         <div style={{ height: 12, flexShrink: 0 }} />
         <p style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '28px', color: '#797979' }}>{item.desc}</p>
-        {item.hasButton && (
+        {active && (
           <>
             <div style={{ flex: 1 }} />
             <div className="mt-2">
@@ -61,11 +63,11 @@ function AccordionCard({ item, active, onHover }: { item: AccItem; active: boole
           </>
         )}
       </div>
-      {/* Imagem (só card ativo) */}
+      {/* Imagem (só card ativo) — ocupa o espaço restante, sem afetar a coluna de texto */}
       {active && (
-        <div className="hidden md:block" style={{ width: '50%', padding: '20px 20px 20px 0' }}>
+        <div className="hidden md:block flex-1 min-w-0" style={{ padding: '20px 20px 20px 0' }}>
           <div className="w-full h-full overflow-hidden" style={{ borderRadius: 16 }}>
-            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+            <img src={item.image} alt={item.titleLines.join(' ')} className="w-full h-full object-cover" />
           </div>
         </div>
       )}
@@ -109,18 +111,27 @@ const PLAT: PlatCard[] = [
 
 function PlatformCard({ c }: { c: PlatCard }) {
   return (
-    <div className="flex flex-col" style={{ background: c.bg, borderRadius: 17, height: 372, padding: 28, border: c.bg === '#fff' ? '1px solid #ecedf0' : undefined }} data-animate>
-      <img src={c.icon} alt="" style={{ width: c.iconSize, height: c.iconSize, marginBottom: 16 }} />
-      <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11.9, letterSpacing: '3.58px', textTransform: 'uppercase', color: c.labelColor, marginBottom: 8 }}>{c.label}</p>
-      <p style={{ marginBottom: 'auto' }}>
+    <div className="flex flex-col" style={{ background: c.bg, borderRadius: 17, height: 372, padding: '36px 68px 48px 67px', border: c.bg === '#fff' ? '1px solid #ecedf0' : undefined }} data-animate>
+      {/* gap ícone→rótulo varia por card p/ manter o rótulo sempre na mesma altura, como no Figma */}
+      <img src={c.icon} alt="" style={{ width: c.iconSize, height: c.iconSize, marginBottom: 75 - c.iconSize }} />
+      <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11.9, letterSpacing: '3.58px', textTransform: 'uppercase', color: c.labelColor, marginBottom: 18 }}>{c.label}</p>
+      <p style={{ marginBottom: 13 }}>
         <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 30, color: c.hubColor }}>HUP PAN</span>{' '}
         <span style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: 20, color: c.nameColor }}>{c.name}</span>
       </p>
-      <p style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '21px', color: c.descColor, marginBottom: 20 }}>{c.desc}</p>
-      <div className="self-start">
-        <HubButton size="sm" variant="blue" circleColor={c.btnCircle} arrowColor={c.btnArrow}
-          className="" >
-          <span style={{ color: c.btnText }}>Explorar</span>
+      {/* margin-bottom:auto empurra o botão pra base do card, independente do nº de linhas da descrição */}
+      <p style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '21px', color: c.descColor, marginBottom: 'auto' }}>{c.desc}</p>
+      <div className="self-start mt-5">
+        <HubButton
+          size="sm"
+          variant={c.btnBg === '#d2e718' ? 'lime' : 'blue'}
+          textColor={c.btnText}
+          circleColor={c.btnCircle}
+          arrowColor={c.btnArrow}
+          circleSize={36}
+          arrowSize={13}
+        >
+          Explorar
         </HubButton>
       </div>
     </div>
@@ -147,7 +158,7 @@ export default function S3Plataformas() {
       </h2>
 
       {/* Linha 1 — Accordion */}
-      <div className="flex flex-col lg:flex-row gap-4 mb-8">
+      <div className="flex flex-col lg:flex-row gap-4 mb-5">
         {ACC.map((item, i) => (
           <AccordionCard key={item.id} item={item} active={i === active} onHover={() => setActive(i)} />
         ))}

@@ -32,9 +32,12 @@ export default function S10Parceiros() {
         <div className="marquee-track flex gap-6 w-max">
           {[...LOGOS, ...LOGOS].map((l, i) => (
             <div key={i} className="flex flex-col items-center shrink-0" style={{ width: 303 }}>
-              <div className="w-full flex items-center justify-center overflow-hidden hover:scale-105 transition-transform duration-200" style={{ height: 125, borderRadius: 10, background: l.bg ?? '#fff' }}>
-                <img src={`/images/${l.img}.png`} alt={l.name} className="max-w-[70%] max-h-[70%] object-contain" style={l.bg ? { mixBlendMode: 'luminosity' } : undefined} />
-              </div>
+              <img
+                src={`/images/${l.img}.png`}
+                alt={l.name}
+                className="hover:scale-105 transition-transform duration-200 object-contain"
+                style={{ width: '100%', height: 125, ...(l.bg ? { mixBlendMode: 'luminosity' } : undefined) }}
+              />
               <p className="mt-3" style={{ fontFamily: 'Inter', fontSize: 16, color: '#000' }}>{l.name}</p>
             </div>
           ))}

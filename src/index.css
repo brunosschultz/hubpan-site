@@ -34,6 +34,10 @@ button { font-synthesis: none; cursor: pointer; }
 /* Sanga global 160px → responsivo */
 .gutter { padding-left: clamp(24px, 8.333vw, 160px); padding-right: clamp(24px, 8.333vw, 160px); }
 
+/* Smooth scroll global (GSAP ScrollSmoother) — estrutura exigida pelo plugin */
+#smooth-wrapper { overflow: hidden; position: fixed; height: 100%; width: 100%; }
+#smooth-content { overflow: visible; width: 100%; }
+
 /* Rótulo olho */
 .eyebrow {
   font-family: 'Inter', sans-serif; font-weight: 400; font-size: 16px;
@@ -48,6 +52,10 @@ button { font-synthesis: none; cursor: pointer; }
   mask-image: linear-gradient(to right, transparent 0, black 66px, black calc(100% - 66px), transparent 100%);
   -webkit-mask-image: linear-gradient(to right, transparent 0, black 66px, black calc(100% - 66px), transparent 100%);
 }
+
+/* Badges S4 — permite rolagem horizontal sem barra visível em telas estreitas */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
 
 /* Selo rotativo S2 */
 @keyframes spin-slow { to { transform: rotate(360deg); } }

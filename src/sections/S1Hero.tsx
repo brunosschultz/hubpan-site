@@ -1,6 +1,5 @@
 import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
-import NavBar from '../components/NavBar';
 import HubButton from '../components/HubButton';
 
 /* Glass card — pill ou accent */
@@ -53,14 +52,13 @@ export default function S1Hero() {
       {/* BG */}
       <div className="absolute inset-0 bg-navy900" style={{ backgroundImage: 'url(/images/s1-hero-bg.webp)', backgroundSize: 'cover', backgroundPosition: 'center right' }} />
 
-      <NavBar />
 
       {/* Conteúdo */}
       <div className="absolute inset-0 z-10 flex flex-col justify-center gutter pt-[120px]">
         <p data-hero-text className="text-[13px] font-medium uppercase mb-6" style={{ letterSpacing: '5.85px', color: 'rgba(255,255,255,0.5)' }}>
           Plataforma Internacional
         </p>
-        <h1 data-hero-text className="mb-8" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 65, lineHeight: '65px', letterSpacing: '-1.95px', color: '#f5f4f4', maxWidth: 720 }}>
+        <h1 data-hero-text className="mb-8" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 4vw + 20px, 65px)', lineHeight: 1, letterSpacing: '-1.95px', color: '#f5f4f4', maxWidth: 720 }}>
           Unimos as Américas e África ao <span style={{ color: '#fff' }}>ecossistema</span> <span style={{ color: '#d2e718' }}>global de inovação.</span>
         </h1>
         <p data-hero-text className="mb-12" style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: 18, lineHeight: '36px', letterSpacing: '-0.18px', color: '#d6d6d6', maxWidth: 593 }}>

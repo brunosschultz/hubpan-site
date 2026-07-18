@@ -29,6 +29,28 @@ a cada pergunta.
 Se nem o `DESIGN-SYSTEM.md` nem o Figma MCP resolverem, peça ao Bruno um print ou
 os valores exatos antes de adivinhar.
 
+**Figma não é só "olhar e copiar número" — é medir de volta no navegador.** Um valor
+extraído do Figma (`width-[Npx]`, `left-[Npx]`, `right-[Npx]`) descreve a posição/
+tamanho DENTRO do frame 1920px do Figma. Isso não garante que:
+- o mesmo valor em `px` vai caber igual no container real do site (que pode ser mais
+  estreito que 1920, ter padding/gutter próprio, ou estar aninhado em outro elemento
+  posicionado) — sempre confirme contra o container PAI real, não assuma;
+- a quebra de linha do texto vai ficar igual — a métrica de fonte no Figma e no
+  browser pode divergir o suficiente pra mudar o número de linhas mesmo usando a
+  fonte certa. **Depois de aplicar um valor de largura/posição que afeta quebra de
+  linha, sempre valide contando as linhas de verdade no navegador** (não só olhando
+  a screenshot), com um snippet tipo:
+  ```js
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const tops = new Set(Array.from(range.getClientRects()).map(r => Math.round(r.top)));
+  tops.size // nº de linhas reais
+  ```
+  Teste em 1280 / 1440 / 1920 / 2560 antes de considerar definitivo.
+- texto branco não aparece em screenshot de node isolado com fundo transparente —
+  se for tirar print de um node específico pra conferir quebra de linha, tire o
+  print da SEÇÃO inteira (com o fundo real) em vez do node isolado.
+
 **Figma:** fileKey `JFAJ01FA0KiD5FQYnMOD4B`, node da Home `2007-20`.
 
 ---
@@ -127,6 +149,42 @@ public/
   resolução alta (2x/retina, não menos) + WebP com qualidade 88-92 + method 6. Não
   comprimir agressivamente só para reduzir KB — o equilíbrio certo normalmente já
   fica leve nessa qualidade.
+- **Container pai "roubando" espaço do filho (double constraint):** um filho com
+  `maxWidth` ou `width` correto pode não renderizar do jeito esperado se o PAI já
+  tem seu próprio `max-w-[Npx]` + padding cortando o espaço disponível antes de
+  chegar no filho. Sempre medir `getBoundingClientRect()` do elemento final, não só
+  conferir o valor que você escreveu — o valor escrito e o valor renderizado podem
+  ser bem diferentes se algo acima na árvore já está restringindo.
+- **CSS Grid + `items-center` não estica as colunas:** `align-items: stretch` é o
+  default do Grid, mas `items-center` (Tailwind) sobrescreve isso — colunas passam a
+  ter a altura do PRÓPRIO conteúdo, não da track do grid. Isso faz uma coluna com
+  `aspect-ratio` no container "estufar" além do esperado se a coluna vizinha tiver
+  mais conteúdo. Prefira altura explícita (`h-[NNvw]`) a `aspect-ratio` quando há
+  grid + conteúdo de altura variável — `aspect-ratio` é só uma preferência, conteúdo
+  grande ainda pode forçar a caixa a crescer além dela.
+- **`flexBasis: 0` + `flexGrow` inline quebram o mobile:** usado para animar largura
+  de cards lado a lado (accordion do S3) — funciona em `flex-row` (eixo principal
+  horizontal), mas em telas menores onde o layout vira `flex-col` (empilhado), o
+  MESMO `flexBasis: 0` zera a ALTURA dos cards (eixo principal agora é vertical) e
+  eles somem. Nunca aplicar `flexGrow`/`flexBasis` inline sem `lg:` — sempre usar
+  classes Tailwind responsivas (`lg:grow`, `lg:basis-0`) pra essas props só valerem
+  no breakpoint onde o layout é realmente `flex-row`. **Sempre testar mobile depois
+  de qualquer mudança em flex-grow/basis/aspect-ratio.**
+- **`right`/`left` absoluto resolve contra o *containing block* mais próximo, não a
+  seção inteira:** se um elemento posicionado (`position:absolute`) está aninhado
+  dentro de outro `position:relative` (ex: uma coluna do grid), `right: 7%` é 7% da
+  LARGURA DESSA COLUNA, não da seção. Se a referência do Figma é a seção inteira,
+  o elemento precisa ser filho direto do `<section>` (ou de um wrapper do tamanho
+  da seção), não de uma subcoluna.
+- **Cor/variante de botão vindo de dados por instância:** nunca hardcodar uma
+  variante genérica (`variant="blue"`) quando existe um campo de dado por card
+  (`btnBg`) — já aconteceu 3 de 4 cards saírem com a cor errada porque o componente
+  ignorava o dado e sempre usava a mesma variante. Sempre conferir que TODAS as
+  props definidas no objeto de dados estão de fato sendo usadas na renderização.
+- **`mix-blend-mode` é dado de design, não decoração opcional:** cada camada/logo no
+  Figma pode ter um blend mode DIFERENTE (`plus-lighter`, `screen`, `luminosity`,
+  `normal`) — nunca aplicar um valor uniforme "que parece ficar bom" pra todas as
+  camadas. Conferir o blend mode de cada layer individualmente no Figma.
 
 ---
 
@@ -139,14 +197,29 @@ public/
 - [ ] Ajustes finos de alinhamento em várias seções (em andamento, seção por seção).
 - [ ] Conectar o domínio do cliente na Vercel quando o site for aprovado.
 - [ ] Revogar/rotacionar qualquer token do GitHub que tenha sido exposto durante setup.
+- [ ] Otimizar `public/images/s4-autoridade-video.webm` (~16MB) — pesado para web,
+      considerar comprimir/reduzir bitrate mantendo o fundo transparente.
 
 ---
 
 ## Fluxo de trabalho esperado
 
 1. Bruno descreve o ajuste ou pede uma seção/página nova (às vezes com print/imagem).
-2. Confira o Figma (se disponível) ou peça valores exatos antes de implementar.
+2. Confira o Figma (se disponível) ou peça valores exatos antes de implementar —
+   `get_design_context` no node certo, não confiar de memória em `DESIGN-SYSTEM.md`
+   pra elementos ainda não documentados.
 3. Edite os arquivos reais do projeto.
-4. Rode `npm run build` para validar que não quebrou nada antes de considerar concluído.
-5. Ao finalizar, ofereça rodar `git add / commit / push` — sempre pedindo confirmação
+4. **Verifique no navegador antes de dar como pronto**, não só visualmente:
+   - Para textos com quebra de linha crítica (títulos, badges): conte as linhas de
+     verdade via JS (ver snippet na seção "Regra de ouro"), não só olhe a screenshot.
+   - Para qualquer mudança em flex/grid (`flex-grow`, `flex-basis`, `aspect-ratio`,
+     `items-*`): teste mobile também, não só desktop — várias dessas props se
+     comportam diferente quando o eixo principal do flex muda de direção.
+   - Para posicionamento absoluto (`right`/`left`/`top` em px ou %): confirme contra
+     qual elemento a porcentagem está de fato resolvendo (`getBoundingClientRect()`
+     do elemento pai posicionado), não assuma que é a seção inteira.
+   - Teste nos 4 breakpoints (1280 / 1440 / 1920 / 2560) sempre que a mudança afetar
+     largura, quebra de linha ou posicionamento.
+5. Rode `npm run build` para validar que não quebrou nada antes de considerar concluído.
+6. Ao finalizar, ofereça rodar `git add / commit / push` — sempre pedindo confirmação
    antes de qualquer ação que envie algo para fora (GitHub).
