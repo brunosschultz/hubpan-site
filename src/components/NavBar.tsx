@@ -3,7 +3,10 @@ import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import HubButton from './HubButton';
+import { EImg, ET } from '../editor/fields';
 
+/* Rótulos do menu são editáveis pelo editor visual (chaves nav.*) — como o
+   NavBar é compartilhado, a edição vale automaticamente pra todas as páginas. */
 const LINKS: { label: string; to: string }[] = [
   { label: 'Início', to: '/' },
   { label: 'O HUB PAN', to: '/o-hub-pan' },
@@ -18,6 +21,8 @@ const UTIL_LINKS: { label: string; to: string }[] = [
   { label: 'IMPRENSA', to: '/imprensa' },
   { label: 'CASOS DE USO', to: '/casos-de-uso' },
 ];
+
+const navKey = (to: string) => `nav.link.${to.replace(/\//g, '') || 'inicio'}`;
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
@@ -34,7 +39,9 @@ export default function NavBar() {
           {UTIL_LINKS.map((l, i) => (
             <span key={l.to} className="flex items-center gap-4">
               {i > 0 && <span className="w-px h-[15px] bg-white/30" />}
-              <Link to={l.to} className="hover:text-lime transition-colors">{l.label}</Link>
+              <Link to={l.to} className="hover:text-lime transition-colors">
+                <ET k={navKey(l.to)} v={l.label} l={`Menu superior — "${l.label}"`} />
+              </Link>
             </span>
           ))}
         </div>
@@ -48,7 +55,13 @@ export default function NavBar() {
       {/* Nav principal — top 83px */}
       <nav className="absolute top-[70px] lg:top-[83px] left-0 right-0 z-20 flex items-center gutter">
         <Link to="/" className="flex-shrink-0 mr-8 xl:mr-[127px]">
-          <img src="/images/logo-hubpan.png" alt="HUB PAN" className="w-[90px] h-[88px] lg:w-[117px] lg:h-[114px] object-contain" />
+          <EImg
+            k="nav.logo" v="/images/logo-hubpan.png"
+            l="Logo do site (menu)"
+            spec={{ w: 468, h: 456, shape: 'quadrada', fit: 'contain', note: 'Logo principal com fundo transparente (PNG ou SVG).' }}
+            alt="HUB PAN"
+            className="w-[90px] h-[88px] lg:w-[117px] lg:h-[114px] object-contain"
+          />
         </Link>
 
         {/* Links desktop */}
@@ -61,16 +74,16 @@ export default function NavBar() {
                 pathname === l.to ? 'text-lime' : 'text-white hover:text-lime'
               }`}
             >
-              {l.label}
+              <ET k={navKey(l.to)} v={l.label} l={`Menu — "${l.label}"`} />
             </Link>
           ))}
         </div>
 
         {/* Botões desktop */}
         <div className="hidden lg:flex gap-3 ml-auto items-center">
-          <HubButton size="xs" variant="cyan">ACESSAR PORTAL</HubButton>
+          <HubButton size="xs" variant="cyan"><ET k="nav.btn1" v="ACESSAR PORTAL" l="Menu — botão Acessar Portal" /></HubButton>
           <Link to="/contato">
-            <HubButton size="xs" variant="navy" withIcon={false}>CONECTE-SE</HubButton>
+            <HubButton size="xs" variant="navy" withIcon={false}><ET k="nav.btn2" v="CONECTE-SE" l="Menu — botão Conecte-se" /></HubButton>
           </Link>
         </div>
 
@@ -96,20 +109,20 @@ export default function NavBar() {
             <div className="flex flex-col gap-7">
               {LINKS.map((l) => (
                 <Link key={l.to} to={l.to} className={`text-[18px] font-medium ${pathname === l.to ? 'text-lime' : 'text-white'}`} onClick={() => setOpen(false)}>
-                  {l.label}
+                  <ET k={navKey(l.to)} v={l.label} l={`Menu — "${l.label}"`} />
                 </Link>
               ))}
               <div className="h-px bg-white/20 my-1" />
               {UTIL_LINKS.map((l) => (
                 <Link key={l.to} to={l.to} className="text-[14px] font-medium text-white/70" onClick={() => setOpen(false)}>
-                  {l.label}
+                  <ET k={navKey(l.to)} v={l.label} l={`Menu superior — "${l.label}"`} />
                 </Link>
               ))}
             </div>
             <div className="flex flex-col gap-3 mt-auto">
-              <HubButton size="sm" variant="cyan">ACESSAR PORTAL</HubButton>
+              <HubButton size="sm" variant="cyan"><ET k="nav.btn1" v="ACESSAR PORTAL" l="Menu — botão Acessar Portal" /></HubButton>
               <Link to="/contato" onClick={() => setOpen(false)}>
-                <HubButton size="sm" variant="navy" withIcon={false}>CONECTE-SE</HubButton>
+                <HubButton size="sm" variant="navy" withIcon={false}><ET k="nav.btn2" v="CONECTE-SE" l="Menu — botão Conecte-se" /></HubButton>
               </Link>
             </div>
           </div>

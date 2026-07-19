@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { EditorProvider } from './editor/store'
+import EditorPage from './editor/EditorPage'
 import SmoothScroll from './components/SmoothScroll'
 import ScrollToTop from './components/ScrollToTop'
 import NavBar from './components/NavBar'
@@ -18,12 +20,14 @@ import CasosDeUso from './pages/utilitarias/CasosDeUso'
 export default function App() {
   return (
     <BrowserRouter>
+      <EditorProvider>
       <SmoothScroll>
         <ScrollToTop />
         <NavBar />
         <main className="w-full overflow-x-hidden">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/editar" element={<EditorPage />} />
             <Route path="/o-hub-pan" element={<Institucional />} />
             <Route path="/prointer" element={<Prointer />} />
             <Route path="/govia" element={<GovIA />} />
@@ -39,6 +43,7 @@ export default function App() {
           <Footer />
         </main>
       </SmoothScroll>
+      </EditorProvider>
     </BrowserRouter>
   )
 }

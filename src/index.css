@@ -65,3 +65,58 @@ button { font-synthesis: none; cursor: pointer; }
   .marquee-track, .spin-slow { animation: none; }
   html { scroll-behavior: auto; }
 }
+
+/* ═══════════ Editor visual (/editar) — modo edição ═══════════ */
+/* Textos editáveis (simples e ricos): contorno tracejado no hover, sólido enquanto edita */
+body[data-edit-mode] [data-et],
+body[data-edit-mode] [data-erich] {
+  cursor: text;
+  border-radius: 4px;
+  outline: 1.5px dashed transparent;
+  outline-offset: 3px;
+  transition: outline-color 0.15s;
+}
+body[data-edit-mode] [data-et]:hover,
+body[data-edit-mode] [data-erich]:hover { outline-color: rgba(0, 228, 255, 0.6); }
+/* Sem tint de fundo durante a edição — um fundo translúcido sobre fotos (ex.: o
+   número grande dos cards de Números) dava a impressão de que a imagem encolhia */
+body[data-edit-mode] [data-et][contenteditable="plaintext-only"],
+body[data-edit-mode] [data-et][contenteditable="true"],
+body[data-edit-mode] [data-erich]:has([contenteditable="true"]) {
+  outline: 1.5px solid #00e4ff;
+}
+/* Imagens editáveis */
+body[data-edit-mode] [data-eimg] { cursor: pointer; transition: outline-color 0.15s; outline: 2px solid transparent; outline-offset: -2px; }
+body[data-edit-mode] [data-eimg]:hover { outline-color: rgba(0, 228, 255, 0.75); }
+/* Ícones editáveis */
+body[data-edit-mode] [data-eicon] { cursor: pointer; border-radius: 8px; outline: 1.5px dashed transparent; outline-offset: 3px; transition: outline-color 0.15s; }
+body[data-edit-mode] [data-eicon]:hover { outline-color: rgba(0, 228, 255, 0.75); }
+/* Superfícies de cor (seções/cards) */
+body[data-edit-mode] [data-esurface] { cursor: pointer; }
+body[data-edit-mode] [data-esurface]:hover { box-shadow: inset 0 0 0 2px rgba(0, 228, 255, 0.35); }
+/* Destaque que mantém a seleção visível enquanto o foco está no input de px da toolbar */
+::highlight(hubpan-sel) { background: rgba(0, 228, 255, 0.32); }
+/* Handle de largura das caixas de texto ricas */
+body[data-edit-mode] [data-resize-handle] {
+  position: absolute;
+  right: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 42px;
+  max-height: 80%;
+  border-radius: 99px;
+  background: rgba(0, 228, 255, 0.35);
+  border: 1px solid rgba(0, 228, 255, 0.6);
+  cursor: ew-resize;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+body[data-edit-mode] [data-erich]:hover [data-resize-handle] { opacity: 1; }
+/* Navegação bloqueada dentro do site em modo edição (o editor fica fora do smooth-content) —
+   mas textos/imagens editáveis DENTRO de links continuam clicáveis (menu, rodapé) */
+body[data-edit-mode] #smooth-content a { pointer-events: none; }
+body[data-edit-mode] #smooth-content a [data-et],
+body[data-edit-mode] #smooth-content a [data-erich],
+body[data-edit-mode] #smooth-content a [data-eimg],
+body[data-edit-mode] #smooth-content a [data-eicon] { pointer-events: auto; }

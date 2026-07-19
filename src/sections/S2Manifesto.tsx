@@ -2,22 +2,30 @@ import { useReveal } from '../components/useReveal';
 import HubButton from '../components/HubButton';
 import ArrowIcon from '../components/ArrowIcon';
 import { Icon1, Icon2, Icon3, Icon4 } from '../components/ManifestoIcons';
+import { EIcon, EImg, ERich, ET, useEditColors } from '../editor/fields';
 
 const circleData = [
-  { Icon: Icon1, top: '13.49%', left: '63.31%' },
-  { Icon: Icon2, top: '28.52%', left: '73.09%' },
-  { Icon: Icon3, top: '46.15%', left: '72.66%' },
-  { Icon: Icon4, top: '60.59%', left: '59.14%' },
+  { id: 'c1', Icon: Icon1, top: '13.49%', left: '63.31%' },
+  { id: 'c2', Icon: Icon2, top: '28.52%', left: '73.09%' },
+  { id: 'c3', Icon: Icon3, top: '46.15%', left: '72.66%' },
+  { id: 'c4', Icon: Icon4, top: '60.59%', left: '59.14%' },
 ];
+
+const pStyle: React.CSSProperties = { fontFamily: 'Inter', fontSize: 18, lineHeight: '30px', color: '#000' };
 
 export default function S2Manifesto() {
   const ref = useReveal<HTMLElement>();
+  const [[bgC1, bgC2], bgProps] = useEditColors('Fundo da seção Manifesto', [
+    { key: 's2.bg.c1', label: 'Cor principal (topo)', fallback: '#ffffff' },
+    { key: 's2.bg.c2', label: 'Cor do degradê (base)', fallback: '#d2e718' },
+  ]);
 
   return (
     <section
       ref={ref}
       className="relative w-full overflow-hidden py-20 lg:py-0"
-      style={{ background: 'linear-gradient(213deg, #ffffff 62.6%, #d2e718 100%)' }}
+      {...bgProps}
+      style={{ background: `linear-gradient(213deg, ${bgC1} 62.6%, ${bgC2} 100%)` }}
     >
       {/* Watermark HUB PAN — colada na base, levemente cortada pelo overflow da seção */}
       <p
@@ -28,7 +36,7 @@ export default function S2Manifesto() {
       </p>
 
       <div className="relative flex flex-col lg:grid lg:grid-cols-2 items-center lg:items-stretch gap-10 lg:gap-0 lg:h-[49.1667vw]">
-        {/* Selo rotativo — anel de texto gira, globo central fica parado. Escala com a seção (vw) e não gruda na quina. */}
+        {/* Selo rotativo — anel de texto gira, globo central fica parado. */}
         <div
           className="hidden lg:block absolute z-10"
           style={{ width: 'clamp(96px, 11.25vw, 216px)', height: 'clamp(96px, 11.25vw, 216px)', right: '8.5%', top: '13%' }}
@@ -47,16 +55,18 @@ export default function S2Manifesto() {
           </span>
           {/* Caixa da foto — proporção exata do Figma (695×845), alinhada na base */}
           <div className="relative" style={{ height: '89.5%', aspectRatio: '695 / 845' }} data-animate>
-            <img
-              src="/images/s2-manifesto-pessoa.webp"
+            <EImg
+              k="s2.foto" v="/images/s2-manifesto-pessoa.webp"
+              l="Manifesto — foto principal"
+              spec={{ w: 1390, h: 1690, shape: 'retrato', note: 'Foto vertical. O rosto/assunto deve ficar na parte de cima da imagem.' }}
               alt="Manifesto HUB PAN"
               className="w-full h-full object-cover rounded-2xl"
               style={{ objectPosition: 'center 15%' }}
             />
-            {/* Círculos glass — posicionados relativos à foto p/ acompanhar responsividade */}
-            {circleData.map(({ Icon, top, left }, i) => (
+            {/* Círculos glass — ícones editáveis (picker Lucide ou SVG próprio) */}
+            {circleData.map(({ id, Icon, top, left }) => (
               <div
-                key={i}
+                key={id}
                 className="absolute flex items-center justify-center"
                 style={{
                   width: 115, height: 115, borderRadius: '50%', top, left,
@@ -65,7 +75,9 @@ export default function S2Manifesto() {
                 }}
                 data-animate
               >
-                <Icon size={48} color="#d2e718" />
+                <EIcon k={`s2.circulo.${id}.icone`} l={`Manifesto — ícone do círculo ${id.slice(1)}`} defaultSize={48} style={{ color: '#d2e718' }}>
+                  <Icon size={48} color="#d2e718" />
+                </EIcon>
               </div>
             ))}
           </div>
@@ -74,22 +86,28 @@ export default function S2Manifesto() {
         {/* Direita: conteúdo */}
         <div className="relative w-full gutter lg:pl-0 lg:pr-[160px] flex flex-col justify-center">
           <h2 className="mb-8" style={{ fontFamily: 'Luxenta', fontWeight: 500, fontSize: 'clamp(40px,4.5vw,65px)', lineHeight: 1.06, color: '#152852' }} data-animate>
-            Manifesto<br />Fundacional
+            <ERich k="s2.titulo" l="Manifesto — título">
+              Manifesto<br />Fundacional
+            </ERich>
           </h2>
-          <div className="mb-10 space-y-6" style={{ maxWidth: 503 }} data-animate>
-            <p style={{ fontFamily: 'Inter', fontSize: 18, lineHeight: '30px', color: '#000' }}>
-              O <strong className="font-semibold">HUB PAN</strong> não nasce para apresentar uma nova marca. Ele nasce para dar <strong className="font-semibold">escala, forma e percepção global</strong> a tudo que o ecossistema já construiu.
+          <div className="mb-10 space-y-6" data-animate>
+            <p style={pStyle}>
+              <ERich k="s2.p1" l="Manifesto — parágrafo 1" baseW={503}>
+                O <strong className="font-semibold">HUB PAN</strong> não nasce para apresentar uma nova marca. Ele nasce para dar <strong className="font-semibold">escala, forma e percepção global</strong> a tudo que o ecossistema já construiu.
+              </ERich>
             </p>
-            <p style={{ fontFamily: 'Inter', fontSize: 18, lineHeight: '30px', color: '#000' }}>
-              Uma década de entregas reais, relações institucionais concretas e acesso a ambientes que poucas organizações no Brasil conseguem alcançar.
+            <p style={pStyle}>
+              <ERich k="s2.p2" l="Manifesto — parágrafo 2" baseW={503}>
+                Uma década de entregas reais, relações institucionais concretas e acesso a ambientes que poucas organizações no Brasil conseguem alcançar.
+              </ERich>
             </p>
           </div>
           <div className="flex flex-wrap gap-4" data-animate>
             <HubButton size="lg" variant="blue" circleColor="#d2e718" icon={<span style={{ color: '#152852', fontSize: 12 }}>▶</span>}>
-              Assistir Vídeo
+              <ET k="s2.btn1" v="Assistir Vídeo" l="Manifesto — botão vídeo" />
             </HubButton>
             <HubButton size="lg" variant="navy" circleColor="rgba(0,0,0,0.1)" arrowColor="#d2e718" icon={<ArrowIcon color="#d2e718" size={13} />}>
-              Leia nosso manifesto completo
+              <ET k="s2.btn2" v="Leia nosso manifesto completo" l="Manifesto — botão manifesto" />
             </HubButton>
           </div>
         </div>

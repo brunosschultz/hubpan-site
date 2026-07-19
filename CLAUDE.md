@@ -267,6 +267,55 @@ public/
 - [ ] Revogar/rotacionar qualquer token do GitHub que tenha sido exposto durante setup.
 - [ ] Otimizar `public/images/s4-autoridade-video.webm` (~16MB) — pesado para web,
       considerar comprimir/reduzir bitrate mantendo o fundo transparente.
+- [ ] **Editor visual (/editar)**: home + NavBar + Footer instrumentados e
+      funcionando em MODO LOCAL (localStorage, login demo). Próximos passos, em
+      ordem: (1) Bruno cria projeto no Supabase e passa URL + anon key → plugar
+      login real, tabelas, storage de imagens e fluxo rascunho→Publicar;
+      (2) rotas de edição por página (`/editar/govia` etc.) + instrumentar as 8
+      páginas internas com ET/ERich/EImg/EIcon/useEditColor como na home.
+      Guia completo em `SETUP-EDITOR.md`.
+      **Regra: toda página nova já nasce instrumentada com os campos editáveis.**
+
+---
+
+## Editor visual de conteúdo (/editar)
+
+A home tem um painel de edição estilo Framer em `/editar` (login → clica no
+texto e edita inline, clica na imagem → painel com specs de tamanho + upload
+otimizado pra WebP, clica em fundo/card → paleta de cores; toolbar flutuante
+com histórico de auditoria: quem/quando/o quê + restaurar).
+
+**Regras ao mexer nas seções da home (S1–S11) e em NavBar/Footer:**
+- Campos editáveis: `<ET>` (texto inline) e `<ERich>` (bloco/caixa inteira,
+  largura arrastável via `baseW`) — AMBOS abrem a mesma toolbar de formatação
+  (B/I/U com estado ativo, tamanho em px na seleção, cor na seleção, limpar);
+  `<EImg>`/`useEditImage`/`<BgEditChip>` (imagens; SVG passa sem rasterizar;
+  `fit:'contain'` pra logos), `<EIcon>` (picker Lucide com tamanho/espessura/
+  cor, catálogo em `editorIcons.ts`) e `useEditColor(s)` (fundos). Tudo em
+  `src/editor/fields.tsx`.
+- O valor padrão (design do Figma) fica no `v`/`children`/`fallback` — o
+  storage guarda só edições (overrides). ERich aceita `<k>.w` (largura).
+- Pegadinhas do contentEditable já resolvidas (não regredir): blur pra dentro
+  da toolbar não pode commitar (checar relatedTarget); `focus()` sempre com
+  `preventScroll: true` e recortes de foto com editável dentro usam
+  `overflow: clip` (hidden permite scroll programático e o focus rolava o
+  recorte — a foto "encolhia"); tamanho em px usa `<font size=7>` como
+  marcador e exige styleWithCSS DESLIGADO na hora do execCommand.
+- Ao alterar um texto padrão, alterar o fallback do campo (não criar campo
+  novo) — a chave `k` é o identificador estável, não renomear sem motivo.
+- Blocos com conteúdo misto (cores/negrito no meio) são UM `<ERich>` com o
+  markup original como children — nunca fatiar em vários `<ET>` (o usuário
+  espera editar a caixa inteira; fatias quebram a seleção no meio das linhas).
+- Fora do modo edição, os componentes não têm handlers nem estilos extras —
+  o site público renderiza idêntico ao design.
+- No hero, o wrapper de conteúdo usa `pointer-events-none` + `pointer-events-auto`
+  nos filhos pra deixar cliques alcançarem o BG e os glass cards atrás dele —
+  manter esse padrão se criar overlays parecidos.
+- **Updaters do React no store precisam ser puros** (StrictMode roda 2x em
+  dev) — persistência e histórico ficam em `useEffect`/refs, nunca dentro de
+  `setState(prev => …)`. Já causou entradas duplicadas no histórico.
+- Cuidado com seletor CSS `[contenteditable]` — casa com `contenteditable="false"`
+  também; usar `[contenteditable="true"]`/`="plaintext-only"`.
 
 ---
 
