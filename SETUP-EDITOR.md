@@ -1,63 +1,88 @@
 # Editor visual do HUB PAN — guia de configuração
 
 O site tem um painel de edição de conteúdo em **`/editar`** — login, edição
-inline de textos, troca de imagens (com specs de tamanho e otimização
-automática pra WebP), cores de fundos/cards e **histórico de auditoria**
-(quem editou, quando, o quê, com botão de restaurar).
+inline de textos com formatação, troca de imagens/ícones, cores, e
+**histórico de auditoria** (quem editou, quando, o quê, com desfazer).
 
-## Estado atual: MODO LOCAL (demonstração)
+## Status: conectado ao Supabase — faltam 3 passos pra ativar de vez
 
-Hoje o editor roda em modo local:
+O código já está pronto e publicado. O projeto Supabase (`hubpan-site`, na
+organização BDDB) já foi criado e as chaves já estão configuradas. Faltam
+só estes passos, todos feitos no **painel do Supabase** (supabase.com/dashboard):
 
-- **Login**: qualquer senha entra (o nome/e-mail digitados são usados no histórico).
-- **Onde salva**: no `localStorage` do navegador — as edições valem **só naquele
-  navegador**, não são publicadas para os visitantes do site.
-- **Objetivo**: validar a experiência de edição antes de plugar o backend real.
+### 1. Rodar o schema do banco (uma vez só)
 
-## Próxima etapa: conectar o Supabase (login real + publicação)
+1. No painel do projeto `hubpan-site`, vá em **SQL Editor** (menu lateral) → **New query**.
+2. Abra o arquivo [`supabase/schema.sql`](supabase/schema.sql) deste projeto, copie o conteúdo inteiro e cole lá.
+3. Clique em **Run**. Isso cria as tabelas de conteúdo e histórico, as
+   permissões de segurança, o espaço de armazenamento das imagens e a
+   função de publicação — tudo de uma vez.
 
-O Supabase é um serviço de banco de dados + autenticação com **plano gratuito**
-que atende este projeto com folga. Com ele conectado:
+### 2. Criar sua conta de acesso ao editor
 
-- Login real com e-mail/senha (um usuário pra agência, um pro cliente).
-- Edições salvas no banco → **publicadas para todos os visitantes**.
-- Imagens hospedadas no Supabase Storage (sem limite do navegador).
-- Histórico de auditoria permanente e compartilhado.
+O `/editar` usa login real (diferente do modo de teste anterior — nenhuma
+senha aleatória funciona mais). Você precisa criar sua conta manualmente:
 
-### Passo a passo (≈10 minutos, feito pelo Bruno)
+1. No painel, vá em **Authentication** → **Users** → **Add user** → **Create new user**.
+2. Preencha seu e-mail e uma senha (marque **Auto Confirm User** — assim
+   não precisa de e-mail de confirmação).
+3. Pronto — use esse e-mail/senha pra entrar em `/editar` (o nome que você
+   digitar no formulário de login é só o que aparece no histórico, pode
+   ser qualquer nome).
 
-1. Criar conta gratuita em **supabase.com** (pode usar o e-mail da agência).
-2. Criar um projeto novo (ex.: `hubpan-site`), região `South America (São Paulo)`.
-3. No painel do projeto, ir em **Project Settings → API** e copiar dois valores:
-   - `Project URL` (algo como `https://xxxx.supabase.co`)
-   - `anon public key` (uma chave longa — essa pode ficar no site, é pública)
-4. Passar esses dois valores pro Claude na próxima sessão. A partir daí o
-   Claude faz o resto: cria as tabelas (via SQL no painel), o bucket de
-   imagens, troca o adaptador de storage do editor (arquivo
-   `src/editor/store.tsx` — as funções de load/persist estão isoladas
-   justamente pra isso) e cria os dois usuários.
+**Quando for dar acesso ao cliente**, repita esse passo com o e-mail dele —
+é só isso, não precisa mexer em código.
 
-### O que NÃO fazer
+### 3. Configurar as variáveis de ambiente na Vercel
 
-- Não compartilhar a `service_role key` (essa é secreta — só a `anon public`).
-- Não criar as tabelas manualmente — o Claude gera o SQL pronto pra colar.
+O site publicado (Vercel) precisa das mesmas duas chaves que já uso aqui
+localmente, senão o `/editar` em produção cai no modo local antigo:
+
+1. No painel da Vercel → projeto `hubpan-site` → **Settings** → **Environment Variables**.
+2. Adicione:
+   - `VITE_SUPABASE_URL` = `https://mankfcffiymqddeqftfq.supabase.co`
+   - `VITE_SUPABASE_ANON_KEY` = a chave publicável (a mesma que você me
+     passou, começa com `sb_publishable_...`)
+3. Marque as três opções de ambiente (Production, Preview, Development) e salve.
+4. Depois de salvar, force um novo deploy (na aba **Deployments**, três
+   pontinhos no último deploy → **Redeploy**) pra ele pegar as variáveis novas.
+
+Feito isso, `/editar` (login) e `/preview` (link pra mandar ao cliente,
+sem senha) já funcionam com dados reais na nuvem — inclusive entre
+dispositivos diferentes.
+
+## Como funciona o rascunho e a publicação
+
+- Toda edição feita em `/editar` vai pro **rascunho** — visível na hora só
+  em `/editar` e em `/preview`.
+- O **site público** (`/`) só muda quando você clica em **Publicar** na
+  barra do editor.
+- `/preview` é o link pra mandar ao cliente conferir antes de publicar —
+  não pede login, é só visualização, e atualiza em tempo real conforme
+  você edita.
+- O histórico registra também o evento de publicação (quem e quando
+  publicou).
 
 ## Arquitetura (pra referência técnica)
 
 ```
 src/editor/
-├── store.tsx       — estado de conteúdo (overrides), histórico, sessão,
-│                     persistência (localStorage hoje → Supabase depois)
-├── fields.tsx      — <ET> texto inline · <EImg>/useEditImage imagens ·
-│                     useEditColor(s) cores — usados dentro das seções
-├── ui.tsx          — login, toolbar flutuante, painéis (cor/imagem/histórico)
-└── EditorPage.tsx  — rota /editar (login gate + home em modo edição)
+├── supabaseClient.ts — cliente Supabase (env vars) + isSupabaseConfigured
+├── store.tsx       — estado de conteúdo (rascunho/publicado), histórico,
+│                     sessão (Supabase Auth), tempo real, upload de imagens
+├── fields.tsx      — <ET> texto · <ERich> bloco rico com toolbar de
+│                     formatação · <EImg>/useEditImage imagens ·
+│                     <EIcon> picker Lucide · useEditColor(s) cores
+├── ui.tsx          — login, toolbar flutuante, painéis, botão Publicar
+├── EditorPage.tsx  — rota /editar (login gate + home em modo edição)
+└── PreviewPage.tsx — rota /preview (home lendo o rascunho, sem edição)
 ```
 
+- Sem `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` configuradas, o editor
+  cai automaticamente no **modo local** antigo (localStorage, qualquer
+  senha entra) — só deve acontecer numa cópia local antes do setup acima.
 - Os **valores padrão** de todos os campos continuam no código das seções
-  (fallbacks) — o banco guarda só o que foi editado. Restaurar padrão = apagar
-  o override.
-- O design fica **travado**: o editor só expõe conteúdo (texto/imagem/cor),
-  nunca layout, fonte ou espaçamento.
-- Chaves e labels dos ~110 campos ficam nos call-sites das seções S1–S11
-  (`<ET k="s1.eyebrow" l="Hero — selo superior" …>`).
+  (fallbacks) — o banco guarda só o que foi editado (rascunho e publicado
+  separados). Restaurar padrão = apagar o override.
+- O design fica **travado**: o editor só expõe conteúdo (texto/imagem/
+  cor/ícone), nunca layout, fonte-base ou espaçamento estrutural.

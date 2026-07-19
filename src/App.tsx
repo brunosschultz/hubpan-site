@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { EditorProvider } from './editor/store'
 import EditorPage from './editor/EditorPage'
+import PreviewPage from './editor/PreviewPage'
 import SmoothScroll from './components/SmoothScroll'
 import ScrollToTop from './components/ScrollToTop'
 import NavBar from './components/NavBar'
@@ -28,6 +29,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/editar" element={<EditorPage />} />
+            <Route path="/preview" element={<PreviewPage />} />
             <Route path="/o-hub-pan" element={<Institucional />} />
             <Route path="/prointer" element={<Prointer />} />
             <Route path="/govia" element={<GovIA />} />

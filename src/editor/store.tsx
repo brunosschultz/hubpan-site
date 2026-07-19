@@ -1,17 +1,26 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
+import { isSupabaseConfigured, supabase } from './supabaseClient';
 
 /* ═══════════════════════════════════════════════════════════════════
    Núcleo do editor visual — estado de conteúdo, histórico e sessão.
 
-   Os valores padrão de cada campo vivem no código das seções (fallback);
-   aqui só guardamos as EDIÇÕES (overrides) + o histórico de quem mudou
-   o quê e quando. Storage atual: localStorage ("modo local", edições
-   valem só neste navegador). O adaptador foi isolado para que plugar o
-   Supabase depois (login real + edições publicadas para todos) troque
-   apenas as funções de load/persist — ver SETUP-EDITOR.md.
+   Modelo de dados: cada campo editável tem um valor de RASCUNHO (o que o
+   editor mostra e edita) e um valor PUBLICADO (o que o site público
+   mostra). Só mudam quando alguém clica em "Publicar". A rota atual
+   decide qual canal ler:
+     - "/"  e demais páginas públicas → published
+     - "/editar" e "/preview"          → draft
+
+   Fonte de verdade: Supabase (Postgres + Auth + Storage), configurado via
+   VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY. Sem essas variáveis, cai
+   automaticamente no modo local antigo (localStorage, qualquer senha
+   entra) — não deve acontecer em produção, só numa checkout local antes
+   do setup (ver SETUP-EDITOR.md).
    ═══════════════════════════════════════════════════════════════════ */
 
 export type FieldKind = 'text' | 'color' | 'image';
+export type Channel = 'draft' | 'published';
 
 export interface ImageSpec {
   w: number;
@@ -34,6 +43,8 @@ export interface HistoryEntry {
   oldValue: string | null;
   newValue: string | null;
   restaurado?: boolean;
+  /** 'publish' = linha do histórico representando um clique em "Publicar" */
+  event?: 'edit' | 'publish';
 }
 
 export interface EditorUser {
@@ -53,38 +64,54 @@ interface EditorCtx {
   user: EditorUser | null;
   editMode: boolean;
   panel: PanelState | null;
+  channel: Channel;
+  connected: boolean;
+  publishing: boolean;
+  hasUnpublished: boolean;
   get: (key: string, fallback: string) => string;
   setValue: (key: string, value: string | null, meta: { label: string; kind: FieldKind; restaurado?: boolean }) => void;
-  login: (u: EditorUser) => void;
+  /** Devolve null em caso de sucesso, ou a mensagem de erro (já traduzida) em caso de falha. */
+  login: (name: string, email: string, password: string) => Promise<string | null>;
   logout: () => void;
   setEditMode: (on: boolean) => void;
   openPanel: (p: PanelState) => void;
   closePanel: () => void;
+  publish: () => Promise<void>;
+  /** Faz upload de uma dataURL pro Storage e devolve a URL final. Sem Supabase
+   * configurado, devolve a própria dataURL (comportamento do modo local). */
+  uploadImage: (dataUrl: string, keyHint: string) => Promise<string>;
 }
 
-/* ---------- Adaptador de storage (modo local) ---------- */
+/* ---------- Adaptador local (fallback sem Supabase) ---------- */
 
 const LS_CONTENT = 'hubpan-editor-content';
 const LS_HISTORY = 'hubpan-editor-history';
-const SS_USER = 'hubpan-editor-user';
-const HISTORY_CAP = 80;
+const LS_USER = 'hubpan-editor-user';
+const HISTORY_CAP = 200;
 
-function loadJSON<T>(storage: Storage, key: string, fallback: T): T {
+function loadJSON<T>(key: string, fallback: T): T {
   try {
-    const raw = storage.getItem(key);
+    const raw = localStorage.getItem(key);
     return raw ? (JSON.parse(raw) as T) : fallback;
   } catch {
     return fallback;
   }
 }
 
-function persistJSON(storage: Storage, key: string, value: unknown): boolean {
+function persistJSON(key: string, value: unknown): boolean {
   try {
-    storage.setItem(key, JSON.stringify(value));
+    localStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch {
     return false;
   }
+}
+
+/** Mensagens de erro do Supabase Auth traduzidas pro que o usuário do editor entende. */
+function traduzErroAuth(msg: string): string {
+  if (/invalid login credentials/i.test(msg)) return 'E-mail ou senha incorretos.';
+  if (/email not confirmed/i.test(msg)) return 'Este e-mail ainda não foi confirmado.';
+  return msg;
 }
 
 /* ---------- Provider ---------- */
@@ -92,11 +119,23 @@ function persistJSON(storage: Storage, key: string, value: unknown): boolean {
 const Ctx = createContext<EditorCtx | null>(null);
 
 export function EditorProvider({ children }: { children: ReactNode }) {
-  const [overrides, setOverrides] = useState<Record<string, string>>(() => loadJSON(localStorage, LS_CONTENT, {}));
-  const [history, setHistory] = useState<HistoryEntry[]>(() => loadJSON(localStorage, LS_HISTORY, []));
-  const [user, setUser] = useState<EditorUser | null>(() => loadJSON(sessionStorage, SS_USER, null));
+  const location = useLocation();
+  const channel: Channel = (location.pathname.startsWith('/editar') || location.pathname.startsWith('/preview'))
+    ? 'draft' : 'published';
+
+  const connected = isSupabaseConfigured;
+
+  /* linhas cruas do banco: cada chave guarda os dois valores (rascunho e
+     publicado) — assim navegar entre canais não exige novo fetch */
+  const [rows, setRows] = useState<Record<string, { draft: string | null; published: string | null }>>({});
+  const [history, setHistory] = useState<HistoryEntry[]>(() => (connected ? [] : loadJSON(LS_HISTORY, [])));
+  const [user, setUser] = useState<EditorUser | null>(() => loadJSON(LS_USER, null));
   const [editMode, setEditModeState] = useState(false);
   const [panel, setPanel] = useState<PanelState | null>(null);
+  const [publishing, setPublishing] = useState(false);
+
+  const rowsRef = useRef(rows);
+  useEffect(() => { rowsRef.current = rows; }, [rows]);
 
   /* Flag no <body> pro CSS do modo edição (outlines, bloqueio de links) */
   useEffect(() => {
@@ -105,62 +144,107 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     return () => { delete document.body.dataset.editMode; };
   }, [editMode]);
 
-  const get = useCallback(
-    (key: string, fallback: string) => overrides[key] ?? fallback,
-    [overrides]
-  );
+  /* ---------- Carga inicial + tempo real (Supabase) ---------- */
 
-  /* Espelho síncrono dos overrides — permite calcular o "valor antigo" fora do
-     updater do React (updaters precisam ser puros; o StrictMode roda 2x em dev
-     e efeitos colaterais lá dentro duplicariam entradas do histórico). */
-  const overridesRef = useRef(overrides);
-  useEffect(() => { overridesRef.current = overrides; }, [overrides]);
-
-  /* Persistência fora dos updaters — roda 1x por mudança real de estado */
-  const hydrated = useRef(false);
   useEffect(() => {
-    if (!hydrated.current) { hydrated.current = true; return; }
-    const ok = persistJSON(localStorage, LS_CONTENT, overrides);
-    persistJSON(localStorage, LS_HISTORY, history);
-    if (!ok) {
-      alert('Não foi possível salvar: o armazenamento local deste navegador está cheio. No modo local há um limite de espaço (imagens ocupam bastante) — conectando o Supabase esse limite desaparece.');
-    }
-  }, [overrides, history]);
+    if (!connected || !supabase) return;
+    const sb = supabase; // captura local — evita perder o narrowing de null dentro dos closures abaixo
+
+    let mounted = true;
+
+    sb.from('content_overrides').select('key,draft_value,published_value').then(({ data }) => {
+      if (!mounted || !data) return;
+      const map: typeof rows = {};
+      for (const r of data) map[r.key] = { draft: r.draft_value, published: r.published_value };
+      setRows(map);
+    });
+
+    sb.from('edit_history').select('*').order('ts', { ascending: false }).limit(HISTORY_CAP).then(({ data }) => {
+      if (!mounted || !data) return;
+      setHistory(data.map((h) => ({
+        id: h.id, ts: new Date(h.ts).getTime(), userName: h.user_name, userEmail: h.user_email,
+        key: h.key, label: h.label, kind: h.kind, oldValue: h.old_value, newValue: h.new_value,
+        restaurado: h.restaurado, event: h.event,
+      })));
+    });
+
+    const channelSub = sb
+      .channel('content_overrides_live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'content_overrides' }, (payload) => {
+        const row = payload.new as { key: string; draft_value: string | null; published_value: string | null } | undefined;
+        if (!row?.key) return;
+        setRows((prev) => ({ ...prev, [row.key]: { draft: row.draft_value, published: row.published_value } }));
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'edit_history' }, (payload) => {
+        const h = payload.new as { id: string; ts: string; user_name: string; user_email: string; key: string; label: string; kind: FieldKind; old_value: string | null; new_value: string | null; restaurado: boolean; event: 'edit' | 'publish' };
+        setHistory((prev) => (prev.some((e) => e.id === h.id) ? prev : [{
+          id: h.id, ts: new Date(h.ts).getTime(), userName: h.user_name, userEmail: h.user_email,
+          key: h.key, label: h.label, kind: h.kind, oldValue: h.old_value, newValue: h.new_value,
+          restaurado: h.restaurado, event: h.event,
+        }, ...prev].slice(0, HISTORY_CAP)));
+      })
+      .subscribe();
+
+    return () => { mounted = false; void sb.removeChannel(channelSub); };
+  }, [connected]);
+
+  const get = useCallback((key: string, fallback: string) => {
+    if (!connected) return rows[key]?.draft ?? fallback; // modo local: um pool só
+    const r = rows[key];
+    const v = channel === 'draft' ? r?.draft : r?.published;
+    return v ?? fallback;
+  }, [connected, rows, channel]);
 
   const setValue = useCallback<EditorCtx['setValue']>((key, value, meta) => {
-    const oldValue = overridesRef.current[key] ?? null;
+    if (channel !== 'draft') return; // edição só faz sentido em /editar (ou /preview, mas lá não há UI de edição)
+    const oldValue = rowsRef.current[key]?.draft ?? null;
     if (oldValue === value) return;
 
-    const next = { ...overridesRef.current };
-    if (value === null) delete next[key];
-    else next[key] = value;
-    overridesRef.current = next;
+    const nextRows = { ...rowsRef.current, [key]: { draft: value, published: rowsRef.current[key]?.published ?? null } };
+    rowsRef.current = nextRows;
+    setRows(nextRows);
 
     const entry: HistoryEntry = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      ts: Date.now(),
-      userName: user?.name ?? 'Desconhecido',
-      userEmail: user?.email ?? '',
-      key,
-      label: meta.label,
-      kind: meta.kind,
-      oldValue,
-      newValue: value,
-      restaurado: meta.restaurado,
+      id: crypto.randomUUID(), ts: Date.now(),
+      userName: user?.name ?? 'Desconhecido', userEmail: user?.email ?? '',
+      key, label: meta.label, kind: meta.kind, oldValue, newValue: value, restaurado: meta.restaurado, event: 'edit',
     };
+    setHistory((h) => [entry, ...h].slice(0, HISTORY_CAP));
 
-    setOverrides(next);
-    setHistory((h) => (h[0]?.id === entry.id ? h : [entry, ...h].slice(0, HISTORY_CAP)));
-  }, [user]);
+    if (connected && supabase) {
+      void supabase.from('content_overrides')
+        .upsert({ key, draft_value: value, updated_at: new Date().toISOString(), updated_by: user?.email ?? null }, { onConflict: 'key' });
+      void supabase.from('edit_history').insert({
+        id: entry.id, ts: new Date(entry.ts).toISOString(), user_name: entry.userName, user_email: entry.userEmail,
+        key: entry.key, label: entry.label, kind: entry.kind, old_value: entry.oldValue, new_value: entry.newValue,
+        restaurado: entry.restaurado ?? false, event: 'edit',
+      });
+    } else {
+      const ok = persistJSON(LS_CONTENT, (() => { const f: Record<string, string> = {}; for (const [k, v] of Object.entries(nextRows)) if (v.draft !== null) f[k] = v.draft; return f; })());
+      persistJSON(LS_HISTORY, [entry, ...history].slice(0, HISTORY_CAP));
+      if (!ok) alert('Não foi possível salvar: o armazenamento local deste navegador está cheio.');
+    }
+  }, [channel, connected, user, history]);
 
-  const login = useCallback((u: EditorUser) => {
+  const login = useCallback(async (name: string, email: string, password: string): Promise<string | null> => {
+    if (!connected || !supabase) {
+      const u = { name, email };
+      setUser(u);
+      persistJSON(LS_USER, u);
+      return null;
+    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return traduzErroAuth(error.message);
+    const u = { name, email };
     setUser(u);
-    persistJSON(sessionStorage, SS_USER, u);
-  }, []);
+    persistJSON(LS_USER, u);
+    return null;
+  }, [connected]);
 
   const logout = useCallback(() => {
     setUser(null);
-    sessionStorage.removeItem(SS_USER);
+    localStorage.removeItem(LS_USER);
+    if (supabase) void supabase.auth.signOut();
     setPanel(null);
     setEditModeState(false);
   }, []);
@@ -173,10 +257,71 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   const openPanel = useCallback((p: PanelState) => setPanel(p), []);
   const closePanel = useCallback(() => setPanel(null), []);
 
+  const publish = useCallback(async () => {
+    if (!user) return;
+    if (!connected || !supabase) { alert('Publicar requer o Supabase conectado — no modo local as edições já são o que aparece.'); return; }
+    setPublishing(true);
+    try {
+      const { error } = await supabase.rpc('publish_all');
+      if (error) throw error;
+      const entry: HistoryEntry = {
+        id: crypto.randomUUID(), ts: Date.now(), userName: user.name, userEmail: user.email,
+        key: '*', label: 'Site publicado', kind: 'text', oldValue: null, newValue: null, event: 'publish',
+      };
+      await supabase.from('edit_history').insert({
+        id: entry.id, ts: new Date(entry.ts).toISOString(), user_name: entry.userName, user_email: entry.userEmail,
+        key: entry.key, label: entry.label, kind: entry.kind, old_value: null, new_value: null, restaurado: false, event: 'publish',
+      });
+      setHistory((h) => [entry, ...h].slice(0, HISTORY_CAP));
+      setRows((prev) => {
+        const next: typeof prev = {};
+        for (const [k, v] of Object.entries(prev)) next[k] = { ...v, published: v.draft };
+        return next;
+      });
+    } catch (e) {
+      alert('Não foi possível publicar. Tente novamente em instantes.');
+      console.error(e);
+    } finally {
+      setPublishing(false);
+    }
+  }, [connected, user]);
+
+  const uploadImage = useCallback(async (dataUrl: string, keyHint: string): Promise<string> => {
+    if (!connected || !supabase) return dataUrl;
+    try {
+      const blob = await (await fetch(dataUrl)).blob();
+      const ext = blob.type === 'image/svg+xml' ? 'svg' : 'webp';
+      const path = `${keyHint.replace(/[^a-z0-9.]/gi, '_')}-${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('editor-images').upload(path, blob, { contentType: blob.type, upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage.from('editor-images').getPublicUrl(path);
+      return data.publicUrl;
+    } catch (e) {
+      console.error(e);
+      alert('Não foi possível enviar a imagem pro servidor. Ela foi aplicada só localmente por enquanto.');
+      return dataUrl;
+    }
+  }, [connected]);
+
+  const flatOverrides = useMemo(() => {
+    const f: Record<string, string> = {};
+    for (const [k, v] of Object.entries(rows)) {
+      const val = connected ? (channel === 'draft' ? v.draft : v.published) : v.draft;
+      if (val !== null && val !== undefined) f[k] = val;
+    }
+    return f;
+  }, [rows, connected, channel]);
+
+  const hasUnpublished = useMemo(
+    () => Object.values(rows).some((v) => v.draft !== v.published),
+    [rows]
+  );
+
   const value = useMemo<EditorCtx>(() => ({
-    overrides, history, user, editMode, panel,
-    get, setValue, login, logout, setEditMode, openPanel, closePanel,
-  }), [overrides, history, user, editMode, panel, get, setValue, login, logout, setEditMode, openPanel, closePanel]);
+    overrides: flatOverrides, history, user, editMode, panel, channel, connected, publishing, hasUnpublished,
+    get, setValue, login, logout, setEditMode, openPanel, closePanel, publish, uploadImage,
+  }), [flatOverrides, history, user, editMode, panel, channel, connected, publishing, hasUnpublished,
+      get, setValue, login, logout, setEditMode, openPanel, closePanel, publish, uploadImage]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
@@ -200,9 +345,8 @@ export function formatWhen(ts: number): string {
     ' às ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
-/** Ajusta a imagem ao spec (cover corta pelo centro; contain preserva inteira com
- * transparência) e devolve WebP otimizado. SVG passa direto, sem rasterizar —
- * mantém qualidade em qualquer tamanho. */
+/** Redimensiona a imagem para cobrir exatamente o spec (crop central) e devolve WebP otimizado.
+ * SVG passa direto, sem rasterizar — mantém qualidade em qualquer tamanho. */
 export function processImage(file: File, spec: ImageSpec): Promise<string> {
   if (file.type === 'image/svg+xml') {
     return new Promise((resolve, reject) => {

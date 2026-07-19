@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { Check, History, LogOut, RotateCcw, Ruler, Undo2, Upload, X } from 'lucide-react';
+import { Check, CloudUpload, ExternalLink, History, Loader2, LogOut, RotateCcw, Ruler, Undo2, Upload, WifiOff, X } from 'lucide-react';
 import { formatWhen, processImage, useEditorStore, type HistoryEntry, type PanelState } from './store';
 import { parseIconValue } from './fields';
 import { LUCIDE_CHOICES, LUCIDE_NAMES } from './editorIcons';
@@ -15,18 +15,23 @@ import { glass, initials, label11, PALETTE, text13 } from './theme';
 /* ═══════════ Login ═══════════ */
 
 export function LoginScreen() {
-  const { login } = useEditorStore();
+  const { login, connected } = useEditorStore();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
   const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
+    setErr('');
     if (name.trim().length < 2) return setErr('Informe seu nome — ele aparece no histórico de edições.');
     if (!/^\S+@\S+\.\S+$/.test(email)) return setErr('Informe um e-mail válido.');
     if (pass.length < 4) return setErr('Senha muito curta.');
-    login({ name: name.trim(), email: email.trim().toLowerCase() });
+    setBusy(true);
+    const erro = await login(name.trim(), email.trim().toLowerCase(), pass);
+    setBusy(false);
+    if (erro) setErr(erro);
   };
 
   const input: CSSProperties = {
@@ -57,18 +62,25 @@ export function LoginScreen() {
           {err && <p className="mt-3" style={{ fontFamily: 'Inter', fontSize: 13, color: '#ff8a8a' }}>{err}</p>}
           <button
             type="submit"
-            className="w-full mt-6 hover:brightness-95 transition"
+            disabled={busy}
+            className="w-full mt-6 hover:brightness-95 transition disabled:opacity-60"
             style={{ height: 50, borderRadius: 60, background: '#d2e718', fontFamily: 'Inter', fontWeight: 600, fontSize: 15, color: '#152852' }}
           >
-            Entrar no editor
+            {busy ? 'Entrando…' : 'Entrar no editor'}
           </button>
-          <div className="mt-6 rounded-[12px] p-4" style={{ background: 'rgba(210,231,24,0.07)', border: '1px solid rgba(210,231,24,0.25)' }}>
-            <p style={{ fontFamily: 'Inter', fontSize: 12.5, lineHeight: '19px', color: 'rgba(255,255,255,0.75)' }}>
-              <b style={{ color: '#d2e718' }}>Modo local de demonstração</b> — qualquer senha entra e as edições
-              ficam salvas só neste navegador. O login real e a publicação para todos serão ativados ao conectar o
-              Supabase (ver SETUP-EDITOR.md).
-            </p>
-          </div>
+          {connected ? (
+            <div className="mt-6 flex items-center gap-2 justify-center">
+              <span className="rounded-full" style={{ width: 7, height: 7, background: '#d2e718' }} />
+              <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#8b90a3' }}>Conectado ao Supabase — edições ficam salvas na nuvem</p>
+            </div>
+          ) : (
+            <div className="mt-6 rounded-[12px] p-4" style={{ background: 'rgba(210,231,24,0.07)', border: '1px solid rgba(210,231,24,0.25)' }}>
+              <p style={{ fontFamily: 'Inter', fontSize: 12.5, lineHeight: '19px', color: 'rgba(255,255,255,0.75)' }}>
+                <b style={{ color: '#d2e718' }}>Modo local de demonstração</b> — qualquer senha entra e as edições
+                ficam salvas só neste navegador. Ver SETUP-EDITOR.md pra conectar o Supabase.
+              </p>
+            </div>
+          )}
         </div>
       </form>
     </section>
@@ -78,7 +90,7 @@ export function LoginScreen() {
 /* ═══════════ Toolbar + painéis (portal) ═══════════ */
 
 export function EditorChrome() {
-  const { user, logout, panel, openPanel, closePanel, history } = useEditorStore();
+  const { user, logout, panel, openPanel, closePanel, history, connected, publish, publishing, hasUnpublished } = useEditorStore();
   const [saved, setSaved] = useState(false);
   const prevLen = useRef(history.length);
 
@@ -108,12 +120,21 @@ export function EditorChrome() {
   return createPortal(
     <div data-editor-ui style={{ fontFamily: 'Inter' }}>
       <div className="fixed left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-1 px-2.5 py-2 rounded-full" style={{ bottom: 22, ...glass }}>
-        <span className="flex items-center gap-2 px-3.5" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: '#fff' }}>
-          <span className="rounded-full" style={{ width: 8, height: 8, background: saved ? '#d2e718' : '#00e4ff', transition: 'background .3s' }} />
+        <span className="flex items-center gap-2 px-3.5" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: '#fff' }} title={connected ? 'Conectado ao Supabase' : 'Modo local — sem Supabase'}>
+          {connected ? <span className="rounded-full" style={{ width: 8, height: 8, background: saved ? '#d2e718' : '#00e4ff', transition: 'background .3s' }} /> : <WifiOff size={13} color="#ff8a8a" />}
           {saved ? <span className="flex items-center gap-1.5" style={{ color: '#d2e718' }}><Check size={14} strokeWidth={2.5} /> Salvo</span> : 'Modo edição'}
         </span>
 
         <span style={{ width: 1, height: 22, background: 'rgba(255,255,255,0.12)' }} />
+
+        <a
+          href="/preview" target="_blank" rel="noreferrer"
+          className="hover:bg-white/10 transition-colors"
+          style={tbBtn}
+          title="Abrir a pré-visualização do rascunho em outra aba — o link que dá pra mandar pro cliente"
+        >
+          <ExternalLink size={15} /> Pré-visualizar
+        </a>
 
         <button
           onClick={() => (panel?.type === 'history' ? closePanel() : openPanel({ type: 'history' }))}
@@ -127,6 +148,19 @@ export function EditorChrome() {
             </span>
           )}
         </button>
+
+        {connected && (
+          <button
+            onClick={publish}
+            disabled={publishing || !hasUnpublished}
+            title={hasUnpublished ? 'Publicar o rascunho para o site público' : 'Tudo já está publicado'}
+            className="flex items-center gap-1.5 px-3.5 rounded-full hover:brightness-95 transition disabled:opacity-40 disabled:cursor-default"
+            style={{ height: 34, background: '#d2e718', fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: '#152852' }}
+          >
+            {publishing ? <Loader2 size={14} className="animate-spin" /> : <CloudUpload size={14} />}
+            {publishing ? 'Publicando…' : hasUnpublished ? 'Publicar' : 'Publicado'}
+          </button>
+        )}
 
         <span style={{ width: 1, height: 22, background: 'rgba(255,255,255,0.12)' }} />
 
@@ -245,7 +279,7 @@ function ColorsBody({ fields }: { fields: { key: string; label: string; fallback
 /* ---------- Imagem ---------- */
 
 function ImageBody({ panel }: { panel: Extract<PanelState, { type: 'image' }> }) {
-  const { get, setValue, overrides } = useEditorStore();
+  const { get, setValue, overrides, uploadImage } = useEditorStore();
   const [busy, setBusy] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const current = get(panel.key, panel.fallback);
@@ -258,7 +292,8 @@ function ImageBody({ panel }: { panel: Extract<PanelState, { type: 'image' }> })
     setBusy(true);
     try {
       const dataUrl = await processImage(file, spec);
-      setValue(panel.key, dataUrl, { label: panel.label, kind: 'image' });
+      const finalSrc = await uploadImage(dataUrl, panel.key);
+      setValue(panel.key, finalSrc, { label: panel.label, kind: 'image' });
     } catch {
       alert('Não foi possível processar essa imagem. Tente outro arquivo (JPG, PNG, WebP ou SVG).');
     } finally {
@@ -325,7 +360,7 @@ function ImageBody({ panel }: { panel: Extract<PanelState, { type: 'image' }> })
 /* ---------- Ícone (picker Lucide + upload SVG) ---------- */
 
 function IconBody({ panel }: { panel: Extract<PanelState, { type: 'icon' }> }) {
-  const { get, setValue, overrides } = useEditorStore();
+  const { get, setValue, overrides, uploadImage } = useEditorStore();
   const current = parseIconValue(get(panel.key, ''));
   const overridden = panel.key in overrides;
 
@@ -350,7 +385,8 @@ function IconBody({ panel }: { panel: Extract<PanelState, { type: 'icon' }> }) {
     setBusy(true);
     try {
       const dataUrl = await processImage(file, { w: 240, h: 240, shape: 'quadrada', fit: 'contain' });
-      setValue(panel.key, `img|${size}|${dataUrl}`, { label: panel.label, kind: 'text' });
+      const finalSrc = await uploadImage(dataUrl, panel.key);
+      setValue(panel.key, `img|${size}|${finalSrc}`, { label: panel.label, kind: 'text' });
     } catch {
       alert('Arquivo inválido — envie um SVG ou PNG.');
     } finally {
@@ -490,12 +526,14 @@ function ValueChip({ kind, value }: { kind: HistoryEntry['kind']; value: string 
 function HistoryBody() {
   const { history, setValue } = useEditorStore();
 
-  /* Desfazer em camadas (estilo Ctrl+Z): as restaurações feitas pelo botão
-     acumulam no topo — a próxima edição "de verdade" a desfazer fica em 2×d,
-     onde d é o nº de desfazeres consecutivos já feitos. */
+  /* Desfazer em camadas (estilo Ctrl+Z): eventos de publicação não são
+     "edições" — ficam de fora da contagem. Entre as edições, as restaurações
+     feitas pelo botão acumulam no topo; a próxima edição "de verdade" a
+     desfazer fica em 2×d, onde d é o nº de desfazeres consecutivos já feitos. */
+  const edits = history.filter((h) => h.event !== 'publish');
   let d = 0;
-  while (history[d]?.restaurado) d++;
-  const undoTarget = history[2 * d];
+  while (edits[d]?.restaurado) d++;
+  const undoTarget = edits[2 * d];
 
   const undo = () => {
     if (!undoTarget) return;
@@ -523,36 +561,53 @@ function HistoryBody() {
         </div>
       ) : (
         <div className="space-y-1">
-          {history.map((h, i) => (
-            <div key={h.id} className="rounded-[14px] p-3.5 transition-colors hover:bg-white/[0.04]" style={{ borderBottom: i < history.length - 1 ? '1px solid rgba(255,255,255,0.06)' : undefined }}>
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className="flex items-center justify-center rounded-full shrink-0" style={{ width: 26, height: 26, background: 'rgba(210,231,24,0.16)', fontFamily: 'Inter', fontWeight: 700, fontSize: 10, color: '#d2e718' }}>
-                  {initials(h.userName)}
-                </span>
-                <div className="min-w-0">
-                  <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 12.5, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {h.userName}
-                    {h.restaurado && <span style={{ fontWeight: 400, color: '#8b90a3' }}> · restauração</span>}
-                  </p>
-                  <p style={{ fontFamily: 'Inter', fontSize: 11, color: '#5c6072' }}>{formatWhen(h.ts)}</p>
+          {history.map((h, i) => {
+            if (h.event === 'publish') {
+              return (
+                <div key={h.id} className="flex items-center gap-2.5 py-3 px-1" style={{ borderBottom: i < history.length - 1 ? '1px solid rgba(255,255,255,0.06)' : undefined }}>
+                  <span className="flex items-center justify-center rounded-full shrink-0" style={{ width: 26, height: 26, background: 'rgba(0,228,255,0.16)' }}>
+                    <CloudUpload size={13} color="#00e4ff" />
+                  </span>
+                  <div className="min-w-0">
+                    <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 12.5, color: '#00e4ff' }}>
+                      {h.userName} publicou o site
+                    </p>
+                    <p style={{ fontFamily: 'Inter', fontSize: 11, color: '#5c6072' }}>{formatWhen(h.ts)}</p>
+                  </div>
+                </div>
+              );
+            }
+            return (
+              <div key={h.id} className="rounded-[14px] p-3.5 transition-colors hover:bg-white/[0.04]" style={{ borderBottom: i < history.length - 1 ? '1px solid rgba(255,255,255,0.06)' : undefined }}>
+                <div className="flex items-center gap-2.5 mb-2">
+                  <span className="flex items-center justify-center rounded-full shrink-0" style={{ width: 26, height: 26, background: 'rgba(210,231,24,0.16)', fontFamily: 'Inter', fontWeight: 700, fontSize: 10, color: '#d2e718' }}>
+                    {initials(h.userName)}
+                  </span>
+                  <div className="min-w-0">
+                    <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 12.5, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {h.userName}
+                      {h.restaurado && <span style={{ fontWeight: 400, color: '#8b90a3' }}> · restauração</span>}
+                    </p>
+                    <p style={{ fontFamily: 'Inter', fontSize: 11, color: '#5c6072' }}>{formatWhen(h.ts)}</p>
+                  </div>
+                </div>
+                <p className="mb-1.5" style={label11}>{h.label}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <ValueChip kind={h.kind} value={h.oldValue} />
+                  <span style={{ color: '#5c6072', fontSize: 11 }}>→</span>
+                  <ValueChip kind={h.kind} value={h.newValue} />
+                  <button
+                    onClick={() => setValue(h.key, h.oldValue, { label: h.label, kind: h.kind, restaurado: true })}
+                    className="ml-auto flex items-center gap-1 hover:text-white transition-colors shrink-0"
+                    title="Desfazer esta alteração — o campo volta ao valor de antes dela"
+                    style={{ fontFamily: 'Inter', fontSize: 11.5, color: '#8b90a3' }}
+                  >
+                    <Undo2 size={11} /> Desfazer
+                  </button>
                 </div>
               </div>
-              <p className="mb-1.5" style={label11}>{h.label}</p>
-              <div className="flex items-center gap-2 flex-wrap">
-                <ValueChip kind={h.kind} value={h.oldValue} />
-                <span style={{ color: '#5c6072', fontSize: 11 }}>→</span>
-                <ValueChip kind={h.kind} value={h.newValue} />
-                <button
-                  onClick={() => setValue(h.key, h.oldValue, { label: h.label, kind: h.kind, restaurado: true })}
-                  className="ml-auto flex items-center gap-1 hover:text-white transition-colors shrink-0"
-                  title="Desfazer esta alteração — o campo volta ao valor de antes dela"
-                  style={{ fontFamily: 'Inter', fontSize: 11.5, color: '#8b90a3' }}
-                >
-                  <Undo2 size={11} /> Desfazer
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

@@ -25,3 +25,7 @@ assets-cliente
 *.njsproj
 *.sln
 *.sw?
+
+# Variáveis de ambiente locais (chaves do Supabase) — nunca versionar
+.env
+.env.local

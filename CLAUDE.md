@@ -267,13 +267,18 @@ public/
 - [ ] Revogar/rotacionar qualquer token do GitHub que tenha sido exposto durante setup.
 - [ ] Otimizar `public/images/s4-autoridade-video.webm` (~16MB) — pesado para web,
       considerar comprimir/reduzir bitrate mantendo o fundo transparente.
-- [ ] **Editor visual (/editar)**: home + NavBar + Footer instrumentados e
-      funcionando em MODO LOCAL (localStorage, login demo). Próximos passos, em
-      ordem: (1) Bruno cria projeto no Supabase e passa URL + anon key → plugar
-      login real, tabelas, storage de imagens e fluxo rascunho→Publicar;
-      (2) rotas de edição por página (`/editar/govia` etc.) + instrumentar as 8
+- [x] **Editor visual (/editar) conectado ao Supabase** — schema em
+      `supabase/schema.sql`, login real (Supabase Auth), rascunho/publicado
+      separados (`content_overrides.draft_value`/`published_value`), upload de
+      imagens no Storage, histórico em `edit_history`, tempo real via
+      `postgres_changes`. Projeto: `hubpan-site` na org BDDB, região São Paulo.
+      **Pendente do lado do Bruno** (painel do Supabase): (1) rodar
+      `supabase/schema.sql` no SQL Editor, (2) criar o usuário dele em
+      Authentication → Users, (3) configurar `VITE_SUPABASE_URL` e
+      `VITE_SUPABASE_ANON_KEY` nas env vars da Vercel + redeploy. Passo a
+      passo completo em `SETUP-EDITOR.md`.
+- [ ] Rotas de edição por página (`/editar/govia` etc.) + instrumentar as 8
       páginas internas com ET/ERich/EImg/EIcon/useEditColor como na home.
-      Guia completo em `SETUP-EDITOR.md`.
       **Regra: toda página nova já nasce instrumentada com os campos editáveis.**
 
 ---
@@ -316,6 +321,29 @@ com histórico de auditoria: quem/quando/o quê + restaurar).
   `setState(prev => …)`. Já causou entradas duplicadas no histórico.
 - Cuidado com seletor CSS `[contenteditable]` — casa com `contenteditable="false"`
   também; usar `[contenteditable="true"]`/`="plaintext-only"`.
+
+**Backend (Supabase) — `src/editor/store.tsx` e `supabase/schema.sql`:**
+- Canal (`draft` vs `published`) é derivado da rota via `useLocation()` dentro
+  do próprio `EditorProvider` — `/editar` e `/preview` leem `draft_value`,
+  todo o resto lê `published_value`. Não precisa (e não deve) passar `channel`
+  por prop — mexer no cálculo em `EditorProvider` se um novo tipo de rota
+  precisar de outro canal.
+- `setValue` só grava se `channel === 'draft'` — o `editMode` (interatividade)
+  é decidido à parte, por página (`EditorPage` liga, `PreviewPage` nunca liga).
+- Publicação é atômica via RPC `publish_all()` (security definer, só
+  `authenticated` pode chamar) — nunca fazer publish campo-a-campo no
+  cliente, quebra o "tudo ou nada" e é mais lento.
+- Funções async dentro do provider que fecham sobre `supabase` (que é
+  `SupabaseClient | null`) precisam capturar `const sb = supabase` logo
+  após o guard `if (!supabase) return` — senão o TS perde o narrowing
+  dentro de closures assíncronas/de cleanup.
+- **`login()` devolve a mensagem de erro (ou `null`), nunca `boolean` +
+  state separado** — já aconteceu de `authError` do contexto ficar stale
+  dentro do closure do `submit()` do formulário (React batches setState),
+  mostrando "Não foi possível entrar" genérico em vez do erro real do
+  Supabase. Qualquer fluxo assíncrono que precise do resultado imediato
+  deve devolver o valor pelo retorno da função, não depender de reler
+  outro state do contexto logo após o `await`.
 
 ---
 
