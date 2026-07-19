@@ -195,10 +195,13 @@ public/
       seção "5.5 PADRÃO DE PÁGINAS INTERNAS" (hero 80vh+20vh, bento grid de
       tiles, timeline com scroll-link, cards com hover+tilt GSAP). **Sempre
       consultar essa seção antes de começar uma página interna nova.**
-- [ ] Outras páginas do site: Institucional (Manifesto, Legado, Governança,
-      Imprensa), Plataformas (PROINTER, Fórum Mundial IA, GovIA, Academy, Alliance),
-      Insights/Newsletter, Contato — todas devem reutilizar NavBar, Footer, tokens,
-      componentes já existentes E o padrão de página interna (DESIGN-SYSTEM.md §5.5).
+- [x] Páginas internas criadas: PROINTER, GovIA, Fórum Mundial IA, Insights,
+      Contato, Glossário, Imprensa e Casos de Uso — todas seguindo o padrão
+      DESIGN-SYSTEM.md §5.5 (Hero80 compartilhado com faixa de cor por página).
+- [ ] Páginas futuras se aprovadas: Academy, Alliance, Manifesto/Legado próprios.
+- [ ] Conteúdo das páginas internas é proposta de copy — validar com o cliente
+      (números da faixa de stats, releases de imprensa e casos de uso são
+      ilustrativos e podem precisar de ajuste factual).
 - [ ] Ajustes finos de alinhamento em várias seções (em andamento, seção por seção).
 - [ ] Conectar o domínio do cliente na Vercel quando o site for aprovado.
 - [ ] Revogar/rotacionar qualquer token do GitHub que tenha sido exposto durante setup.

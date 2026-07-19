@@ -385,12 +385,13 @@ Todos pill (border-radius: 100px). Ícone à direita dentro de círculo.
 
 ---
 
-# 4. MAPA DO SITE (páginas a gerar)
+# 4. MAPA DO SITE
 
-- **Institucional:** O HUB PAN ✅ · Manifesto · Legado · Governança · Imprensa
-- **Plataformas:** PROINTER · Fórum Mundial de IA · GovIA · Academy · Alliance
-- **Conteúdo:** Insights / Newsletter
-- **Contato / Conecte-se**
+- **Institucional:** O HUB PAN ✅ · Imprensa ✅ · Glossário ✅ · Casos de Uso ✅
+- **Plataformas:** PROINTER ✅ · Fórum Mundial de IA ✅ · GovIA ✅ · Insights ✅
+- **Contato / Conecte-se** ✅
+- Ainda sem página própria: Academy · Alliance · Manifesto/Legado/Governança
+  (cobertos dentro de O HUB PAN por enquanto)
 
 Cada página reutiliza: nav, rodapé, tokens, catálogo de cards, ritmo de seção.
 

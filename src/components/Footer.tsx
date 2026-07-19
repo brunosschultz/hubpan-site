@@ -1,7 +1,33 @@
-const COLUMNS = [
-  { title: 'Institucional', links: ['O HUB PAN', 'Manifesto', 'Legado', 'Governança', 'Imprensa'] },
-  { title: 'Plataformas', links: ['PROINTER', 'Fórum Mundial de IA', 'GovIA', 'Academy', 'Alliance'] },
-  { title: 'Conecte-se', links: ['Fale Conosco', 'Seja um Parceiro', 'Patrocinar o WAIF', 'Apoiar o PROINTER', 'LinkedIn'] },
+import { Link } from 'react-router-dom';
+
+const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
+  {
+    title: 'Institucional',
+    links: [
+      { label: 'O HUB PAN', to: '/o-hub-pan' },
+      { label: 'Casos de Uso', to: '/casos-de-uso' },
+      { label: 'Glossário', to: '/glossario' },
+      { label: 'Imprensa', to: '/imprensa' },
+    ],
+  },
+  {
+    title: 'Plataformas',
+    links: [
+      { label: 'PROINTER', to: '/prointer' },
+      { label: 'Fórum Mundial de IA', to: '/forum-mundial-ia' },
+      { label: 'GovIA', to: '/govia' },
+      { label: 'Insights', to: '/insights' },
+    ],
+  },
+  {
+    title: 'Conecte-se',
+    links: [
+      { label: 'Fale Conosco', to: '/contato' },
+      { label: 'Seja um Parceiro', to: '/contato' },
+      { label: 'Patrocinar o WAIF', to: '/forum-mundial-ia' },
+      { label: 'Apoiar o PROINTER', to: '/prointer' },
+    ],
+  },
 ];
 
 export default function Footer() {
@@ -25,7 +51,7 @@ export default function Footer() {
           <div key={col.title}>
             <p style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 24, lineHeight: '50px', color: '#fff', letterSpacing: '-0.48px' }}>{col.title}</p>
             {col.links.map((l) => (
-              <a key={l} href="#" className="block hover:text-white transition-colors" style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '50px', color: '#a7a4a4' }}>{l}</a>
+              <Link key={l.label} to={l.to} className="block hover:text-white transition-colors" style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '50px', color: '#a7a4a4' }}>{l.label}</Link>
             ))}
           </div>
         ))}

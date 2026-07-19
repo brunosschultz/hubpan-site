@@ -6,6 +6,14 @@ import S11Newsletter from './sections/S11Newsletter'
 import Footer from './components/Footer'
 import Home from './pages/Home'
 import Institucional from './pages/institucional'
+import Prointer from './pages/prointer'
+import GovIA from './pages/govia'
+import ForumMundialIA from './pages/forum'
+import Insights from './pages/insights'
+import Contato from './pages/contato'
+import Glossario from './pages/utilitarias/Glossario'
+import Imprensa from './pages/utilitarias/Imprensa'
+import CasosDeUso from './pages/utilitarias/CasosDeUso'
 
 export default function App() {
   return (
@@ -17,7 +25,14 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/o-hub-pan" element={<Institucional />} />
-            {/* Rotas ainda não construídas voltam pra home */}
+            <Route path="/prointer" element={<Prointer />} />
+            <Route path="/govia" element={<GovIA />} />
+            <Route path="/forum-mundial-ia" element={<ForumMundialIA />} />
+            <Route path="/insights" element={<Insights />} />
+            <Route path="/contato" element={<Contato />} />
+            <Route path="/glossario" element={<Glossario />} />
+            <Route path="/imprensa" element={<Imprensa />} />
+            <Route path="/casos-de-uso" element={<CasosDeUso />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           <S11Newsletter />
