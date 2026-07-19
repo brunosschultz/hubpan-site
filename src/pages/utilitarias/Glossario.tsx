@@ -1,48 +1,101 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import PageHero from '../../components/PageHero';
 import HubButton from '../../components/HubButton';
 import { useReveal } from '../../components/useReveal';
 
-const TERMOS: { termo: string; def: string }[] = [
-  { termo: 'HUB PAN', def: 'Plataforma internacional de inovação que conecta as Américas e a África a ecossistemas globais de inovação, educação, IA e cooperação. A narrativa unificadora de um ecossistema com quase dez anos de entregas.' },
-  { termo: 'Fórum Pan-Americano da Inovação', def: 'O fórum original do ecossistema, criado em 2017 em Belo Horizonte — 15 edições realizadas, incluindo quatro em Nova York e uma em Boston.' },
-  { termo: 'WAIF · Fórum Mundial de IA', def: 'World Artificial Intelligence Forum — o maior ativo proprietário do HUB PAN. Primeira edição em 2027, em Cambridge, Massachusetts.' },
-  { termo: 'PROINTER', def: 'Programa internacional de bolsas do HUB PAN: intercâmbio de alto impacto para professores da rede pública e afroempreendedores, com imersão em Harvard Square, ONU, Nova York e Boston.' },
-  { termo: 'GovIA', def: 'Plataforma de assinatura de IA para municípios, estados e consórcios públicos — ferramentas, formação de servidores e Observatório de IA em um único contrato.' },
-  { termo: 'HUB PAN Academy', def: 'A frente educacional do ecossistema: formação, cursos, extensão, pós-graduação e comunidades. Herdeira direta da Premier Niveau.' },
-  { termo: 'HUB PAN Alliance', def: 'Rede estratégica de empresas, startups, universidades, ICTs e governos conectados ao ecossistema — networking institucional, missões e visibilidade global.' },
-  { termo: 'HUB PAN Digital', def: 'A infraestrutura de acesso: portal, aplicativo, AVA, área do aluno e biblioteca do ecossistema.' },
-  { termo: 'HUB PAN Insights', def: 'A frente de inteligência: observatórios, pesquisas, white papers e análises estratégicas sobre IA, educação e cooperação.' },
-  { termo: 'MIPAD', def: 'Most Influential People of African Descent — organismo vinculado à ONU que reconhece as pessoas negras mais influentes do mundo. Parceiro estratégico fundacional do HUB PAN.' },
-  { termo: 'ODS', def: 'Objetivos de Desenvolvimento Sustentável da ONU — o referencial de impacto que orienta programas, seleção de projetos e critérios de avaliação do ecossistema.' },
-  { termo: 'Smart Cities', def: 'Agenda de cidades inteligentes que, conectada aos ODS, deu origem à tese do primeiro fórum em Belo Horizonte, em 2017.' },
-  { termo: 'Brasil Master® Group', def: 'Marca fundadora do ecossistema — base histórica e credencial do Fórum Pan-Americano da Inovação, registrada no INPI.' },
-  { termo: 'Premier Niveau®', def: 'Marca fundadora da frente educacional — extensão universitária, pós-graduação lato sensu e educação executiva de alto padrão.' },
-  { termo: 'eGov Tecnologia®', def: 'Marca fundadora da frente govtech — experiência real com municípios e estados que deu origem à GovIA.' },
-  { termo: 'EXPO BH® · EXPO NYC®', def: 'As marcas de eventos do ecossistema em Belo Horizonte e Nova York, registradas no INPI — o legado documentado de 15 edições.' },
+/* ═══════════ Dados — extraídos do wireframe oficial (page-glossario) ═══════════ */
+
+const CATEGORIAS = ['Todos', 'Inovação', 'Inteligência Artificial', 'Governança', 'Impacto Social', 'Cooperação'];
+
+const TERMOS: { categoria: string; termo: string; p1: string; p2: string }[] = [
+  {
+    categoria: 'Inovação', termo: 'Inovação de Impacto',
+    p1: 'Inovação de impacto são soluções inovadoras — tecnológicas, sociais, pedagógicas ou organizacionais — que geram benefícios mensuráveis para comunidades, territórios ou sistemas, com alinhamento aos Objetivos de Desenvolvimento Sustentável da ONU (ODS). Não é inovação apenas pelo uso de tecnologia, mas pelo efeito real que ela produz na vida das pessoas.',
+    p2: 'No contexto do HUB PAN, inovação de impacto é o critério central de seleção de projetos nos fóruns pan-americanos — qualquer iniciativa que orbite os ODS e gere mudança verificável é elegível.',
+  },
+  {
+    categoria: 'Impacto Social', termo: 'ODS — Objetivos de Desenvolvimento Sustentável',
+    p1: 'Os ODS são os 17 Objetivos de Desenvolvimento Sustentável da Agenda 2030 da ONU — uma agenda global aprovada em 2015 por 193 países para erradicar a pobreza, proteger o planeta e garantir prosperidade para todos até 2030. Cada objetivo tem metas específicas e indicadores mensuráveis.',
+    p2: 'O HUB PAN alinha suas plataformas diretamente a três ODS prioritários: ODS 4 (educação de qualidade, via PROINTER e Academy), ODS 10 (redução das desigualdades, via PROINTER e afroempreendedorismo) e ODS 17 (parcerias para os objetivos, via HUB PAN Alliance e cooperação internacional).',
+  },
+  {
+    categoria: 'Inteligência Artificial', termo: 'GovTech',
+    p1: 'GovTech — abreviação de Government Technology — é o campo que reúne tecnologias, plataformas e soluções digitais aplicadas ao setor público. Inclui desde softwares de gestão administrativa até inteligência artificial, big data, automação de serviços ao cidadão e plataformas de transparência e participação.',
+    p2: 'O HUB PAN nasceu do nicho GovTech — mas expandiu sua narrativa para além dele. O GovIA é a plataforma que representa a evolução desse campo dentro do ecossistema, com foco específico em inteligência artificial para governos municipais e estaduais.',
+  },
+  {
+    categoria: 'Governança', termo: 'ESG',
+    p1: 'ESG — Environmental, Social and Governance — é um conjunto de critérios usados para avaliar o desempenho de empresas e organizações em três dimensões: ambiental (impacto sobre o meio ambiente), social (relação com funcionários, fornecedores, comunidades e sociedade) e de governança (práticas de liderança, transparência e ética).',
+    p2: 'No contexto do HUB PAN, o PROINTER é uma iniciativa de ESG concreto e rastreável — cada bolsa financiada por uma empresa gera dados de impacto documentados que podem ser incluídos em relatórios de sustentabilidade. A conexão com ODS torna o impacto ainda mais estruturado e verificável internacionalmente.',
+  },
+  {
+    categoria: 'Inteligência Artificial', termo: 'Governança de Inteligência Artificial',
+    p1: 'Governança de inteligência artificial é o conjunto de políticas, princípios, regulações e práticas que orientam o desenvolvimento, uso e impacto de sistemas de IA — com foco em segurança, transparência, equidade, privacidade e responsabilidade. É um dos temas centrais da agenda global de tecnologia e política pública.',
+    p2: 'O Fórum Mundial de IA do HUB PAN tem a governança de IA como um dos seus painéis temáticos centrais — especificamente no contexto das Américas e da África, onde o debate sobre IA inclusiva e IA para o bem público ainda tem espaço para contribuições originais.',
+  },
+  {
+    categoria: 'Cooperação', termo: 'Pan-Americanismo',
+    p1: 'Pan-americanismo é o movimento político e cultural que promove a cooperação, integração e solidariedade entre os países das Américas — do Canadá à Argentina. No contexto da inovação, representa a ideia de que desafios compartilhados entre países americanos — como desigualdade, acesso a tecnologia e desenvolvimento sustentável — podem ser melhor enfrentados por meio de redes e colaborações continentais.',
+    p2: 'O HUB PAN opera com uma visão pan-americana e pan-africana: seus fóruns, missões e plataformas conectam atores das Américas e da África em torno de inovação de impacto, educação e cooperação institucional.',
+  },
+  {
+    categoria: 'Impacto Social', termo: 'Impacto Transgeracional',
+    p1: 'Impacto transgeracional é o efeito de uma ação ou iniciativa que vai além do beneficiário direto, alcançando gerações futuras. Uma professora da rede pública que acessa Harvard e a ONU pelo PROINTER não apenas transforma sua própria perspectiva — ela transforma como ela ensina, o que ela transmite e quem ela inspira ao longo de toda a sua carreira.',
+    p2: 'O HUB PAN usa esse conceito para comunicar a dimensão real do PROINTER: não é um benefício individual, é um investimento em cadeias de impacto que se propagam por décadas.',
+  },
+  {
+    categoria: 'Inovação', termo: 'LTV — Lifetime Value',
+    p1: 'LTV — Lifetime Value ou Valor Vitalício — é um conceito de negócios que representa o valor total que um cliente gera para uma empresa ao longo de todo o seu relacionamento. Em plataformas de educação e assinatura, LTV é a métrica central: quanto mais tempo o aluno ou assinante permanece, maior o retorno sobre o investimento em aquisição.',
+    p2: 'O HUB PAN usa o PROINTER como instrumento de fidelização de LTV educacional: bolsistas são selecionados entre alunos dos programas do ecossistema, criando um incentivo real para permanecer e evoluir dentro da plataforma.',
+  },
+  {
+    categoria: 'Cooperação', termo: 'ICT — Instituição de Ciência e Tecnologia',
+    p1: 'ICT é a sigla para Instituição de Ciência, Tecnologia e Inovação — categoria jurídica brasileira que inclui universidades, institutos de pesquisa, centros tecnológicos e organizações sem fins lucrativos com foco em pesquisa e desenvolvimento. ICTs têm acesso a incentivos fiscais específicos e podem celebrar contratos de transferência de tecnologia com empresas privadas.',
+    p2: 'A HUB PAN Alliance inclui ICTs como categoria de membros elegíveis — integrando o ecossistema de pesquisa e inovação ao network estratégico do HUB PAN.',
+  },
 ];
 
 export default function Glossario() {
   const ref = useReveal<HTMLElement>();
+  const [ativo, setAtivo] = useState('Todos');
+  const visiveis = ativo === 'Todos' ? TERMOS : TERMOS.filter((t) => t.categoria === ativo);
+
   return (
     <>
       <PageHero
-        eyebrow="REFERÊNCIA · TERMOS DO ECOSSISTEMA"
-        title={<>Todo ecossistema tem<br />seu vocabulário. <span style={{ color: '#d2e718' }}>Este é o nosso.</span></>}
-        sub="Marcas, programas e conceitos que aparecem em todo o site — explicados sem rodeio."
+        eyebrow="REFERÊNCIA CONCEITUAL · INOVAÇÃO · IA · IMPACTO · COOPERAÇÃO"
+        title="Glossário HUB PAN"
+        sub="Definições claras dos conceitos centrais do ecossistema — para que qualquer pessoa, independente do nível técnico, entenda o que o HUB PAN faz e por que faz."
       />
       <section ref={ref} className="py-24 lg:py-32 gutter bg-white">
+        <div className="flex flex-wrap gap-3 mb-12" data-animate>
+          {CATEGORIAS.map((c) => (
+            <button
+              key={c}
+              onClick={() => setAtivo(c)}
+              className="rounded-full px-5 py-2 transition-colors"
+              style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13.5, background: ativo === c ? '#152852' : '#f5f5f5', color: ativo === c ? '#fff' : '#797979' }}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {TERMOS.map((t) => (
+          {visiveis.map((t) => (
             <div key={t.termo} className="rounded-[20px] p-7" style={{ background: '#f5f5f5' }} data-animate>
-              <h3 className="mb-3" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 22, lineHeight: 1.1, color: '#152852' }}>{t.termo}</h3>
-              <p style={{ fontFamily: 'Inter', fontSize: 14.5, lineHeight: '24px', color: '#797979' }}>{t.def}</p>
+              <p className="mb-3" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10.5, letterSpacing: '1.8px', textTransform: 'uppercase', color: '#2d4ebf' }}>{t.categoria}</p>
+              <h3 className="mb-3" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 22, lineHeight: 1.15, color: '#152852' }}>{t.termo}</h3>
+              <p className="mb-3" style={{ fontFamily: 'Inter', fontSize: 14.5, lineHeight: '24px', color: '#797979' }}>{t.p1}</p>
+              <p style={{ fontFamily: 'Inter', fontSize: 14.5, lineHeight: '24px', color: '#797979' }}>{t.p2}</p>
             </div>
           ))}
         </div>
+
         <div className="mt-14 flex flex-wrap items-center gap-6" data-animate>
-          <p style={{ fontFamily: 'Inter', fontSize: 16, color: '#797979' }}>Ficou faltando algum termo?</p>
-          <Link to="/contato"><HubButton size="md" variant="navy">Fale com a gente</HubButton></Link>
+          <p style={{ fontFamily: 'Inter', fontSize: 16, color: '#797979' }}>Não encontrou o termo que buscava? Sugira uma entrada para o glossário.</p>
+          <Link to="/contato"><HubButton size="md" variant="navy">Sugerir um termo</HubButton></Link>
         </div>
       </section>
     </>

@@ -1,30 +1,58 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Building2, CheckCircle2, Landmark, Briefcase, GraduationCap, Newspaper } from 'lucide-react';
+import { Landmark, Sparkles, HeartHandshake, MapPin, Building2, Newspaper, CheckCircle2 } from 'lucide-react';
 import HubButton from '../../components/HubButton';
 import { useReveal } from '../../components/useReveal';
 import { useTilt } from '../../components/useTilt';
 
-/* ═══════════ Dados ═══════════ */
+/* ═══════════ Dados — extraídos do wireframe oficial (page-contato) ═══════════ */
 
-const SEDES = [
-  { Icon: MapPin, tag: 'SEDE GLOBAL', nome: 'Harvard Square', desc: 'Cambridge, Massachusetts — EUA' },
-  { Icon: Building2, tag: 'SEDE BRASIL', nome: 'Avenida Paulista', desc: 'São Paulo, SP — Brasil · a partir de 2026' },
+const CAMINHOS: { sigla: string; titulo: string; desc: string; btn: string; to: string; Icon: typeof Landmark; color: 'navy' | 'lime' | 'blue' }[] = [
+  { sigla: 'GOV', titulo: 'Governos & Instituições', desc: 'Prefeituras, estados, consórcios interessados em GovIA.', btn: 'Solicitar Demo GovIA', to: '/govia', Icon: Landmark, color: 'navy' },
+  { sigla: 'WAIF', titulo: 'Patrocinar o Fórum Mundial de IA', desc: 'Empresas que querem associar-se ao maior evento de IA das Américas.', btn: 'Solicitar Proposta', to: '/forum-mundial-ia', Icon: Sparkles, color: 'lime' },
+  { sigla: 'PRO', titulo: 'Apoiar o PROINTER', desc: 'Pessoas físicas, empresas e fundações que querem financiar bolsas de impacto.', btn: 'Fazer uma Doação', to: '/prointer', Icon: HeartHandshake, color: 'blue' },
 ];
 
-const PORTAS = [
-  { Icon: Landmark, titulo: 'Governos', desc: 'Municípios, estados e consórcios: a porta de entrada é a GovIA.', to: '/govia', link: 'Conhecer a GovIA' },
-  { Icon: Briefcase, titulo: 'Empresas & investidores', desc: 'Patrocínio, delegações e rede: comece pelo Fórum Mundial de IA.', to: '/forum-mundial-ia', link: 'Conhecer o WAIF' },
-  { Icon: GraduationCap, titulo: 'Educadores & profissionais', desc: 'Bolsas, formação e imersão internacional: seu caminho é o PROINTER.', to: '/prointer', link: 'Conhecer o PROINTER' },
-  { Icon: Newspaper, titulo: 'Imprensa', desc: 'Releases, dados do ecossistema e kit de marca na sala de imprensa.', to: '/imprensa', link: 'Sala de imprensa' },
-];
+const CAMINHO_COLORS = {
+  navy: { bg: '#152852', title: '#fff', desc: 'rgba(255,255,255,0.75)', sigla: '#d2e718', badgeBg: 'rgba(255,255,255,0.1)', badgeIcon: '#fff', btn: '#d2e718' },
+  lime: { bg: '#d2e718', title: '#152852', desc: 'rgba(21,40,82,0.8)', sigla: '#152852', badgeBg: 'rgba(21,40,82,0.08)', badgeIcon: '#152852', btn: '#152852' },
+  blue: { bg: '#2d4ebf', title: '#fff', desc: 'rgba(255,255,255,0.82)', sigla: '#d2e718', badgeBg: 'rgba(255,255,255,0.12)', badgeIcon: '#fff', btn: '#d2e718' },
+} as const;
 
-const PERFIS = ['Governo ou órgão público', 'Empresa ou investidor', 'Educador ou profissional', 'Universidade ou ICT', 'Imprensa', 'Outro'];
+const ASSUNTOS = ['Parceria estratégica', 'Imprensa e mídia', 'HUB PAN Alliance', 'Outro assunto'];
+
+const ENDERECOS = [
+  { Icon: MapPin, tag: 'Sede Global', linha1: 'Harvard Square, Cambridge, MA', linha2: 'Massachusetts, United States', lime: true },
+  { Icon: Building2, tag: 'Sede Brasil', linha1: 'Avenida Paulista, São Paulo, SP', linha2: 'Centro econômico e institucional do Brasil', lime: false },
+];
 
 const INPUT_STYLE: React.CSSProperties = {
   height: 52, borderRadius: 12, background: '#f5f5f5', border: '1px solid #ecedf0',
   fontFamily: 'Inter', fontSize: 15, color: '#152852', padding: '0 18px', width: '100%', outline: 'none',
 };
+
+/* ═══════════ Caminho rápido por perfil ═══════════ */
+
+function CaminhoCard({ c }: { c: (typeof CAMINHOS)[number] }) {
+  const tilt = useTilt<HTMLDivElement>(4, 6);
+  const { Icon } = c;
+  const col = CAMINHO_COLORS[c.color];
+  return (
+    <Link to={c.to} className="block h-full">
+      <div ref={tilt} className="flex flex-col rounded-[20px] p-7 h-full group cursor-pointer" style={{ background: col.bg }} data-animate>
+        <div className="flex items-center gap-3 mb-6">
+          <span className="flex items-center justify-center rounded-full shrink-0" style={{ width: 48, height: 48, background: col.badgeBg }}>
+            <Icon size={22} strokeWidth={2} color={col.badgeIcon} />
+          </span>
+          <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 12, letterSpacing: '1px', color: col.sigla }}>{c.sigla}</span>
+        </div>
+        <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 21, lineHeight: 1.15, color: col.title }}>{c.titulo}</h3>
+        <p className="mb-6" style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '23px', color: col.desc }}>{c.desc}</p>
+        <p className="mt-auto" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 14, color: col.btn }}>{c.btn} →</p>
+      </div>
+    </Link>
+  );
+}
 
 /* ═══════════ Formulário ═══════════ */
 
@@ -33,74 +61,34 @@ function FormCard() {
 
   if (sent) {
     return (
-      <div className="rounded-[20px] bg-white p-8 lg:p-12 flex flex-col items-center justify-center text-center min-h-[560px]" style={{ border: '1px solid #ecedf0', boxShadow: '0 24px 80px rgba(6,9,25,0.12)' }}>
+      <div className="rounded-[20px] bg-white p-8 lg:p-12 flex flex-col items-center justify-center text-center min-h-[480px]" style={{ border: '1px solid #ecedf0' }}>
         <CheckCircle2 size={64} strokeWidth={1.5} color="#d2e718" style={{ background: '#152852', borderRadius: '50%', padding: 12, width: 80, height: 80 }} />
-        <h3 className="mt-8 mb-3" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 28, lineHeight: 1, color: '#152852' }}>Mensagem registrada!</h3>
-        <p style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: '#797979', maxWidth: 380 }}>
-          Obrigado pelo contato. Nossa equipe direciona sua mensagem para a frente certa do ecossistema e retorna em breve.
+        <h3 className="mt-8 mb-3" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 26, lineHeight: 1, color: '#152852' }}>Mensagem enviada!</h3>
+        <p style={{ fontFamily: 'Inter', fontSize: 15.5, lineHeight: '26px', color: '#797979', maxWidth: 360 }}>
+          Obrigado pelo contato. Nossa equipe retorna em breve.
         </p>
       </div>
     );
   }
 
   return (
-    <form
-      className="rounded-[20px] bg-white p-8 lg:p-10"
-      style={{ border: '1px solid #ecedf0', boxShadow: '0 24px 80px rgba(6,9,25,0.12)' }}
-      onSubmit={(e) => { e.preventDefault(); setSent(true); }}
-    >
-      <p className="mb-7" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '2.2px', textTransform: 'uppercase', color: '#2d4ebf' }}>FORMULÁRIO INSTITUCIONAL</p>
-      <div className="grid sm:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label className="block mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13, color: '#152852' }}>Nome completo *</label>
-          <input required placeholder="Seu nome" style={INPUT_STYLE} />
+    <form className="rounded-[20px] bg-white p-8 lg:p-9" style={{ border: '1px solid #ecedf0' }} onSubmit={(e) => { e.preventDefault(); setSent(true); }}>
+      <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 24, lineHeight: 1.1, color: '#152852' }}>Fale com nossa equipe</h3>
+      <p className="mb-7" style={{ fontFamily: 'Inter', fontSize: 14.5, lineHeight: '23px', color: '#797979' }}>Para parcerias estratégicas, imprensa ou qualquer assunto institucional.</p>
+      <div className="space-y-4">
+        <input required placeholder="Nome completo" style={INPUT_STYLE} />
+        <div className="grid sm:grid-cols-2 gap-4">
+          <input required type="email" placeholder="E-mail" style={INPUT_STYLE} />
+          <input placeholder="Organização" style={INPUT_STYLE} />
         </div>
-        <div>
-          <label className="block mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13, color: '#152852' }}>E-mail *</label>
-          <input required type="email" placeholder="seu@email.com" style={INPUT_STYLE} />
-        </div>
-      </div>
-      <div className="grid sm:grid-cols-2 gap-4 mb-4">
-        <div>
-          <label className="block mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13, color: '#152852' }}>Organização</label>
-          <input placeholder="Empresa, órgão ou instituição" style={INPUT_STYLE} />
-        </div>
-        <div>
-          <label className="block mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13, color: '#152852' }}>Perfil *</label>
-          <select required defaultValue="" style={{ ...INPUT_STYLE, appearance: 'none', color: '#152852' }}>
-            <option value="" disabled>Selecione seu perfil</option>
-            {PERFIS.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
-        </div>
-      </div>
-      <div className="mb-7">
-        <label className="block mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13, color: '#152852' }}>Mensagem *</label>
-        <textarea required placeholder="Conte em poucas linhas o que você busca no ecossistema" rows={5} style={{ ...INPUT_STYLE, height: 'auto', padding: '14px 18px', resize: 'vertical' }} />
-      </div>
-      <div className="flex flex-wrap items-center gap-5">
-        <HubButton size="lg" variant="blue">Enviar mensagem</HubButton>
-        <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#a7a4a4' }}>Respondemos em até 2 dias úteis.</p>
+        <select required defaultValue="" style={{ ...INPUT_STYLE, color: '#152852' }}>
+          <option value="" disabled>Assunto</option>
+          {ASSUNTOS.map((a) => <option key={a}>{a}</option>)}
+        </select>
+        <textarea required placeholder="Mensagem" rows={5} style={{ ...INPUT_STYLE, height: 'auto', padding: '14px 18px', resize: 'vertical' }} />
+        <HubButton size="lg" variant="blue" className="w-full justify-center">Enviar mensagem</HubButton>
       </div>
     </form>
-  );
-}
-
-/* ═══════════ Portas de entrada ═══════════ */
-
-function PortaCard({ p }: { p: (typeof PORTAS)[number] }) {
-  const tilt = useTilt<HTMLDivElement>(5, 7);
-  const { Icon } = p;
-  return (
-    <Link to={p.to} className="block h-full">
-      <div ref={tilt} className="rounded-[20px] bg-white p-7 flex flex-col h-full group cursor-pointer" style={{ border: '1px solid #ecedf0' }} data-animate>
-        <span className="flex items-center justify-center rounded-full mb-6 transition-colors duration-300 group-hover:bg-lime" style={{ width: 52, height: 52, background: '#f5f5f5' }}>
-          <Icon size={24} strokeWidth={2} color="#152852" />
-        </span>
-        <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 21, lineHeight: 1.1, color: '#152852' }}>{p.titulo}</h3>
-        <p className="mb-6" style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '23px', color: '#797979' }}>{p.desc}</p>
-        <p className="mt-auto" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 14, color: '#2d4ebf' }}>{p.link} →</p>
-      </div>
-    </Link>
   );
 }
 
@@ -108,73 +96,82 @@ function PortaCard({ p }: { p: (typeof PORTAS)[number] }) {
 
 export default function Contato() {
   const heroRef = useReveal<HTMLElement>();
-  const portasRef = useReveal<HTMLElement>();
+  const caminhosRef = useReveal<HTMLElement>();
 
   return (
     <>
-      {/* Hero escuro com grade + formulário sobreposto */}
       <section ref={heroRef} className="relative w-full bg-navy900 overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
-          }}
+          style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px)', backgroundSize: '48px 48px' }}
         />
-        <div className="relative gutter pt-[170px] lg:pt-[220px] pb-[220px]">
+        <div className="relative gutter pt-[170px] lg:pt-[220px] pb-[200px] lg:pb-[260px]">
           <p className="text-[13px] font-medium uppercase mb-6" style={{ fontFamily: 'Inter', letterSpacing: '5.85px', color: 'rgba(255,255,255,0.5)' }} data-animate>
-            CONECTE-SE · FALE COM O ECOSSISTEMA
+            CONTATO & CONEXÕES
           </p>
-          <h1 className="mb-7 text-white" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 3vw + 18px, 62px)', lineHeight: 1, letterSpacing: '-1.2px' }} data-animate>
-            Toda grande conexão<br />começa com uma<br /><span style={{ color: '#d2e718' }}>conversa simples.</span>
+          <h1 className="mb-5 text-white" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 3vw + 18px, 62px)', lineHeight: 1, letterSpacing: '-1.2px' }} data-animate>
+            Vamos conversar.
           </h1>
-          <p style={{ fontFamily: 'Inter', fontSize: 17, lineHeight: '29px', color: '#d6d6d6', maxWidth: 620 }} data-animate>
-            Governo, empresa, educador ou imprensa — conte o que você busca e nossa equipe direciona sua mensagem para a frente certa do HUB PAN.
+          <p style={{ fontFamily: 'Inter', fontSize: 17, lineHeight: '29px', color: '#d6d6d6', maxWidth: 560 }} data-animate>
+            Seja qual for seu perfil — há um caminho específico para você entrar no ecossistema.
           </p>
         </div>
       </section>
 
-      {/* Formulário sobreposto + sedes */}
+      {/* Form + endereços — sobreposto entre o hero e o resto do conteúdo */}
       <section className="gutter pb-24 lg:pb-32" style={{ background: '#f5f5f5' }}>
-        <div className="grid lg:grid-cols-[1fr_1.25fr] gap-10 items-start -mt-[160px] relative z-10">
-          {/* Sedes e contexto */}
-          <div className="order-2 lg:order-1 lg:pt-[190px]">
-            <div className="space-y-4 mb-10">
-              {SEDES.map(({ Icon, tag, nome, desc }) => (
-                <div key={nome} className="flex items-center gap-5 rounded-[20px] bg-white p-6" style={{ border: '1px solid #ecedf0' }}>
-                  <span className="flex items-center justify-center rounded-full shrink-0" style={{ width: 52, height: 52, background: '#f5f5f5' }}>
-                    <Icon size={24} strokeWidth={2} color="#2d4ebf" />
+        <div className="grid lg:grid-cols-[1fr_1.3fr] gap-10 items-stretch -mt-[150px] lg:-mt-[190px] relative z-10">
+          <div className="h-full flex flex-col">
+            <h3 className="mb-6 shrink-0 text-white" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 22, lineHeight: 1.1 }}>Onde estamos.</h3>
+            <div className="flex-1 flex flex-col gap-4">
+              {ENDERECOS.map(({ Icon, tag, linha1, linha2, lime }) => (
+                <div
+                  key={tag}
+                  className="shrink-0 flex items-center gap-4 rounded-[20px] p-6"
+                  style={{ background: lime ? '#d2e718' : '#fff', border: lime ? 'none' : '1px solid #ecedf0' }}
+                >
+                  <span className="flex items-center justify-center rounded-full shrink-0" style={{ width: 44, height: 44, background: lime ? 'rgba(21,40,82,0.08)' : '#f5f5f5' }}>
+                    <Icon size={20} strokeWidth={2} color={lime ? '#152852' : '#2d4ebf'} />
                   </span>
                   <div>
-                    <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10, letterSpacing: '1.8px', textTransform: 'uppercase', color: '#a7a4a4' }}>{tag}</p>
-                    <p style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 20, lineHeight: 1.2, color: '#152852' }}>{nome}</p>
-                    <p style={{ fontFamily: 'Inter', fontSize: 13.5, color: '#797979' }}>{desc}</p>
+                    <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10, letterSpacing: '1.6px', textTransform: 'uppercase', color: lime ? 'rgba(21,40,82,0.65)' : '#a7a4a4' }}>{tag}</p>
+                    <p style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 16, lineHeight: 1.3, color: '#152852' }}>{linha1}</p>
+                    <p style={{ fontFamily: 'Inter', fontSize: 13, color: lime ? 'rgba(21,40,82,0.7)' : '#797979' }}>{linha2}</p>
                   </div>
                 </div>
               ))}
+
+              <div className="flex-1 flex flex-col justify-center rounded-[20px] p-6 bg-navy">
+                <div className="flex items-center gap-4 mb-3">
+                  <span className="flex items-center justify-center rounded-full shrink-0" style={{ width: 44, height: 44, background: 'rgba(255,255,255,0.08)' }}>
+                    <Newspaper size={20} strokeWidth={2} color="#d2e718" />
+                  </span>
+                  <p style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 16, color: '#fff' }}>Imprensa & Mídia</p>
+                </div>
+                <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 13.5, lineHeight: '22px', color: 'rgba(255,255,255,0.75)' }}>
+                  Para press kit, dados do Observatório de IA ou cobertura do lançamento do portal.
+                </p>
+                <Link to="/imprensa"><HubButton size="sm" variant="lime">Baixar press kit</HubButton></Link>
+              </div>
             </div>
-            <p style={{ fontFamily: 'Inter', fontSize: 15, lineHeight: '26px', color: '#797979', maxWidth: 420 }}>
-              Prefere começar explorando? As portas de entrada por perfil estão logo abaixo — cada frente do ecossistema tem seu próprio caminho.
-            </p>
           </div>
 
-          {/* Formulário */}
-          <div className="order-1 lg:order-2">
+          <div className="lg:self-start lg:-mt-12">
             <FormCard />
           </div>
         </div>
       </section>
 
-      {/* Portas de entrada por perfil */}
-      <section ref={portasRef} className="py-24 lg:py-32 gutter bg-white">
+      {/* 3 caminhos rápidos */}
+      <section ref={caminhosRef} className="py-24 lg:py-32 gutter bg-white">
         <div className="mb-14 max-w-[700px]">
-          <p className="eyebrow text-muted mb-6" data-animate>PORTAS DE ENTRADA</p>
-          <h2 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#152852' }} data-animate>
-            Qual porta é a sua?
+          <p className="eyebrow text-muted mb-6" data-animate>COMECE POR AQUI</p>
+          <h2 style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#152852' }} data-animate>
+            Qual é o seu caminho?
           </h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {PORTAS.map((p) => <PortaCard key={p.titulo} p={p} />)}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {CAMINHOS.map((c) => <CaminhoCard key={c.sigla} c={c} />)}
         </div>
       </section>
     </>

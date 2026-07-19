@@ -1,185 +1,214 @@
-import { useLayoutEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
-import {
-  BrainCircuit, GraduationCap, Building2, HeartHandshake, Scale, Globe2, Megaphone, Users, Mic,
-} from 'lucide-react';
+import { Check } from 'lucide-react';
 import Hero80, { STRIP_THEMES } from '../../components/Hero80';
 import FAQAccordion from '../../components/FAQAccordion';
-import CTABanner from '../../components/CTABanner';
 import HubButton from '../../components/HubButton';
-import { useReveal, useRevealBidirectional } from '../../components/useReveal';
+import { useReveal } from '../../components/useReveal';
 import { useTilt } from '../../components/useTilt';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ═══════════ Dados ═══════════ */
+/* ═══════════ Dados — extraídos do wireframe oficial (page-waif) ═══════════ */
 
 const STATS = [
-  { value: '2027', label: 'Primeira edição · Cambridge', accent: true },
-  { value: 15, label: 'Edições de legado' },
-  { value: 4, label: 'Continentes conectados' },
-  { value: 'ONU', label: 'Rota institucional 2026' },
+  { value: '2027', label: 'Primeira edição', accent: true },
+  { value: 'CAM', label: 'Cambridge, MA' },
+  { value: 'WAIF', label: 'World AI Forum' },
+  { value: 'ONU', label: 'Ancoragem institucional' },
   { value: 100, suffix: '%', label: 'Ativo proprietário' },
-  { value: 'WAIF', label: 'Marca global do fórum' },
 ];
 
-const ROTA = [
-  { ano: '2026', quando: 'Maio', titulo: '1ª Expo Boston', major: false, desc: 'A primeira edição do ecossistema fora do eixo Brasil–Nova York. Boston entra no mapa como palco de tecnologia e inovação.' },
-  { ano: '2026', quando: 'Junho', titulo: 'Lançamento do Portal HUB PAN', major: false, desc: 'O ecossistema vira plataforma global — e a campanha do Fórum Mundial de IA começa oficialmente.' },
-  { ano: '2026', quando: 'Novembro', titulo: '4º andar das Nações Unidas', major: true, desc: 'O Delegates Dining Room inteiro, dentro da ONU, em Nova York. O palco institucional que apresenta o WAIF ao mundo.' },
-  { ano: '2027', quando: 'O destino', titulo: 'Fórum Mundial de IA · Cambridge, MA', major: true, desc: 'Entre Harvard e MIT, a primeira edição do maior ativo proprietário do HUB PAN. Autoridade global em IA, construída tijolo a tijolo.' },
+const PILARES: { sigla: string; titulo: string; desc: string; gera: string; color: 'white' | 'blue' | 'lime' | 'navy' }[] = [
+  { sigla: 'AU', titulo: 'Autoridade Temática', desc: 'O WAIF posiciona o HUB PAN como referência em governança de IA e inovação de impacto. Cada edição gera conteúdo, dados do Observatório, pesquisas e publicações que circulam com o WAIF como fonte.', gera: 'Gera: mídia espontânea · citações acadêmicas · convites institucionais', color: 'white' },
+  { sigla: 'RE', titulo: 'Relacionamento Estratégico', desc: 'O Fórum coloca no mesmo ambiente: CEOs de empresas de IA, policy makers, reitores, representantes de governos, pesquisadores de Harvard e MIT, lideranças do MIPAD e investidores. Networking único no Brasil.', gera: 'Gera: parcerias · contratos · relações institucionais de longo prazo', color: 'blue' },
+  { sigla: 'PA', titulo: 'Patrocínio e Negócios', desc: 'Para patrocinadores, o WAIF é a oportunidade de associar a marca ao ecossistema de IA mais estratégico das Américas — com visibilidade perante tomadores de decisão qualificados em Harvard Square, Cambridge.', gera: 'Gera: retorno de marca · acesso a decisores · presença em Cambridge', color: 'lime' },
+  { sigla: 'EC', titulo: 'Ecossistema HUB PAN', desc: 'O WAIF é o epicentro do ecossistema — conecta GovIA (dados do Observatório), PROINTER (bolsistas presentes), Academy (conteúdo gerado), Alliance (membros) e Insights (publicações). Cada plataforma converge para o Fórum.', gera: 'Gera: fortalecimento do ecossistema · cross-sell entre plataformas', color: 'navy' },
 ];
 
-const PORQUE = [
-  { img: 'inst-boston-mit', tag: 'VIZINHANÇA IMEDIATA', nome: 'MIT', desc: 'O epicentro mundial da pesquisa aplicada em IA fica a minutos do endereço do fórum.' },
-  { img: 'inst-cambridge-harvard', tag: 'AUTORIDADE ACADÊMICA', nome: 'Harvard', desc: 'Harvard Square é a sede global do HUB PAN — o fórum acontece em casa, não em território alugado.' },
-  { img: 'forum-onu-flags', tag: 'LEGITIMIDADE INSTITUCIONAL', nome: 'Rota ONU', desc: 'A campanha de lançamento passa por dentro das Nações Unidas — não por um outdoor.' },
+const PILAR_COLORS = {
+  white: { bg: '#ffffff', border: '1px solid #ecedf0', title: '#152852', desc: '#797979', foot: '#a7a4a4', footBorder: '#ecedf0', badgeBg: '#f5f5f5', badgeText: '#2d4ebf' },
+  blue: { bg: '#2d4ebf', border: undefined, title: '#ffffff', desc: 'rgba(255,255,255,0.82)', foot: 'rgba(255,255,255,0.6)', footBorder: 'rgba(255,255,255,0.2)', badgeBg: 'rgba(255,255,255,0.12)', badgeText: '#d2e718' },
+  lime: { bg: '#d2e718', border: undefined, title: '#152852', desc: 'rgba(21,40,82,0.8)', foot: 'rgba(21,40,82,0.55)', footBorder: 'rgba(21,40,82,0.15)', badgeBg: 'rgba(21,40,82,0.08)', badgeText: '#152852' },
+  navy: { bg: '#152852', border: undefined, title: '#ffffff', desc: 'rgba(255,255,255,0.78)', foot: 'rgba(255,255,255,0.55)', footBorder: 'rgba(255,255,255,0.15)', badgeBg: 'rgba(255,255,255,0.1)', badgeText: '#d2e718' },
+} as const;
+
+const EDICAO_ITENS = [
+  'Palestras principais com lideranças globais de IA',
+  'Painéis: IA e governança, IA e ODS, IA inclusiva',
+  'Lançamento dos dados do Observatório de IA HUB PAN',
+  'Sessões de networking curado por perfil',
+  'Experiências no ecossistema Harvard Square e MIT',
+  'Publicação do Relatório Anual de IA nas Américas e África',
 ];
 
-const EIXOS = [
-  { Icon: BrainCircuit, titulo: 'IA & Governos', desc: 'Políticas públicas, regulação e o Estado como usuário de IA.' },
-  { Icon: GraduationCap, titulo: 'IA & Educação', desc: 'Formação, futuro do trabalho e a sala de aula na era dos modelos.' },
-  { Icon: Building2, titulo: 'IA & Negócios', desc: 'Adoção real, produtividade e os novos mercados da inteligência.' },
-  { Icon: HeartHandshake, titulo: 'IA & Impacto', desc: 'ODS, diversidade e a cooperação Sul-Sul como pauta central.' },
-  { Icon: Scale, titulo: 'Ética & Governança', desc: 'Transparência algorítmica, dados e confiança pública.' },
-  { Icon: Globe2, titulo: 'Cooperação Internacional', desc: 'Américas e África na mesma mesa — a assinatura do HUB PAN.' },
+const CONTEXTO = [
+  { tag: 'Antecedente', titulo: 'Expo Boston como trampolim', desc: 'A Expo Boston (maio 2026) é o antecedente direto do WAIF — mesma audiência, mesmo ecossistema, escala e ambição amplificadas para 2027.' },
+  { tag: 'Estratégia', titulo: 'Campanha de apoiadores no Brasil', desc: 'Após o lançamento do portal, campanha nacional com foco em captação de patrocinadores brasileiros. Oportunidade de entrada no nível fundador — menor custo e maior retorno.' },
+  { tag: 'Sinergia', titulo: 'GovIA e Observatório no centro', desc: 'O Fórum é o principal momento de divulgação dos dados do Observatório de IA e apresentação do GovIA para policy makers e gestores internacionais.' },
 ];
 
-const PARTICIPE = [
+const NIVEIS = [
   {
-    Icon: Megaphone, bg: '#152852', text: '#fff', sub: 'rgba(255,255,255,0.78)', iconBg: 'rgba(255,255,255,0.1)', iconColor: '#d2e718',
-    tag: 'PATROCINADORES', titulo: 'Coloque sua marca na fundação', desc: 'Cotas fundadoras com naming, ativação nos territórios e relacionamento de alto nível — antes de o mundo inteiro chegar.',
-    btn: <HubButton size="md" variant="lime">Quero patrocinar</HubButton>,
+    nivel: 'Nível 01', nome: 'Bronze', desc: 'Visibilidade e presença. Ideal para marcas que querem estar associadas ao Fórum.',
+    inclui: ['Logo em materiais do evento', '2 ingressos para o Fórum', 'Menção nas comunicações', 'Relatório pós-evento'],
+    destaque: false,
   },
   {
-    Icon: Users, bg: '#2d4ebf', text: '#fff', sub: 'rgba(255,255,255,0.82)', iconBg: 'rgba(255,255,255,0.12)', iconColor: '#d2e718',
-    tag: 'DELEGAÇÕES', titulo: 'Leve seu governo ou empresa', desc: 'Delegações oficiais com agenda estruturada em Cambridge e Boston — imersão, negócios e relações institucionais.',
-    btn: <HubButton size="md" variant="lime">Montar delegação</HubButton>,
+    nivel: 'Nível 02', nome: 'Prata', desc: 'Ativações e conteúdo. Para marcas que querem leads qualificados e posicionamento editorial em IA.',
+    inclui: ['Tudo do Bronze', 'Painel ou workshop no programa', '5 ingressos para o Fórum', 'Artigo no HUB PAN Insights'],
+    destaque: false,
   },
   {
-    Icon: Mic, bg: '#d2e718', text: '#152852', sub: 'rgba(21,40,82,0.85)', iconBg: 'rgba(21,40,82,0.08)', iconColor: '#152852',
-    tag: 'PALESTRANTES & PARCEIROS', titulo: 'Entre para a programação', desc: 'Chamada de conteúdo, parcerias acadêmicas e institucionais para compor os eixos temáticos da primeira edição.',
-    btn: <HubButton size="md" variant="navy">Propor participação</HubButton>,
+    nivel: 'Nível 03', nome: 'Ouro', desc: 'Parceria estratégica. Liderança editorial, acesso a decisores e posicionamento permanente no HUB PAN.',
+    inclui: ['Tudo do Prata', 'Keynote ou abertura do Fórum', '10 ingressos + convidados VIP', 'Co-branding em todas as comunicações', 'Acesso à rede MIPAD ONU', 'Presença permanente na HUB PAN Alliance'],
+    destaque: true, tagLabel: 'Maior retorno',
   },
 ];
+
+const OBJETIVOS = ['Visibilidade de marca em Cambridge', 'Acesso a decisores e policy makers', 'Posicionamento editorial em IA', 'Geração de leads qualificados', 'Todos os anteriores'];
+const PARTICIPACAO = ['Participante', 'Palestrante', 'Mediador de painel', 'Representante de governo ou organismo', 'Pesquisador ou acadêmico'];
+const EXPERTISE = ['Governança e políticas públicas de IA', 'IA e educação', 'IA e saúde', 'IA e cidades inteligentes', 'IA e ESG / ODS', 'Pesquisa e desenvolvimento em IA', 'Negócios e mercado de IA'];
+
+const ECOSSISTEMA = [
+  { tag: 'Governos', t: 'GovIA — IA e Observatório', to: '/govia', color: 'navy' as const },
+  { tag: 'ESG', t: 'PROINTER — Impacto transgeracional', to: '/prointer', color: 'blue' as const },
+  { tag: 'Alliance', t: 'Rede estratégica de parceiros', to: '/o-hub-pan', color: 'lime' as const },
+  { tag: 'Press', t: 'Imprensa e press kit', to: '/imprensa', color: 'blue' as const },
+];
+
+const ECO_COLORS = {
+  blue: { bg: '#2d4ebf', text: '#fff', sub: 'rgba(255,255,255,0.7)' },
+  lime: { bg: '#d2e718', text: '#152852', sub: 'rgba(21,40,82,0.65)' },
+  navy: { bg: '#152852', text: '#fff', sub: 'rgba(255,255,255,0.6)' },
+};
 
 const FAQ = [
-  { q: 'Quando e onde acontece o Fórum Mundial de IA?', a: 'A primeira edição está marcada para 2027, em Cambridge, Massachusetts — no entorno imediato de Harvard e MIT, onde fica a sede global do HUB PAN. As edições preparatórias da rota (Expo Boston e o evento no 4º andar da ONU) acontecem ao longo de 2026.' },
-  { q: 'Quem organiza o fórum?', a: 'O WAIF é o maior ativo proprietário do HUB PAN — organizado pelo próprio ecossistema, que soma 15 edições de fóruns internacionais realizados em quase dez anos, incluindo quatro em Nova York e presença dentro das Nações Unidas.' },
-  { q: 'Qual é a relação do fórum com a ONU?', a: 'A campanha global de lançamento do WAIF passa por dentro das Nações Unidas: em novembro de 2026, o HUB PAN ocupa o 4º andar inteiro da sede da ONU em Nova York, no Delegates Dining Room, com a parceria do MIPAD — organismo vinculado à ONU.' },
-  { q: 'Como patrocinar a primeira edição?', a: 'As cotas fundadoras de patrocínio estão abertas para conversa — com naming, presença nos territórios do ecossistema durante toda a rota 2026-2027 e relacionamento direto com as delegações. Fale com a equipe pelo formulário de contato.' },
-  { q: 'Por que Cambridge, e não um centro de convenções qualquer?', a: 'Porque autoridade não se aluga. Cambridge concentra a maior densidade de pesquisa e inovação em IA do mundo, e o HUB PAN tem sede em Harvard Square desde 2023. O fórum acontece onde a conversa global de IA já mora.' },
+  { q: 'O que é o Fórum Mundial de Inteligência Artificial (WAIF)?', a: 'O Fórum Mundial de Inteligência Artificial — WAIF (World Artificial Intelligence Forum) — é um evento proprietário do HUB PAN que reúne grandes players globais de IA, policy makers, pesquisadores, governos e investidores em Cambridge, Massachusetts. A primeira edição está prevista para 2027, ancorada em Harvard Square, com perspectiva pan-americana e pan-africana — diferencial que nenhum outro fórum brasileiro oferece.' },
+  { q: 'Por que o WAIF acontece em Cambridge e não no Brasil?', a: 'Cambridge, Massachusetts, é o metro quadrado de inovação mais disputado das Américas — abriga Harvard, MIT e um ecossistema denso de empresas de tecnologia, startups e centros de pesquisa de referência mundial. O HUB PAN tem sua sede global em Harvard Square, o que torna Cambridge o local natural e estrategicamente mais poderoso para um fórum de IA com pretensões globais.' },
+  { q: 'Qual o retorno esperado para um patrocinador do WAIF?', a: 'Patrocinadores do WAIF ganham visibilidade perante um público qualificado de tomadores de decisão em IA, acesso a networking exclusivo em Harvard Square, co-branding em todas as comunicações do evento, acesso a dados inéditos do Observatório de IA HUB PAN e — nos níveis mais altos — ingresso permanente na HUB PAN Alliance e acesso à rede MIPAD ONU.' },
+  { q: 'Como o WAIF se relaciona com o GovIA e o Observatório de IA?', a: 'O Fórum Mundial de IA é o principal momento de lançamento e divulgação dos dados do Observatório de IA HUB PAN — o primeiro mapeamento sistemático do uso de IA na administração pública brasileira. O WAIF também é a vitrine do GovIA para policy makers e gestores públicos internacionais, criando sinergia direta entre as plataformas do ecossistema.' },
+  { q: 'Posso propor uma palestra ou painel no WAIF 2027?', a: 'Sim. O WAIF aceita propostas de palestrantes e mediadores de painéis com expertise em governança de IA, IA e ODS, IA inclusiva, políticas públicas de IA, IA e educação, IA e saúde, e mercado de IA nas Américas e África. As propostas passam por processo de seleção e devem ser submetidas pelo formulário de manifestação de interesse nesta página.' },
 ];
 
-/* ═══════════ Rota até 2027 — timeline com anos gigantes e linha animada ═══════════ */
+const INPUT_STYLE: React.CSSProperties = {
+  height: 50, borderRadius: 10, background: '#f5f5f5', border: '1px solid #ecedf0',
+  fontFamily: 'Inter', fontSize: 14.5, color: '#152852', padding: '0 16px', width: '100%', outline: 'none',
+};
 
-function RotaItem({ item, side }: { item: (typeof ROTA)[number]; side: 'left' | 'right' }) {
-  const ref = useRevealBidirectional<HTMLDivElement>(0.08);
+/* ═══════════ Seções ═══════════ */
+
+function SecDiferencial() {
+  const ref = useReveal<HTMLElement>();
+  const tilt = useTilt<HTMLDivElement>(3, 4);
   return (
-    <div ref={ref} className="relative py-14 lg:py-20">
-      {/* Ano gigante centralizado */}
-      <p
-        className="relative text-center select-none"
-        style={{
-          fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(80px, 11vw, 190px)', lineHeight: 0.9, letterSpacing: '-4px',
-          color: item.major ? '#152852' : 'transparent',
-          WebkitTextStroke: item.major ? undefined : '1.5px rgba(21,40,82,0.35)',
-        }}
-        data-animate
-      >
-        {item.ano}
-      </p>
-      {/* Bolinha no trilho */}
-      <span className="absolute left-1/2 top-1/2 -translate-x-1/2 w-[14px] h-[14px] rounded-full bg-white" style={{ border: '2px solid #152852' }} />
-      {/* Info em ziguezague */}
-      <div className={`mt-8 lg:mt-0 lg:absolute lg:top-1/2 lg:-translate-y-1/2 lg:w-[38%] ${side === 'left' ? 'lg:left-0 lg:text-right' : 'lg:right-0'}`} data-animate>
-        <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '2.2px', textTransform: 'uppercase', color: '#2d4ebf' }}>{item.quando}</p>
-        <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 23, lineHeight: 1.1, color: '#152852' }}>{item.titulo}</h3>
-        <p style={{ fontFamily: 'Inter', fontSize: 14.5, lineHeight: '23px', color: '#797979' }}>{item.desc}</p>
-      </div>
-    </div>
-  );
-}
+    <section ref={ref} className="relative w-full overflow-hidden bg-white">
+      <div className="gutter grid lg:grid-cols-2 gap-12 lg:gap-16 py-20 lg:py-0 lg:min-h-screen items-center">
+        <div>
+          <p className="eyebrow text-muted mb-6" data-animate>DIFERENCIAL DO WAIF</p>
+          <h2 className="mb-7" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1.05, color: '#152852' }} data-animate>
+            Por que o WAIF é <span style={{ color: '#2d4ebf' }}>diferente</span> de tudo que existe.
+          </h2>
+          <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 16.5, lineHeight: '28px', color: '#797979' }} data-animate>
+            O mercado tem dezenas de eventos sobre inteligência artificial. O que o WAIF traz de diferente não é o tema — é a combinação que nenhum outro fórum brasileiro consegue reunir: localização estratégica em Cambridge, ancoragem institucional com ONU e MIPAD, conexão direta com o Observatório de IA e uma perspectiva genuinamente pan-americana e pan-africana.
+          </p>
+          <p style={{ fontFamily: 'Inter', fontSize: 16.5, lineHeight: '28px', color: '#797979' }} data-animate>
+            Enquanto outros falam de IA de forma genérica, o WAIF entra nos temas que importam para as Américas e África: governança de IA no setor público, IA e ODS, IA inclusiva e o papel da cooperação Sul-Sul.
+          </p>
+        </div>
 
-function SecRota() {
-  const headRef = useReveal<HTMLDivElement>();
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const progRef = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    const wrap = wrapRef.current;
-    const prog = progRef.current;
-    if (!wrap || !prog) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(prog, { scaleY: 0 }, {
-        scaleY: 1, ease: 'none', transformOrigin: 'top center',
-        scrollTrigger: { trigger: wrap, start: 'top 62%', end: 'bottom 78%', scrub: 0.6 },
-      });
-    }, wrap);
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <section
-      id="forum-rota"
-      className="pt-24 lg:pt-32 gutter overflow-hidden"
-      style={{ background: 'linear-gradient(39.8deg, #ffffff 65.3%, #d2e718 99%)' }}
-    >
-      <div ref={headRef} className="mb-16 max-w-[680px]">
-        <p className="eyebrow text-muted mb-6" data-animate>A ROTA ATÉ 2027</p>
-        <h2 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#152852' }} data-animate>
-          Ninguém chega a Cambridge por acaso.
-        </h2>
-        <p style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: '#797979' }} data-animate>
-          O WAIF não é um evento anunciado — é uma rota em execução, com cada etapa de 2026 construindo o palco de 2027.
-        </p>
-      </div>
-
-      {/* pb aqui (não na section) pro trilho encostar na seção seguinte */}
-      <div ref={wrapRef} className="relative pb-24 lg:pb-32">
-        <div className="absolute top-1 bottom-0 w-px" style={{ left: 'calc(50% - 0.5px)', background: '#dcdcdc' }} />
-        <div ref={progRef} className="absolute top-1 bottom-0 w-[2px] bg-hubblue" style={{ left: 'calc(50% - 1px)', transform: 'scaleY(0)' }} />
-        {ROTA.map((item, i) => (
-          <RotaItem key={`${item.ano}-${item.quando}`} item={item} side={i % 2 === 0 ? 'left' : 'right'} />
-        ))}
+        <div ref={tilt} className="relative rounded-[20px] overflow-hidden" style={{ aspectRatio: '4 / 3' }} data-animate>
+          <img src="/images/forum-onu-flags.webp" alt="Sede da ONU com bandeiras dos países membros" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(6,9,25,0.85) 0%, transparent 55%)' }} />
+          <div className="absolute inset-x-0 bottom-0 p-7">
+            <p className="mb-1" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '1.6px', textTransform: 'uppercase', color: '#d2e718' }}>ANCORAGEM INSTITUCIONAL</p>
+            <p style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 22, lineHeight: 1.15, color: '#fff' }}>ONU · MIPAD · Harvard Square</p>
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
-/* Por que Cambridge — seção escura com 3 tiles fotográficos */
-function SecPorque() {
+function PilarCard({ p }: { p: (typeof PILARES)[number] }) {
+  const tilt = useTilt<HTMLDivElement>(5, 7);
+  const c = PILAR_COLORS[p.color];
+  return (
+    <div ref={tilt} className="rounded-[20px] p-7 flex flex-col" style={{ background: c.bg, border: c.border }} data-animate>
+      <span className="flex items-center justify-center rounded-full mb-6 shrink-0" style={{ width: 48, height: 48, background: c.badgeBg }}>
+        <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, color: c.badgeText }}>{p.sigla}</span>
+      </span>
+      <h3 className="mb-3" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 21, lineHeight: 1.1, color: c.title }}>{p.titulo}</h3>
+      <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '23px', color: c.desc }}>{p.desc}</p>
+      <p className="mt-auto pt-4 border-t" style={{ borderColor: c.footBorder, fontFamily: 'Inter', fontSize: 12.5, color: c.foot }}>{p.gera}</p>
+    </div>
+  );
+}
+
+function SecPilares() {
   const ref = useReveal<HTMLElement>();
   return (
-    <section ref={ref} className="relative w-full bg-navy900 overflow-hidden">
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px)',
-          backgroundSize: '48px 48px',
-        }}
-      />
-      <div className="relative gutter py-24 lg:py-32">
+    <section ref={ref} className="py-24 lg:py-32 gutter" style={{ background: '#f5f5f5' }}>
+      <div className="mb-14 max-w-[700px]">
+        <p className="eyebrow text-muted mb-6" data-animate>OS PILARES DO WAIF</p>
+        <h2 style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#152852' }} data-animate>
+          Um fórum com quatro camadas de valor.
+        </h2>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {PILARES.map((p) => <PilarCard key={p.sigla} p={p} />)}
+      </div>
+    </section>
+  );
+}
+
+/* Edição 2027 — seção escura com foto + lista + contexto */
+function SecEdicao() {
+  const ref = useReveal<HTMLDivElement>();
+  return (
+    <section className="relative w-full bg-navy900 overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+      <div ref={ref} className="relative gutter py-24 lg:py-32">
         <div className="mb-14 max-w-[720px]">
-          <p className="eyebrow mb-6" style={{ color: 'rgba(255,255,255,0.69)' }} data-animate>POR QUE CAMBRIDGE</p>
-          <h2 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#fff' }} data-animate>
-            Autoridade <span style={{ color: '#d2e718' }}>não se aluga.</span> Se constrói no endereço certo.
+          <p className="eyebrow mb-6" style={{ color: 'rgba(255,255,255,0.69)' }} data-animate>EDIÇÃO 2027</p>
+          <h2 style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#fff' }} data-animate>
+            Cambridge, Massachusetts. <span style={{ color: '#d2e718' }}>O próximo capítulo começa aqui.</span>
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {PORQUE.map((t) => (
-            <div key={t.nome} className="group relative rounded-[20px] overflow-hidden h-[380px]" data-animate>
-              <img src={`/images/${t.img}.webp`} alt={t.nome} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(6,9,25,0.92) 0%, rgba(6,9,25,0.35) 50%, rgba(6,9,25,0.08) 100%)' }} />
-              <div className="absolute inset-x-0 bottom-0 p-7">
-                <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10, letterSpacing: '1.6px', textTransform: 'uppercase', color: '#d2e718' }}>{t.tag}</p>
-                <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 26, lineHeight: 1.05, color: '#fff' }}>{t.nome}</h3>
-                <p style={{ fontFamily: 'Inter', fontSize: 13.5, lineHeight: '21px', color: 'rgba(255,255,255,0.85)' }}>{t.desc}</p>
-              </div>
+        <div className="grid lg:grid-cols-2 gap-10 mb-14">
+          <div className="relative rounded-[20px] overflow-hidden h-[320px] lg:h-auto" data-animate>
+            <img src="/images/forum-hero-mit.webp" alt="Cambridge / Harvard Square" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(6,9,25,0.7), transparent 60%)' }} />
+          </div>
+          <div data-animate>
+            <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', color: '#d2e718' }}>WAIF 2027 · Primeira edição</p>
+            <h3 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 24, lineHeight: 1.1, color: '#fff' }}>Harvard Square, Cambridge, MA</h3>
+            <p className="mb-6" style={{ fontFamily: 'Inter', fontSize: 15, lineHeight: '25px', color: '#d6d6d6' }}>
+              A primeira edição acontecerá em Harvard Square — o metro quadrado de inovação mais disputado das Américas, no entorno de Harvard e MIT, onde o HUB PAN tem sua sede global.
+            </p>
+            <ul className="space-y-2 mb-6">
+              {EDICAO_ITENS.map((it) => (
+                <li key={it} className="flex items-start gap-3">
+                  <Check size={15} strokeWidth={2.5} color="#d2e718" className="mt-[3px] shrink-0" />
+                  <span style={{ fontFamily: 'Inter', fontSize: 13.5, lineHeight: '22px', color: 'rgba(255,255,255,0.85)' }}>{it}</span>
+                </li>
+              ))}
+            </ul>
+            <p style={{ fontFamily: 'Inter', fontSize: 12.5, color: 'rgba(255,255,255,0.6)' }}>
+              <b style={{ color: '#d2e718' }}>Parceria institucional</b> · MIPAD ONU + Expo Boston como preparatória do WAIF
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {CONTEXTO.map((c) => (
+            <div key={c.tag} className="rounded-[20px] p-6" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }} data-animate>
+              <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10.5, letterSpacing: '1.6px', textTransform: 'uppercase', color: '#d2e718' }}>{c.tag}</p>
+              <h4 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 17, lineHeight: 1.2, color: '#fff' }}>{c.titulo}</h4>
+              <p style={{ fontFamily: 'Inter', fontSize: 13, lineHeight: '21px', color: 'rgba(255,255,255,0.7)' }}>{c.desc}</p>
             </div>
           ))}
         </div>
@@ -188,67 +217,123 @@ function SecPorque() {
   );
 }
 
-/* Eixos temáticos — 6 cards com tilt */
-function EixoCard({ e }: { e: (typeof EIXOS)[number] }) {
-  const tilt = useTilt<HTMLDivElement>(5, 7);
-  const { Icon } = e;
+/* Patrocínio — 3 níveis */
+function NivelCard({ n }: { n: (typeof NIVEIS)[number] }) {
+  const tilt = useTilt<HTMLDivElement>(4, 6);
   return (
-    <div ref={tilt} className="rounded-[20px] bg-white p-7 flex flex-col" style={{ border: '1px solid #ecedf0' }} data-animate>
-      <span className="flex items-center justify-center rounded-full mb-6" style={{ width: 52, height: 52, background: '#f5f5f5' }}>
-        <Icon size={24} strokeWidth={2} color="#2d4ebf" />
-      </span>
-      <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 21, lineHeight: 1.1, color: '#152852' }}>{e.titulo}</h3>
-      <p style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '23px', color: '#797979' }}>{e.desc}</p>
+    <div
+      ref={tilt}
+      className="relative flex flex-col rounded-[20px] p-8"
+      style={{ background: n.destaque ? '#152852' : '#fff', border: n.destaque ? undefined : '1px solid #ecedf0' }}
+      data-animate
+    >
+      {n.destaque && (
+        <span className="absolute -top-3 left-8 rounded-full px-4 py-1" style={{ background: '#d2e718', fontFamily: 'Inter', fontWeight: 600, fontSize: 11, letterSpacing: '1px', textTransform: 'uppercase', color: '#152852' }}>{n.tagLabel}</span>
+      )}
+      <p className="mt-2 mb-1" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12, letterSpacing: '1.6px', textTransform: 'uppercase', color: n.destaque ? 'rgba(255,255,255,0.55)' : '#a7a4a4' }}>{n.nivel}</p>
+      <h3 className="mb-3" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 28, lineHeight: 1.05, color: n.destaque ? '#fff' : '#152852' }}>{n.nome}</h3>
+      <p className="mb-7" style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '23px', color: n.destaque ? 'rgba(255,255,255,0.78)' : '#797979' }}>{n.desc}</p>
+      <ul className="space-y-3 mb-8 flex-1">
+        {n.inclui.map((it) => (
+          <li key={it} className="flex items-start gap-3">
+            <Check size={16} strokeWidth={2.5} color={n.destaque ? '#d2e718' : '#2d4ebf'} className="mt-[3px] shrink-0" />
+            <span style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '22px', color: n.destaque ? 'rgba(255,255,255,0.9)' : '#152852' }}>{it}</span>
+          </li>
+        ))}
+      </ul>
+      <HubButton size="md" variant={n.destaque ? 'lime' : 'outline-dark'} className="w-full justify-center">
+        Solicitar proposta{n.destaque ? ' Ouro' : ''}
+      </HubButton>
     </div>
   );
 }
 
-function SecEixos() {
+function SecPatrocinio() {
   const ref = useReveal<HTMLElement>();
   return (
-    <section ref={ref} className="py-24 lg:py-32 gutter" style={{ background: '#f5f5f5' }}>
-      <div className="mb-14 max-w-[700px]">
-        <p className="eyebrow text-muted mb-6" data-animate>EIXOS TEMÁTICOS</p>
-        <h2 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#152852' }} data-animate>
-          A agenda que o mundo precisa debater.
+    <section ref={ref} className="py-24 lg:py-32 gutter bg-white">
+      <div className="mb-14 max-w-[720px]">
+        <p className="eyebrow text-muted mb-6" data-animate>OPORTUNIDADES DE PATROCÍNIO</p>
+        <h2 style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#152852' }} data-animate>
+          Sua marca no ecossistema de IA mais estratégico das Américas.
         </h2>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {EIXOS.map((e) => <EixoCard key={e.titulo} e={e} />)}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-4">
+        {NIVEIS.map((n) => <NivelCard key={n.nivel} n={n} />)}
       </div>
     </section>
   );
 }
 
-/* Participe — 3 cards coloridos */
-function ParticipeCard({ p }: { p: (typeof PARTICIPE)[number] }) {
-  const tilt = useTilt<HTMLDivElement>(5, 7);
-  const { Icon } = p;
+/* Formulários duplos — empresas / palestrantes */
+function SecFormularios() {
+  const ref = useReveal<HTMLElement>();
   return (
-    <div ref={tilt} className="flex flex-col rounded-[20px] p-8" style={{ background: p.bg }} data-animate>
-      <span className="flex items-center justify-center rounded-full mb-8" style={{ width: 56, height: 56, background: p.iconBg }}>
-        <Icon size={26} strokeWidth={2} color={p.iconColor} />
-      </span>
-      <p className="mb-3" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10.5, letterSpacing: '1.8px', textTransform: 'uppercase', color: p.sub }}>{p.tag}</p>
-      <h3 className="mb-3" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 24, lineHeight: 1.05, color: p.text }}>{p.titulo}</h3>
-      <p className="mb-8" style={{ fontFamily: 'Inter', fontSize: 14.5, lineHeight: '24px', color: p.sub }}>{p.desc}</p>
-      <div className="mt-auto"><Link to="/contato">{p.btn}</Link></div>
-    </div>
+    <section id="forum-form" ref={ref} className="py-24 lg:py-32 gutter" style={{ background: '#f5f5f5' }}>
+      <div className="grid lg:grid-cols-2 gap-6">
+        <form className="rounded-[20px] bg-white p-8 lg:p-9" style={{ border: '1px solid #ecedf0' }} onSubmit={(e) => e.preventDefault()}>
+          <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', color: '#2d4ebf' }}>PARA EMPRESAS E MARCAS</p>
+          <h3 className="mb-6" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 24, lineHeight: 1.1, color: '#152852' }}>Patrocinar o WAIF 2027</h3>
+          <p className="mb-7" style={{ fontFamily: 'Inter', fontSize: 14.5, lineHeight: '23px', color: '#797979' }}>Sua marca ao lado dos principais players globais de inteligência artificial em Cambridge.</p>
+          <div className="space-y-4">
+            <input placeholder="Nome completo" style={INPUT_STYLE} />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <input placeholder="Empresa" style={INPUT_STYLE} />
+              <input placeholder="Cargo" style={INPUT_STYLE} />
+            </div>
+            <input placeholder="E-mail corporativo" style={INPUT_STYLE} />
+            <select defaultValue="" style={{ ...INPUT_STYLE, color: '#152852' }}>
+              <option value="" disabled>Nível de patrocínio</option>
+              <option>Bronze — visibilidade e presença</option><option>Prata — ativações e conteúdo</option><option>Ouro — parceria estratégica</option><option>Personalizado — quero ser o patrocinador título</option>
+            </select>
+            <select defaultValue="" style={{ ...INPUT_STYLE, color: '#152852' }}>
+              <option value="" disabled>Objetivo principal</option>
+              {OBJETIVOS.map((o) => <option key={o}>{o}</option>)}
+            </select>
+            <textarea placeholder="Mensagem" rows={3} style={{ ...INPUT_STYLE, height: 'auto', padding: '12px 16px', resize: 'vertical' }} />
+            <HubButton size="md" variant="blue" className="w-full justify-center">Solicitar proposta de patrocínio</HubButton>
+          </div>
+        </form>
+
+        <form className="rounded-[20px] bg-white p-8 lg:p-9" style={{ border: '1px solid #ecedf0' }} onSubmit={(e) => e.preventDefault()}>
+          <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', color: '#2d4ebf' }}>PARA PALESTRANTES E PARTICIPANTES</p>
+          <h3 className="mb-6" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 24, lineHeight: 1.1, color: '#152852' }}>Manifestar interesse no WAIF</h3>
+          <p className="mb-7" style={{ fontFamily: 'Inter', fontSize: 14.5, lineHeight: '23px', color: '#797979' }}>Inscrições abertas para 2027. Vagas limitadas com processo de seleção por perfil.</p>
+          <div className="space-y-4">
+            <input placeholder="Nome completo" style={INPUT_STYLE} />
+            <input placeholder="E-mail" style={INPUT_STYLE} />
+            <input placeholder="Organização e cargo" style={INPUT_STYLE} />
+            <select defaultValue="" style={{ ...INPUT_STYLE, color: '#152852' }}>
+              <option value="" disabled>Como deseja participar?</option>
+              {PARTICIPACAO.map((p) => <option key={p}>{p}</option>)}
+            </select>
+            <select defaultValue="" style={{ ...INPUT_STYLE, color: '#152852' }}>
+              <option value="" disabled>Área de expertise em IA</option>
+              {EXPERTISE.map((e) => <option key={e}>{e}</option>)}
+            </select>
+            <textarea placeholder="Por que você deve estar no WAIF 2027?" rows={3} style={{ ...INPUT_STYLE, height: 'auto', padding: '12px 16px', resize: 'vertical' }} />
+            <HubButton size="md" variant="lime" className="w-full justify-center">Manifestar interesse</HubButton>
+          </div>
+        </form>
+      </div>
+    </section>
   );
 }
 
-function SecParticipe() {
-  const ref = useReveal<HTMLElement>();
+function SecEcossistema() {
   return (
-    <section ref={ref} className="py-24 lg:py-32 gutter bg-white">
-      <div className="mb-14 max-w-[700px]">
-        <p className="eyebrow text-muted mb-6" data-animate>COMO PARTICIPAR</p>
-        <h2 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#152852' }} data-animate>
-          Três portas de entrada para 2027.
-        </h2>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {PARTICIPE.map((p) => <ParticipeCard key={p.tag} p={p} />)}
+    <section className="py-16 gutter bg-white">
+      <p className="mb-6" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12, letterSpacing: '1.6px', textTransform: 'uppercase', color: '#a7a4a4' }}>TAMBÉM NO ECOSSISTEMA HUB PAN</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {ECOSSISTEMA.map((e) => {
+          const c = ECO_COLORS[e.color];
+          return (
+            <Link key={e.t} to={e.to} className="group rounded-[16px] p-5 flex flex-col justify-between h-[110px] transition-transform duration-300 hover:-translate-y-1" style={{ background: c.bg }}>
+              <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 12, letterSpacing: '1px', color: c.sub }}>{e.tag}</span>
+              <span style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13.5, lineHeight: '19px', color: c.text }}>{e.t}</span>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );
@@ -257,15 +342,15 @@ function SecParticipe() {
 function SecFAQ() {
   const ref = useReveal<HTMLElement>();
   return (
-    <section ref={ref} className="py-24 lg:py-32 gutter" style={{ background: '#f5f5f5' }}>
+    <section ref={ref} className="py-24 lg:py-32 gutter bg-white">
       <div className="grid lg:grid-cols-[1fr_1.4fr] gap-12">
         <div>
           <p className="eyebrow text-muted mb-6" data-animate>PERGUNTAS FREQUENTES</p>
           <h2 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#152852' }} data-animate>
-            O essencial sobre o WAIF.
+            O que empresas e parceiros mais perguntam sobre o WAIF.
           </h2>
           <p style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: '#797979' }} data-animate>
-            Não achou sua resposta? <Link to="/contato" className="underline" style={{ color: '#2d4ebf' }}>Fale com a equipe</Link>.
+            Respostas diretas para quem quer patrocinar, participar ou entender o posicionamento do Fórum Mundial de IA.
           </p>
         </div>
         <div data-animate>
@@ -284,29 +369,24 @@ export default function ForumMundialIA() {
       <Hero80
         img="/images/forum-hero-mit.webp"
         imgAlt="MIT Museum — Cambridge, MA"
-        eyebrow="O MAIOR ATIVO PROPRIETÁRIO DO HUB PAN"
-        title={<>O mundo vai debater IA.<br />O endereço será<br /><span style={{ color: '#d2e718' }}>Cambridge, 2027.</span></>}
-        sub="O Fórum Mundial de Inteligência Artificial (WAIF) é o evento âncora do HUB PAN: autoridade, patrocínio, relacionamento e geração de negócios no epicentro global da inovação — entre Harvard e MIT."
+        eyebrow="ATIVO PROPRIETÁRIO HUB PAN · AUTORIDADE GLOBAL · CAMBRIDGE 2027"
+        title="Fórum Mundial de Inteligência Artificial"
+        sub="O maior ativo estratégico do HUB PAN. O WAIF reúne grandes players globais de IA, policy makers, pesquisadores, governos e investidores em Cambridge, Massachusetts — o epicentro mundial de inovação — para uma conversa que nenhum outro fórum no Brasil consegue ter."
         actions={<>
-          <Link to="/contato"><HubButton size="lg" variant="lime">Quero patrocinar</HubButton></Link>
-          <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#forum-rota', true)}>Ver a rota até 2027</HubButton>
+          <HubButton size="lg" variant="lime" onClick={() => ScrollSmoother.get()?.scrollTo('#forum-form', true)}>Patrocinar o Fórum</HubButton>
+          <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#forum-form', true)}>Sobre a 1ª edição</HubButton>
+          <HubButton size="lg" variant="outline-light" onClick={() => ScrollSmoother.get()?.scrollTo('#forum-form', true)}>Manifestar interesse</HubButton>
         </>}
         stats={STATS}
         strip={STRIP_THEMES.lime}
       />
-      <SecRota />
-      <SecPorque />
-      <SecEixos />
-      <SecParticipe />
+      <SecDiferencial />
+      <SecPilares />
+      <SecEdicao />
+      <SecPatrocinio />
+      <SecFormularios />
+      <SecEcossistema />
       <SecFAQ />
-      <CTABanner
-        title={<>2027 está mais perto <span style={{ color: '#d2e718' }}>do que parece.</span></>}
-        sub="Cotas fundadoras de patrocínio abertas para conversa — quem entra agora, entra na fundação."
-        actions={<>
-          <Link to="/contato"><HubButton size="lg" variant="lime">Patrocinar o WAIF</HubButton></Link>
-          <Link to="/imprensa"><HubButton size="lg" variant="navy">Área de imprensa</HubButton></Link>
-        </>}
-      />
     </>
   );
 }

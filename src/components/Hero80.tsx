@@ -64,6 +64,8 @@ interface Hero80Props {
   /** Use <br /> pra quebras manuais e <span style={{color:'#d2e718'}}> no trecho lime */
   title: ReactNode;
   sub: ReactNode;
+  /** conteúdo extra abaixo do sub (ex: selo de parceria) — opcional */
+  badge?: ReactNode;
   actions?: ReactNode;
   stats: HeroStat[];
   strip: StripTheme;
@@ -71,7 +73,15 @@ interface Hero80Props {
   imgPosition?: string;
 }
 
-export default function Hero80({ img, imgAlt = '', eyebrow, title, sub, actions, stats, strip, imgPosition }: Hero80Props) {
+/** Grid responsivo conforme a quantidade real de stats — nem toda página tem 6 */
+function statsGridClass(n: number): string {
+  if (n <= 3) return 'grid-cols-3';
+  if (n === 4) return 'grid-cols-2 sm:grid-cols-4';
+  if (n === 5) return 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5';
+  return 'grid-cols-3 lg:grid-cols-6';
+}
+
+export default function Hero80({ img, imgAlt = '', eyebrow, title, sub, badge, actions, stats, strip, imgPosition }: Hero80Props) {
   const ref = useReveal<HTMLElement>();
   return (
     <section ref={ref} className="relative w-full">
@@ -91,14 +101,15 @@ export default function Hero80({ img, imgAlt = '', eyebrow, title, sub, actions,
           <p className="mb-9" style={{ fontFamily: 'Inter', fontSize: 17, lineHeight: '29px', color: '#d6d6d6', maxWidth: 660 }} data-animate>
             {sub}
           </p>
-          {actions && <div className="flex flex-wrap gap-4" data-animate>{actions}</div>}
+          {actions && <div className="flex flex-wrap gap-4 mb-8" data-animate>{actions}</div>}
+          {badge && <div data-animate>{badge}</div>}
         </div>
       </div>
 
       {/* Faixa de números — 20vh, cor por página (DESIGN-SYSTEM.md §5.5.5) */}
       <div className="w-full h-[20vh] min-h-[150px] flex items-center" style={{ background: strip.bg, borderTop: strip.borderTop }}>
         <div className="gutter w-full">
-          <div className="grid grid-cols-3 lg:grid-cols-6 gap-y-6">
+          <div className={`grid ${statsGridClass(stats.length)} gap-y-6`}>
             {stats.map((s, i) => (
               <div key={s.label} className="text-center px-2" style={i > 0 ? { borderLeft: `1px solid ${strip.divider}` } : undefined}>
                 <p style={{

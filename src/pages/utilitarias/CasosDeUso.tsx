@@ -1,84 +1,153 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Landmark, GraduationCap, Briefcase } from 'lucide-react';
 import PageHero from '../../components/PageHero';
 import HubButton from '../../components/HubButton';
-import CTABanner from '../../components/CTABanner';
 import { useReveal } from '../../components/useReveal';
 import { useTilt } from '../../components/useTilt';
 
+/* ═══════════ Dados — extraídos do wireframe oficial (page-casos) ═══════════ */
+
+const PLATAFORMAS = ['Todos', 'PROINTER', 'GovIA', 'Fórum Mundial de IA', 'Fórum Pan-Americano'];
+
 const CASOS = [
   {
-    img: 's3-accordion-govia', tag: 'GOVERNOS · GOVIA', titulo: 'A prefeitura que saiu do zero em IA',
-    desc: 'Um município de médio porte adere à GovIA, faz o diagnóstico de maturidade e coloca assistentes de IA nas secretarias de saúde e educação — com servidores formados pela própria plataforma.',
-    resultado: 'Primeiras entregas em semanas, não em anos.', to: '/govia',
+    plataforma: 'PROINTER', img: 's7-persona-2', tag: 'PROINTER · Educação', selo: 'Missão 2027', tipo: 'História de impacto',
+    titulo: '"Quando voltei de Harvard, minha escola inteira mudou de perspectiva"',
+    desc: 'Professora de matemática da rede municipal de Minas Gerais, selecionada como bolsista PROINTER pela performance em programa de extensão Premier Niveau. Após a missão em Nova York, Boston e Cambridge, implementou projeto de inovação pedagógica reconhecido pela Secretaria de Educação do estado.',
+    stats: [{ v: '320', l: 'Alunos impactados' }, { v: '3', l: 'Projetos derivados' }, { v: 'ODS 4', l: 'Alinhamento' }],
+    cta: 'Ler história completa',
   },
   {
-    img: 's7-persona-2', tag: 'EDUCAÇÃO · PROINTER', titulo: 'A professora que atravessou a ponte',
-    desc: 'Selecionada por edital público, uma professora da rede estadual faz imersão em Harvard Square e na ONU — e volta com um projeto de replicação para toda a sua diretoria de ensino.',
-    resultado: 'Uma bolsa, centenas de alunos alcançados.', to: '/prointer',
+    plataforma: 'GovIA', img: 's3-accordion-govia', tag: 'GovIA · Administração Pública', selo: 'Piloto MG · 2026', tipo: 'Caso de uso',
+    titulo: 'Prefeitura de município mineiro adota IA para comunicação e atendimento ao cidadão',
+    desc: 'Município com 45.000 habitantes no interior de Minas Gerais assinou o plano Municipal do GovIA e capacitou 18 servidores em 6 semanas. Resultado: redução de 40% no tempo de produção de comunicados oficiais e implementação de chatbot de atendimento para dúvidas sobre IPTU.',
+    stats: [{ v: '18', l: 'Servidores capacitados' }, { v: '40%', l: 'Redução de tempo' }, { v: '6 sem', l: 'Para implementar' }],
+    cta: 'Ver caso completo',
   },
   {
-    img: 's3-accordion-forum', tag: 'EMPREENDEDORISMO · MIPAD', titulo: 'O afroempreendedor que chegou ao mercado global',
-    desc: 'Via PROINTER e rede MIPAD, um fundador brasileiro conecta seu negócio a mentores internacionais e apresenta sua tese nos ambientes institucionais de Nova York.',
-    resultado: 'Rede global, credencial institucional.', to: '/prointer',
+    plataforma: 'Fórum Pan-Americano', img: 'inst-nyc-onu', tag: 'Fórum Pan-Americano · ONU', selo: 'Expo NY 2025', tipo: 'Caso de uso',
+    titulo: 'Startup de separação de resíduos apresenta projeto na ONU e firma parceiro nos EUA',
+    desc: 'Empresa participante da Expo New York 2025 apresentou projeto de inovação de impacto em gestão de resíduos na sede das Nações Unidas. Resultado: contato com investidor americano, início de negociação de partnership e reconhecimento do projeto como boas práticas em ODS 11 (cidades sustentáveis).',
+    stats: [{ v: 'ONU', l: 'Palco do pitch' }, { v: '1', l: 'Investidor contatado' }, { v: 'ODS 11', l: 'Alinhamento' }],
+    cta: 'Ver caso completo',
   },
   {
-    img: 'forum-hero-mit', tag: 'EMPRESAS · WAIF', titulo: 'A marca que entrou na fundação do fórum',
-    desc: 'Uma empresa de tecnologia assume cota fundadora do Fórum Mundial de IA e ativa sua marca em toda a rota 2026-2027 — da Expo Boston ao 4º andar da ONU.',
-    resultado: 'Autoridade construída antes da concorrência chegar.', to: '/forum-mundial-ia',
-  },
-  {
-    img: 'inst-cambridge-harvard', tag: 'ACADEMIA · ALLIANCE', titulo: 'A universidade que virou parceira global',
-    desc: 'Uma universidade brasileira entra na HUB PAN Alliance, leva pesquisadores às missões internacionais e co-produz análises com o Insights.',
-    resultado: 'Presença internacional sem abrir campus fora.', to: '/o-hub-pan',
-  },
-  {
-    img: 'inst-hero-onu', tag: 'GOVERNOS · DELEGAÇÕES', titulo: 'A delegação que conheceu a ONU por dentro',
-    desc: 'Gestores públicos integram uma delegação oficial do ecossistema em Nova York — agenda real dentro das Nações Unidas, com a credencial de dez anos de relações do HUB PAN.',
-    resultado: 'Relações institucionais que nenhum voo comprado entrega.', to: '/contato',
+    plataforma: 'PROINTER', img: 'inst-cambridge-harvard', tag: 'PROINTER · Afroempreendedorismo', selo: 'Missão 2027', tipo: 'História de impacto',
+    titulo: 'Afroempreendedor acessa rede MIPAD em Cambridge e abre mercado internacional',
+    desc: 'Empreendedor negro com negócio de tecnologia educacional participou do PROINTER e foi conectado à rede MIPAD ONU em Cambridge. Após a missão, iniciou conversas com parceiro africano e assinou primeiro contrato internacional de distribuição de sua plataforma educacional.',
+    stats: [{ v: 'MIPAD', l: 'Rede acessada' }, { v: '1', l: 'Contrato fechado' }, { v: 'ODS 10', l: 'Alinhamento' }],
+    cta: 'Ler história completa',
   },
 ];
 
+const PERFIS: { sigla: string; Icon: typeof Landmark; titulo: string; desc: string; btn: string; to: string; color: 'navy' | 'blue' | 'lime' }[] = [
+  { sigla: 'GOV', Icon: Landmark, titulo: 'Sou governo', desc: 'Ver como o GovIA funciona na prática para municípios e estados.', btn: 'Conhecer o GovIA', to: '/govia', color: 'navy' },
+  { sigla: 'EDU', Icon: GraduationCap, titulo: 'Sou educador', desc: 'Me candidatar ao PROINTER e acessar Harvard, MIT e a ONU.', btn: 'Candidatar-se ao PROINTER', to: '/prointer', color: 'blue' },
+  { sigla: 'EMP', Icon: Briefcase, titulo: 'Sou empresa', desc: 'Apoiar o PROINTER ou patrocinar o Fórum Mundial de IA.', btn: 'Falar com nossa equipe', to: '/contato', color: 'lime' },
+];
+
+const PERFIL_COLORS = {
+  navy: { bg: '#152852', title: '#fff', desc: 'rgba(255,255,255,0.75)', sigla: '#d2e718', badgeBg: 'rgba(255,255,255,0.08)', badgeIcon: '#d2e718', btn: 'lime' as const },
+  blue: { bg: '#2d4ebf', title: '#fff', desc: 'rgba(255,255,255,0.82)', sigla: '#d2e718', badgeBg: 'rgba(255,255,255,0.12)', badgeIcon: '#d2e718', btn: 'lime' as const },
+  lime: { bg: '#d2e718', title: '#152852', desc: 'rgba(21,40,82,0.8)', sigla: '#152852', badgeBg: 'rgba(21,40,82,0.08)', badgeIcon: '#152852', btn: 'navy' as const },
+};
+
+/* ═══════════ Componentes ═══════════ */
+
 function CasoCard({ c }: { c: (typeof CASOS)[number] }) {
-  const tilt = useTilt<HTMLDivElement>(4, 6);
+  const tilt = useTilt<HTMLDivElement>(3, 5);
   return (
-    <Link to={c.to} className="block h-full">
-      <div ref={tilt} className="flex flex-col rounded-[20px] overflow-hidden bg-white h-full group cursor-pointer" style={{ border: '1px solid #ecedf0' }} data-animate>
-        <div className="relative overflow-hidden shrink-0 h-[210px]">
-          <img src={`/images/${c.img}.webp`} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-        </div>
-        <div className="flex flex-col flex-1 p-7">
-          <p className="mb-3" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10.5, letterSpacing: '1.8px', textTransform: 'uppercase', color: '#2d4ebf' }}>{c.tag}</p>
-          <h3 className="mb-3" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 22, lineHeight: 1.1, color: '#152852' }}>{c.titulo}</h3>
-          <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '23px', color: '#797979' }}>{c.desc}</p>
-          <p className="mt-auto pt-4 border-t" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13.5, color: '#152852', borderColor: '#ecedf0' }}>
-            <span style={{ color: '#2d4ebf' }}>→</span> {c.resultado}
-          </p>
+    <div ref={tilt} className="grid md:grid-cols-[280px_1fr] rounded-[20px] overflow-hidden bg-white" style={{ border: '1px solid #ecedf0' }} data-animate>
+      <div className="relative h-[220px] md:h-full">
+        <img src={`/images/${c.img}.webp`} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
+          <span className="rounded-full px-3 py-1.5" style={{ background: 'rgba(6,9,25,0.6)', backdropFilter: 'blur(8px)', fontFamily: 'Inter', fontWeight: 500, fontSize: 10.5, letterSpacing: '1px', textTransform: 'uppercase', color: '#fff' }}>{c.tag}</span>
+          <span className="rounded-full px-3 py-1.5" style={{ background: '#d2e718', fontFamily: 'Inter', fontWeight: 600, fontSize: 10.5, color: '#152852' }}>{c.selo}</span>
         </div>
       </div>
-    </Link>
+      <div className="p-7 lg:p-8 flex flex-col">
+        <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10.5, letterSpacing: '1.8px', textTransform: 'uppercase', color: '#a7a4a4' }}>{c.tipo}</p>
+        <h3 className="mb-3" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 21, lineHeight: 1.2, color: '#152852' }}>{c.titulo}</h3>
+        <p className="mb-6" style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '23px', color: '#797979' }}>{c.desc}</p>
+        <div className="flex flex-wrap gap-6 mb-6 mt-auto">
+          {c.stats.map((s) => (
+            <div key={s.l}>
+              <p style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 24, lineHeight: 1, color: '#2d4ebf' }}>{s.v}</p>
+              <p style={{ fontFamily: 'Inter', fontSize: 11.5, color: '#a7a4a4' }}>{s.l}</p>
+            </div>
+          ))}
+        </div>
+        <Link to="/contato" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 14, color: '#2d4ebf' }}>{c.cta} →</Link>
+      </div>
+    </div>
   );
 }
 
+function PerfilCard({ p }: { p: (typeof PERFIS)[number] }) {
+  const { Icon } = p;
+  const c = PERFIL_COLORS[p.color];
+  return (
+    <div className="flex flex-col rounded-[20px] p-7" style={{ background: c.bg }} data-animate>
+      <div className="flex items-center gap-3 mb-6">
+        <span className="flex items-center justify-center rounded-full shrink-0" style={{ width: 48, height: 48, background: c.badgeBg }}>
+          <Icon size={22} strokeWidth={2} color={c.badgeIcon} />
+        </span>
+        <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 12, letterSpacing: '1px', color: c.sigla }}>{p.sigla}</span>
+      </div>
+      <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 21, lineHeight: 1.15, color: c.title }}>{p.titulo}</h3>
+      <p className="mb-7" style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '23px', color: c.desc }}>{p.desc}</p>
+      <div className="mt-auto"><Link to={p.to}><HubButton size="sm" variant={c.btn}>{p.btn}</HubButton></Link></div>
+    </div>
+  );
+}
+
+/* ═══════════ Página ═══════════ */
+
 export default function CasosDeUso() {
   const ref = useReveal<HTMLElement>();
+  const perfilRef = useReveal<HTMLElement>();
+  const [ativo, setAtivo] = useState('Todos');
+  const visiveis = ativo === 'Todos' ? CASOS : CASOS.filter((c) => c.plataforma === ativo);
+
   return (
     <>
       <PageHero
-        eyebrow="NA PRÁTICA · CENÁRIOS DE USO"
-        title={<>O ecossistema explicado<br />do jeito mais honesto: <span style={{ color: '#d2e718' }}>em uso.</span></>}
-        sub="Cenários que mostram como governos, educadores, empresas e universidades se conectam ao HUB PAN — e o que cada porta destrava."
-        actions={<Link to="/contato"><HubButton size="lg" variant="lime">Encontrar minha porta</HubButton></Link>}
+        eyebrow="CASOS DE USO · HISTÓRIAS DE IMPACTO · RESULTADOS REAIS"
+        title="O que o HUB PAN entrega na prática."
+        sub="Não basta dizer que o ecossistema funciona. Aqui estão os dados, as histórias e os resultados documentados de quem já viveu o que o HUB PAN propõe."
       />
-      <section ref={ref} className="py-24 lg:py-32 gutter" style={{ background: '#f5f5f5' }}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {CASOS.map((c) => <CasoCard key={c.titulo} c={c} />)}
+
+      <section ref={ref} className="py-24 lg:py-32 gutter bg-white">
+        <div className="mb-10">
+          <p className="eyebrow text-muted mb-6" data-animate>POR PLATAFORMA</p>
+          <h2 className="mb-8" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(28px,3vw,38px)', letterSpacing: '-0.5px', lineHeight: 1.1, color: '#152852' }} data-animate>
+            Casos de uso por área do ecossistema.
+          </h2>
+          <div className="flex flex-wrap gap-3" data-animate>
+            {PLATAFORMAS.map((p) => (
+              <button
+                key={p}
+                onClick={() => setAtivo(p)}
+                className="rounded-full px-5 py-2 transition-colors"
+                style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13.5, background: ativo === p ? '#152852' : '#f5f5f5', color: ativo === p ? '#fff' : '#797979' }}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          {visiveis.map((c) => <CasoCard key={c.titulo} c={c} />)}
         </div>
       </section>
-      <CTABanner
-        title={<>Seu cenário não está aqui? <span style={{ color: '#d2e718' }}>Melhor ainda.</span></>}
-        sub="Os melhores casos do ecossistema começaram com uma conversa fora do roteiro."
-        actions={<Link to="/contato"><HubButton size="lg" variant="lime">Contar meu contexto</HubButton></Link>}
-      />
+
+      <section ref={perfilRef} className="py-20 gutter" style={{ background: '#f5f5f5' }}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {PERFIS.map((p) => <PerfilCard key={p.sigla} p={p} />)}
+        </div>
+      </section>
     </>
   );
 }

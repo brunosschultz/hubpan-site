@@ -55,6 +55,66 @@ tamanho DENTRO do frame 1920px do Figma. Isso não garante que:
 
 ---
 
+## Regra de ouro #2: fidelidade ao CONTEÚDO (nunca inventar texto)
+
+**Erro cometido nesta sessão (não repetir):** ao criar as páginas internas
+(PROINTER, GovIA, Fórum Mundial de IA, Insights, Contato, Glossário, Imprensa,
+Casos de Uso), o conteúdo foi **inventado do zero** — títulos, números,
+programas, formulários, FAQ — em vez de extraído do wireframe de referência
+que o Bruno já tinha compartilhado no início do projeto. O layout/design saiu
+ótimo (o padrão §5.5 do DESIGN-SYSTEM.md é sólido), mas o texto não tinha
+nenhuma relação com o conteúdo real definido pelo cliente. Ele só percebeu
+depois de publicado, teve que apontar página por página o que estava errado.
+
+**Causa raiz:** ao construir uma página nova sem ter o conteúdo em mãos, é
+tentador "preencher" com copy plausível e no tom certo — mas plausível não é
+o mesmo que correto. Alguns exemplos do que foi inventado incorretamente:
+- PROINTER: inventei um programa genérico de patrocínio ESG. O real é um
+  programa de **bolsas 100% gratuitas** com jornada específica (Belo
+  Horizonte → Nova York → Boston/Cambridge → volta como "Embaixador"),
+  modelo de doação com 4 níveis de valor (R$500/1000/5000/10000) e dois
+  formulários distintos (apoiar / candidatar-se).
+- GovIA: inventei um "5.570 municípios" e uma seção de governança de IA
+  genérica. O real tem um insight específico ("governos não têm cartão de
+  crédito"), 3 planos de preço nomeados (Básico/Profissional/Enterprise) e
+  um Observatório de IA com dados reais (mapeamento em MG, comparativo com
+  Boston em 2027).
+- WAIF: inventei uma "rota até 2027" com etapas genéricas. O real tem 4
+  pilares nomeados (Autoridade/Relacionamento/Patrocínio/Ecossistema) e 3
+  níveis de patrocínio (Bronze/Prata/Ouro) com benefícios específicos.
+
+**Regra a partir de agora:**
+1. **Antes de criar qualquer página nova (ou editar o conteúdo de uma
+   existente), pergunte se existe uma referência de conteúdo** (wireframe,
+   doc, brief) — não assuma que não existe só porque não foi mencionada de
+   novo na conversa atual.
+2. Se o Bruno mencionar um wireframe/link do Claude (`claude.ai/public/artifacts/...`),
+   ele é a fonte de verdade do CONTEÚDO (textos, números, estrutura de
+   formulários, FAQ) — o design system e os componentes já construídos são a
+   fonte de verdade do VISUAL. As duas coisas são complementares, não uma
+   substitui a outra.
+3. **Como extrair o conteúdo de um artifact público do Claude:** WebFetch
+   direto falha (é um iframe client-rendered). Abrir com o Browser tool e
+   rodar via `javascript_exec`:
+   ```js
+   fetch('/api/published_artifacts/{uuid}').then(r => r.json()).then(d => window.__artifactData = d)
+   ```
+   Depois parsear `window.__artifactData.content` (string HTML) com
+   `new DOMParser().parseFromString(html, 'text/html')` e extrair o texto de
+   cada página via `doc.getElementById('page-xxx').innerText` — os
+   wireframes desse projeto usam ids `page-home`, `page-prointer`,
+   `page-govia`, `page-waif`, `page-inst`, `page-contato`, `page-insights`,
+   `page-glossario`, `page-imprensa`, `page-casos`.
+4. **Nunca preencher lacunas de conteúdo com texto "plausível".** Se não tem
+   a fonte de conteúdo, é melhor perguntar ao Bruno do que inventar — mesmo
+   que o resultado pareça bom, se não for o conteúdo real ele vai ter que
+   revisar tudo de novo depois.
+5. Números, nomes de planos/produtos, valores em R$, siglas e FAQ são
+   **fatos do negócio**, não decisões de copywriting — nunca aproximar ou
+   estimar um número que devia vir de uma fonte real.
+
+---
+
 ## Design tokens (tailwind.config.js)
 
 ```js
