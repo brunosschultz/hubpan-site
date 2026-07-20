@@ -29,3 +29,6 @@ assets-cliente
 # Variáveis de ambiente locais (chaves do Supabase) — nunca versionar
 .env
 .env.local
+
+# Cache local do Supabase CLI (link do projeto, versões) — não versionar
+supabase/.temp

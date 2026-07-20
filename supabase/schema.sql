@@ -89,3 +89,81 @@ $$;
 
 revoke all on function publish_all() from public, anon;
 grant execute on function publish_all() to authenticated;
+
+-- ═══════════════════════════════════════════════════════════════════
+-- Leads: captação real dos formulários públicos (Contato e Newsletter)
+-- ═══════════════════════════════════════════════════════════════════
+
+-- Uma linha por envio. `source` distingue os dois formulários (contato tem
+-- nome/organização/assunto/mensagem; newsletter só tem e-mail — os campos
+-- que não se aplicam ficam null).
+create table if not exists leads (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  source text not null check (source in ('contato', 'newsletter')),
+  nome text,
+  email text not null,
+  organizacao text,
+  assunto text,
+  mensagem text,
+  lida boolean not null default false
+);
+
+alter table leads enable row level security;
+
+-- Mesma pegadinha já documentada acima pra content_overrides/edit_history:
+-- tabela criada via SQL puro não recebe GRANT básico pra anon/authenticated
+-- sozinho — sem isso todo insert/select falha com "permission denied" mesmo
+-- com as políticas certas.
+grant select, update on leads to authenticated;
+grant insert on leads to anon, authenticated;
+
+-- Escrita: qualquer visitante do site (sempre "anon", não existe cadastro
+-- público) pode inserir um lead — é o próprio formulário público enviando.
+-- Sem UPDATE/DELETE pra anon: ninguém de fora pode alterar ou apagar um lead
+-- já enviado.
+create policy "leads_insercao_publica" on leads
+  for insert to anon, authenticated with check (true);
+
+-- Leitura: só quem está logado no painel (só o Bruno) — o inverso de
+-- content_overrides, onde a leitura é pública e a escrita é autenticada.
+create policy "leads_leitura_autenticada" on leads
+  for select to authenticated using (true);
+
+-- Atualização: só pra marcar lida/não lida no painel (toggle simples, sem
+-- workflow de resposta/e-mail — o aviso de novo lead vai por e-mail via
+-- Edge Function + Database Webhook, ver supabase/functions/notify-lead).
+create policy "leads_atualizacao_autenticada" on leads
+  for update to authenticated using (true) with check (true);
+
+-- Webhook de notificação por e-mail: em vez de configurar isso manualmente
+-- em Dashboard → Database → Webhooks, é um trigger chamando `net.http_post`
+-- direto (extensão `pg_net` — o mecanismo de baixo nível que o próprio
+-- recurso "Database Webhooks" do Dashboard usa por baixo dos panos).
+-- Dispara a Edge Function `notify-lead` a cada INSERT, de forma assíncrona
+-- (não trava o insert esperando o e-mail sair). A function é implantada
+-- com `--no-verify-jwt` (sem checar Authorization) porque só ENVIA e-mail,
+-- não expõe nem altera dado nenhum — na pior das hipóteses alguém forja um
+-- POST e gera um e-mail falso de aviso, sem risco real de segurança/dado,
+-- o que dispensa gerenciar mais um segredo só pra esse detalhe.
+create extension if not exists pg_net;
+
+create or replace function public.notify_lead_webhook()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, net
+as $$
+begin
+  perform net.http_post(
+    url := 'https://mankfcffiymqddeqftfq.supabase.co/functions/v1/notify-lead',
+    headers := '{"Content-Type": "application/json"}'::jsonb,
+    body := jsonb_build_object('record', to_jsonb(new))
+  );
+  return new;
+end;
+$$;
+
+create trigger "leads_notificar_email"
+after insert on public.leads
+for each row execute function public.notify_lead_webhook();

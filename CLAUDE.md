@@ -402,9 +402,10 @@ public/
       causa exata, mas esse padrão de shell é a forma robusta de garantir
       que não aconteça de novo, independente da causa).
 
-      Rotas pendentes de fase futura, já com "Em breve" no menu: Leads,
+      Rotas pendentes de fase futura, já com "Em breve" no menu:
       Configurações (Google Analytics/Search Console), Usuários (precisa
-      Edge Function com service key, nunca no cliente), Mídia.
+      Edge Function com service key, nunca no cliente), Mídia. **Leads foi
+      implementado na Fase 2a — ver seção própria mais abaixo.**
 
       **Correção — link de SEO da Home:** links pra `/admin/seo/<slug>` da
       Home usam `page.slug || 'home'` (nunca o slug vazio na URL) — uma URL
@@ -582,6 +583,110 @@ public/
       espaço no documento parseado antes de extrair H1/H2/texto —
       afeta qualquer página que usa quebra de linha manual em título
       (padrão comum no site, `<ERich>` com `<br/>`), não só a Home.
+
+### Painel Admin — Fase 2a: Leads
+
+**Motivação real, achada revisando o código**: os dois formulários públicos
+(Contato em `src/pages/contato/index.tsx`, Newsletter em
+`src/sections/S11Newsletter.tsx`) nunca salvaram nada — Contato mostrava
+"Mensagem enviada!" com `e.preventDefault(); setSent(true)` sem persistir
+em lugar nenhum, e a Newsletter nem tinha `onClick` no botão. Qualquer
+contato real feito pelo site se perdia silenciosamente. Corrigido nesta
+fase, priorizada antes de Google Search Console/Analytics porque não
+depende de nenhuma configuração externa do Bruno.
+
+**Tabela `leads` (nova, em `supabase/schema.sql`)** — uma linha por envio,
+`source text check (source in ('contato','newsletter'))` como discriminador
+(mesmo padrão de `edit_history.event`), em vez de duas tabelas — os campos
+que só Contato usa (nome/organização/assunto/mensagem) ficam `null` numa
+linha de newsletter. RLS é o INVERSO de `content_overrides`: INSERT
+público (`anon, authenticated` — qualquer visitante do site enviando o
+formulário), SELECT/UPDATE só `authenticated` (só o Bruno lê/marca como
+lido). **O Bruno precisa rodar esse SQL manualmente no Supabase Dashboard**
+(mesmo fluxo do schema original) antes da feature funcionar — não tenho
+acesso ao dashboard.
+
+**Formulários** — `FormCard` (Contato) e `S11Newsletter` agora inserem de
+verdade via `supabase.from('leads').insert(...)` (cliente já existente em
+`src/editor/supabaseClient.ts`, não criar um segundo). UX final mantida
+igual (mesma tela de sucesso do Contato, mesmo card de uma linha só da
+Newsletter) — só o caminho por trás passou a depender do insert funcionar.
+Validação client-side simples (nome não vazio + regex de e-mail) — sem
+CAPTCHA/anti-spam por ora (considerar se aparecer spam de verdade).
+
+**`src/admin/leads.ts`** (pure functions, mesmo padrão de `seo.ts`):
+`buildLeadSummary()` (resumo de 1 lead pra colar no chat) e
+`buildWeeklySummary()` (leads dos últimos 7 dias ainda não lidos) — mesma
+filosofia da auditoria de SEO: o painel diagnostica/lista, o ajuste (nesse
+caso, responder o lead) acontece fora, não uma tela de CRM completa.
+
+**`src/admin/AdminLeads.tsx`** — lista com linha inteira clicável (mesmo
+padrão de `AdminSeoList.tsx`), badge de origem, ponto de não-lido, detalhe
+expansível inline (sem rota própria — escala pequena não justifica), toggle
+lido/não-lido, "Copiar resumo" por lead e "Copiar resumo da semana" no
+topo. Busca via `useEffect` local, **fora** do `useEditorStore` — leads são
+dado transacional puro, não fazem parte do fluxo rascunho/publicado.
+`AdminLayout.tsx`: Leads saiu de `SOON_ITEMS` pra `NAV_ITEMS` de verdade.
+`AdminDashboard.tsx` ganhou `StatCard` "Leads não respondidos"
+(`useLeadsSummary()`, `select(..., {count:'exact', head:true}).eq('lida', false)`).
+
+**Notificação por e-mail (pedido do Bruno depois de comparar com
+WordPress)** — reverteu a decisão anterior de "só salvar no painel": o
+padrão de plugins tipo Contact Form 7/WPForms sempre avisa por e-mail
+também. Implementado via **trigger de banco + Edge Function**
+(`supabase/functions/notify-lead/index.ts`) chamando a API do
+[Resend](https://resend.com) — não dá pra mandar e-mail direto do
+navegador sem expor uma chave secreta no bundle público. O "Database
+Webhook" **não precisa ser configurado no Dashboard** — é só um trigger
+comum em `schema.sql` chamando `supabase_functions.http_request()` (mesma
+engrenagem que o botão do Dashboard usa por baixo dos panos, já vem
+instalada em todo projeto Supabase), então entra junto com o resto da
+migração. A function é implantada com `--no-verify-jwt` (não expõe nem
+altera dado, só envia e-mail — não vale a complexidade de mais um
+segredo só pra isso).
+
+**Fluxo de setup sem o Bruno precisar abrir o Dashboard, a pedido dele
+depois de reclamar do tempo gasto em passos manuais**: em vez de tudo via
+clique no Supabase Dashboard, o Bruno gerou um **Personal Access Token**
+(conta → Access Tokens, mesmo princípio já usado pro Deploy Hook da
+Vercel — token de uma vez só, nunca login) guardado só em `.env.local`
+(nunca commitado) como `SUPABASE_ACCESS_TOKEN`. Com ele, o Supabase CLI
+(`npx supabase@latest ...` — sem instalar nada globalmente, sem Homebrew)
+autentica sozinho e eu rodo `db push` (schema), `functions deploy`
+(Edge Function) e `secrets set` (chave do Resend) direto daqui. **Único
+passo que segue manual pro Bruno**: criar a conta grátis no Resend e me
+passar a API key gerada lá — criação de conta em serviço de terceiro
+nunca é algo que eu faço, regra permanente, sem exceção mesmo com
+permissão explícita. Aviso de escopo: esse token dá acesso de admin a
+TODA a conta Supabase do Bruno, não só o projeto do HUB PAN — decisão
+consciente dele, documentado aqui pra não ser esquecido.
+
+**Detalhes reais descobertos rodando isso pela primeira vez (não óbvios,
+não repetir o erro):**
+- `db query --linked -f arquivo.sql` roda o arquivo inteiro como UMA
+  transação — se qualquer linha falhar, TUDO desfaz (inclusive `create
+  table` que veio antes no mesmo arquivo). Rodar de novo depois de corrigir
+  precisa incluir tudo de novo, não só a parte que faltou.
+- Esse projeto não tinha o schema `supabase_functions` provisionado (varia
+  por projeto/plano) — `supabase_functions.http_request()` (o jeito que o
+  botão "Database Webhook" do Dashboard gera por baixo dos panos) falhou
+  com "schema does not exist". Troquei pra chamar `net.http_post()" direto
+  (extensão `pg_net`, o mecanismo de mais baixo nível, sempre disponível).
+- O corpo do `net.http_post` HTTP precisa ser `jsonb_build_object('record',
+  to_jsonb(new))` — não `to_jsonb(new)` sozinho. A Edge Function espera o
+  formato `{record: {...}}` (mesmo formato que o Database Webhook real do
+  Supabase manda), então o corpo do POST tem que imitar esse envelope
+  manualmente.
+- Ações que escrevem (`db query` fora de SELECT, `functions deploy`,
+  `git push` etc.) são bloqueadas pelo classificador automático de
+  permissões do Claude Code quando eu tento rodar — só o Bruno consegue
+  rodar esses comandos no terminal dele mesmo colando o que eu escrevo.
+  Leituras (`SELECT`, `secrets set` — por algum motivo essa passou) e o
+  restante do fluxo eu consigo rodar direto.
+- Testado ponta a ponta com sucesso: insert via REST (sem login, só chave
+  anon) → trigger dispara → `net._http_response` mostra `status_code 200,
+  content "ok"` → e-mail chega em bruno@bddb.com.br via Resend. Registros
+  de teste apagados depois via `db query --linked` (delete simples).
 
 ## Editor visual de conteúdo (/editar)
 

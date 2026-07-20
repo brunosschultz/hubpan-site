@@ -5,6 +5,7 @@ import AdminDashboard from './AdminDashboard';
 import AdminPages from './AdminPages';
 import AdminSeoList from './AdminSeoList';
 import AdminSeoEditor from './AdminSeoEditor';
+import AdminLeads from './AdminLeads';
 import './theme.css';
 
 /**
@@ -27,6 +28,7 @@ export default function AdminApp() {
       <Route path="paginas" element={<AdminPages />} />
       <Route path="seo" element={<AdminSeoList />} />
       <Route path="seo/:slug" element={<AdminSeoEditor />} />
+      <Route path="leads" element={<AdminLeads />} />
       <Route path="*" element={<AdminDashboard />} />
     </Routes>
   );

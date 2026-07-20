@@ -1,11 +1,31 @@
 import { useState } from 'react';
 import { useReveal } from '../components/useReveal';
 import { ERich, ET, useEditColor } from '../editor/fields';
+import { supabase } from '../editor/supabaseClient';
+
+const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
 export default function S11Newsletter() {
   const ref = useReveal<HTMLElement>();
   const [email, setEmail] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [bg, bgProps] = useEditColor('s11.bg', '#ffffff', 'Fundo da seção Newsletter');
+
+  async function handleSubscribe() {
+    if (sending || sent) return;
+    if (!isValidEmail(email)) { setError('Digite um e-mail válido.'); return; }
+    if (!supabase) { setError('Não foi possível inscrever. Tente novamente mais tarde.'); return; }
+
+    setSending(true);
+    setError(null);
+    const { error: insertError } = await supabase.from('leads').insert({ source: 'newsletter', email });
+    setSending(false);
+
+    if (insertError) { setError('Não foi possível inscrever. Tente novamente.'); return; }
+    setSent(true);
+  }
 
   return (
     <section ref={ref} className="relative w-full py-24 gutter" {...bgProps} style={{ background: bg }}>
@@ -30,19 +50,22 @@ export default function S11Newsletter() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={sent}
               placeholder="seu@email.com"
-              className="flex-1 px-6 outline-none"
+              className="flex-1 px-6 outline-none disabled:opacity-60"
               style={{ height: 50, borderRadius: 60, background: '#ebebeb', fontFamily: 'Inter', fontSize: 16, color: '#797979' }}
             />
             <button
-              className="px-8 text-white hover:brightness-95 transition"
-              style={{ height: 50, borderRadius: 60, background: '#2d4ebf', fontFamily: 'Inter', fontSize: 16, minWidth: 167 }}
+              onClick={handleSubscribe}
+              disabled={sending || sent}
+              className="px-8 text-white hover:brightness-95 transition disabled:opacity-60"
+              style={{ height: 50, borderRadius: 60, background: sent ? '#3fa855' : '#2d4ebf', fontFamily: 'Inter', fontSize: 16, minWidth: 167 }}
             >
-              <ET k="s11.btn" v="Inscreva-se" l="Newsletter — botão" />
+              {sent ? 'Inscrito!' : <ET k="s11.btn" v={sending ? 'Enviando…' : 'Inscreva-se'} l="Newsletter — botão" />}
             </button>
           </div>
-          <p className="mt-4" style={{ fontFamily: 'Inter', fontSize: 16, color: '#a7a4a4' }}>
-            <ET k="s11.aviso" v="Sem spam. Cancele quando quiser." l="Newsletter — aviso" />
+          <p className="mt-4" style={{ fontFamily: 'Inter', fontSize: 16, color: error ? '#c0392b' : '#a7a4a4' }}>
+            {error ?? <ET k="s11.aviso" v="Sem spam. Cancele quando quiser." l="Newsletter — aviso" />}
           </p>
         </div>
       </div>

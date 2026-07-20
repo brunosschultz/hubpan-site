@@ -8,10 +8,10 @@ const NAV_ITEMS = [
   { to: '/admin', label: 'Dashboard', Icon: LayoutDashboard, end: true },
   { to: '/admin/paginas', label: 'Páginas', Icon: FileText, end: false },
   { to: '/admin/seo', label: 'SEO', Icon: Search, end: false },
+  { to: '/admin/leads', label: 'Leads', Icon: Mail, end: false },
 ];
 
 const SOON_ITEMS = [
-  { label: 'Leads', Icon: Mail },
   { label: 'Configurações', Icon: Settings },
 ];
 

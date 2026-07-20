@@ -1,11 +1,25 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FileText, PencilLine } from 'lucide-react';
 import { useEditorStore, formatWhen } from '../editor/store';
+import { supabase } from '../editor/supabaseClient';
 import { PAGE_ROUTES } from '../editor/pageRoutes';
 import { SEO_DEFAULTS } from './seoDefaults';
 import { seoKey, quickSeoLevel, SEO_LEVEL_LABEL, SEO_LEVEL_TOKEN, type SeoLevel } from './seo';
 import AdminLayout from './AdminLayout';
 import { t } from './theme';
+
+function useLeadsSummary() {
+  const [naoLidos, setNaoLidos] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.from('leads').select('id', { count: 'exact', head: true }).eq('lida', false)
+      .then(({ count }) => setNaoLidos(count ?? 0));
+  }, []);
+
+  return { naoLidos };
+}
 
 function useSeoSummary() {
   const { overrides, get } = useEditorStore();
@@ -38,11 +52,12 @@ function StatCard({ label, value, hint, color }: { label: string; value: string 
 export default function AdminDashboard() {
   const { pendingCount, history } = useEditorStore();
   const seo = useSeoSummary();
+  const leadsSummary = useLeadsSummary();
   const recent = history.slice(0, 8);
 
   return (
     <AdminLayout title="Dashboard">
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         <StatCard
           label="Rascunhos pendentes"
           value={pendingCount}
@@ -59,6 +74,12 @@ export default function AdminDashboard() {
           label="SEO precisando de ajuste"
           value={seo.counts.bad + seo.counts.warning}
           color={seo.counts.bad > 0 ? t.destructive : seo.counts.warning > 0 ? t.warning : t.success}
+        />
+        <StatCard
+          label="Leads não respondidos"
+          value={leadsSummary.naoLidos ?? '—'}
+          hint={leadsSummary.naoLidos === null ? undefined : 'Confira em Leads no menu.'}
+          color={leadsSummary.naoLidos ? t.warning : t.success}
         />
       </div>
 

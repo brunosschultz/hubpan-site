@@ -5,6 +5,9 @@ import HubButton from '../../components/HubButton';
 import { useReveal } from '../../components/useReveal';
 import { useTilt } from '../../components/useTilt';
 import { EIcon, ERich, ET, useEditColor } from '../../editor/fields';
+import { supabase } from '../../editor/supabaseClient';
+
+const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
 /* ═══════════ Dados — extraídos do wireframe oficial (page-contato) ═══════════ */
 
@@ -118,6 +121,30 @@ function ImprensaMidiaCard() {
 
 function FormCard() {
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [organizacao, setOrganizacao] = useState('');
+  const [assunto, setAssunto] = useState('');
+  const [mensagem, setMensagem] = useState('');
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (sending) return;
+    if (!nome.trim() || !isValidEmail(email) || !assunto || !mensagem.trim()) return;
+    if (!supabase) { setError('Não foi possível enviar. Tente novamente mais tarde.'); return; }
+
+    setSending(true);
+    setError(null);
+    const { error: insertError } = await supabase.from('leads').insert({
+      source: 'contato', nome, email, organizacao: organizacao || null, assunto, mensagem,
+    });
+    setSending(false);
+
+    if (insertError) { setError('Não foi possível enviar. Tente novamente.'); return; }
+    setSent(true);
+  }
 
   if (sent) {
     return (
@@ -134,7 +161,7 @@ function FormCard() {
   }
 
   return (
-    <form className="rounded-[20px] bg-white p-8 lg:p-9" style={{ border: '1px solid #ecedf0' }} onSubmit={(e) => { e.preventDefault(); setSent(true); }}>
+    <form className="rounded-[20px] bg-white p-8 lg:p-9" style={{ border: '1px solid #ecedf0' }} onSubmit={handleSubmit}>
       <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 24, lineHeight: 1.1, color: '#152852' }}>
         <ERich k="contato.form.titulo" l="Contato — título do formulário">Fale com nossa equipe</ERich>
       </h3>
@@ -142,17 +169,20 @@ function FormCard() {
         <ERich k="contato.form.desc" l="Contato — descrição do formulário">Para parcerias estratégicas, imprensa ou qualquer assunto institucional.</ERich>
       </p>
       <div className="space-y-4">
-        <input required placeholder="Nome completo" style={INPUT_STYLE} />
+        <input required placeholder="Nome completo" value={nome} onChange={(e) => setNome(e.target.value)} style={INPUT_STYLE} />
         <div className="grid sm:grid-cols-2 gap-4">
-          <input required type="email" placeholder="E-mail" style={INPUT_STYLE} />
-          <input placeholder="Organização" style={INPUT_STYLE} />
+          <input required type="email" placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} style={INPUT_STYLE} />
+          <input placeholder="Organização" value={organizacao} onChange={(e) => setOrganizacao(e.target.value)} style={INPUT_STYLE} />
         </div>
-        <select required defaultValue="" style={{ ...INPUT_STYLE, color: '#152852' }}>
+        <select required value={assunto} onChange={(e) => setAssunto(e.target.value)} style={{ ...INPUT_STYLE, color: '#152852' }}>
           <option value="" disabled>Assunto</option>
           {ASSUNTOS.map((a) => <option key={a}>{a}</option>)}
         </select>
-        <textarea required placeholder="Mensagem" rows={5} style={{ ...INPUT_STYLE, height: 'auto', padding: '14px 18px', resize: 'vertical' }} />
-        <HubButton size="lg" variant="blue" className="w-full justify-center"><ET k="contato.form.btn" v="Enviar mensagem" l="Contato — botão de envio do formulário" /></HubButton>
+        <textarea required placeholder="Mensagem" rows={5} value={mensagem} onChange={(e) => setMensagem(e.target.value)} style={{ ...INPUT_STYLE, height: 'auto', padding: '14px 18px', resize: 'vertical' }} />
+        {error && <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#c0392b' }}>{error}</p>}
+        <HubButton size="lg" variant="blue" className={`w-full justify-center ${sending ? 'opacity-60 pointer-events-none' : ''}`}>
+          <ET k="contato.form.btn" v={sending ? 'Enviando…' : 'Enviar mensagem'} l="Contato — botão de envio do formulário" />
+        </HubButton>
       </div>
     </form>
   );
