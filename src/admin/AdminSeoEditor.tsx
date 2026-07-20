@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { AlertTriangle, ArrowLeft, Check, CheckCircle2, ClipboardCopy, ExternalLink, Loader2, MinusCircle, RefreshCw, Upload, XCircle } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Check, CheckCircle2, ChevronDown, ClipboardCopy, ExternalLink, ImageOff, Loader2, MinusCircle, RefreshCw, Upload, XCircle } from 'lucide-react';
 import { useEditorStore, formatWhen, processImage } from '../editor/store';
 import { pageForSlug } from '../editor/pageRoutes';
 import { SEO_DEFAULTS } from './seoDefaults';
@@ -359,17 +359,29 @@ export default function AdminSeoEditor() {
 const CHECK_ICON = { good: CheckCircle2, warning: AlertTriangle, bad: XCircle, neutral: MinusCircle };
 const CHECK_COLOR_KEY = { good: 'success', warning: 'warning', bad: 'destructive', neutral: 'mutedForeground' } as const;
 
+type ExpandKey = 'h1' | 'h2' | 'imagens' | null;
+
 function AuditResult({ audit, checks }: { audit: OnPageAudit; checks: SeoCheck[] }) {
   const imagesOk = audit.images.length - audit.imagesMissingAlt.length;
+  const [expanded, setExpanded] = useState<ExpandKey>(null);
+  const toggle = (k: ExpandKey) => setExpanded((cur) => (cur === k ? null : k));
 
   return (
     <div>
-      <div className="grid sm:grid-cols-4 gap-4 mb-5">
+      <div className="grid sm:grid-cols-4 gap-4 mb-3">
         <MiniStat label="Palavras" value={audit.wordCount} />
-        <MiniStat label="H1" value={audit.h1.length} />
-        <MiniStat label="H2" value={audit.h2.length} />
-        <MiniStat label="Imagens OK" value={`${imagesOk}/${audit.images.length}`} />
+        <MiniStat label="H1" value={audit.h1.length} expanded={expanded === 'h1'} onClick={() => toggle('h1')} />
+        <MiniStat label="H2" value={audit.h2.length} expanded={expanded === 'h2'} onClick={() => toggle('h2')} />
+        <MiniStat label="Imagens OK" value={`${imagesOk}/${audit.images.length}`} expanded={expanded === 'imagens'} onClick={() => toggle('imagens')} />
       </div>
+
+      {expanded && (
+        <div className="mb-5 p-4" style={{ borderRadius: t.radius, background: t.muted }}>
+          {expanded === 'h1' && <TagList items={audit.h1} empty="Nenhum H1 encontrado." />}
+          {expanded === 'h2' && <TagList items={audit.h2} empty="Nenhum H2 encontrado." />}
+          {expanded === 'imagens' && <ImageGallery images={audit.images} />}
+        </div>
+      )}
 
       <div className="divide-y" style={{ borderColor: t.border }}>
         {checks.map((c) => {
@@ -390,11 +402,64 @@ function AuditResult({ audit, checks }: { audit: OnPageAudit; checks: SeoCheck[]
   );
 }
 
-function MiniStat({ label, value }: { label: string; value: string | number }) {
+function TagList({ items, empty }: { items: string[]; empty: string }) {
+  if (items.length === 0) return <p style={{ fontFamily: 'Inter', fontSize: 13, color: t.mutedForeground }}>{empty}</p>;
   return (
-    <div className="p-3" style={{ borderRadius: t.radius, background: t.muted }}>
-      <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '0.4px', textTransform: 'uppercase', color: t.mutedForeground }}>{label}</p>
-      <p className="mt-1" style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 22, color: t.foreground }}>{value}</p>
+    <ul className="space-y-2">
+      {items.map((text, i) => (
+        <li key={i} className="flex items-start gap-2" style={{ fontFamily: 'Inter', fontSize: 13, color: t.foreground, lineHeight: '19px' }}>
+          <span className="shrink-0" style={{ color: t.mutedForeground, fontVariantNumeric: 'tabular-nums' }}>{String(i + 1).padStart(2, '0')}</span>
+          {text}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function ImageGallery({ images }: { images: OnPageAudit['images'] }) {
+  if (images.length === 0) return <p style={{ fontFamily: 'Inter', fontSize: 13, color: t.mutedForeground }}>Nenhuma imagem encontrada.</p>;
+  return (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {images.map((img, i) => {
+        const status = img.decorative ? 'Decorativa (alt vazio de propósito)' : img.alt.trim() ? `Alt: "${img.alt}"` : 'Sem alt (precisa de ajuste)';
+        const color = !img.decorative && !img.alt.trim() ? t.destructive : t.mutedForeground;
+        return (
+          <div key={i} className="overflow-hidden" style={{ borderRadius: t.radius, background: t.card, border: `1px solid ${t.border}` }}>
+            <div className="flex items-center justify-center" style={{ height: 90, background: t.border }}>
+              {img.src ? (
+                <img src={img.src} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <ImageOff size={20} style={{ color: t.mutedForeground }} />
+              )}
+            </div>
+            <div className="p-2.5">
+              <p className="truncate" style={{ fontFamily: 'Inter', fontSize: 11, color: t.mutedForeground }}>{img.src.split('/').pop()}</p>
+              <p style={{ fontFamily: 'Inter', fontSize: 11.5, color }}>{status}</p>
+            </div>
+          </div>
+        );
+      })}
     </div>
+  );
+}
+
+function MiniStat({ label, value, expanded, onClick }: { label: string; value: string | number; expanded?: boolean; onClick?: () => void }) {
+  const clickable = !!onClick;
+  return (
+    <button
+      onClick={onClick}
+      disabled={!clickable}
+      className="p-3 text-left transition"
+      style={{
+        borderRadius: t.radius, background: expanded ? t.accent : t.muted, cursor: clickable ? 'pointer' : 'default',
+        border: `1px solid ${expanded ? t.primary : 'transparent'}`,
+      }}
+    >
+      <div className="flex items-center justify-between">
+        <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '0.4px', textTransform: 'uppercase', color: t.mutedForeground }}>{label}</p>
+        {clickable && <ChevronDown size={13} style={{ color: t.mutedForeground, transform: expanded ? 'rotate(180deg)' : undefined, transition: 'transform .15s' }} />}
+      </div>
+      <p className="mt-1" style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 22, color: t.foreground }}>{value}</p>
+    </button>
   );
 }

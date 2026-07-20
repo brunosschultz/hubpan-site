@@ -1,25 +1,28 @@
 import { Link } from 'react-router-dom';
-import { FileText, PencilLine, Search } from 'lucide-react';
+import { FileText, PencilLine } from 'lucide-react';
 import { useEditorStore, formatWhen } from '../editor/store';
 import { PAGE_ROUTES } from '../editor/pageRoutes';
+import { SEO_DEFAULTS } from './seoDefaults';
 import { seoKey, quickSeoLevel, SEO_LEVEL_LABEL, SEO_LEVEL_TOKEN, type SeoLevel } from './seo';
 import AdminLayout from './AdminLayout';
 import { t } from './theme';
 
 function useSeoSummary() {
   const { overrides, get } = useEditorStore();
-  let unreviewed = 0;
   const counts: Record<SeoLevel, number> = { good: 0, warning: 0, bad: 0 };
 
   for (const page of PAGE_ROUTES) {
     const tKey = seoKey(page.slug, 'title');
     const dKey = seoKey(page.slug, 'description');
-    const reviewed = tKey in overrides || dKey in overrides;
-    if (!reviewed) { unreviewed++; continue; }
-    const level = quickSeoLevel({ title: get(tKey, ''), description: get(dKey, '') });
+    const fallback = SEO_DEFAULTS[page.slug || 'home'];
+    const level = quickSeoLevel({
+      title: get(tKey, fallback?.title ?? ''),
+      description: get(dKey, fallback?.description ?? ''),
+    });
     counts[level]++;
   }
-  return { unreviewed, counts, total: PAGE_ROUTES.length };
+  const edited = PAGE_ROUTES.filter((p) => (seoKey(p.slug, 'title') in overrides) || (seoKey(p.slug, 'description') in overrides)).length;
+  return { edited, counts, total: PAGE_ROUTES.length };
 }
 
 function StatCard({ label, value, hint, color }: { label: string; value: string | number; hint?: string; color?: string }) {
@@ -48,14 +51,13 @@ export default function AdminDashboard() {
         />
         <StatCard label="Páginas no site" value={seo.total} hint="Home + 9 páginas internas." />
         <StatCard
-          label="SEO revisado"
-          value={`${seo.total - seo.unreviewed}/${seo.total}`}
-          hint={seo.unreviewed > 0 ? `${seo.unreviewed} ainda usando o título/descrição padrão do código.` : 'Todas as páginas já têm SEO revisado no painel.'}
+          label="SEO em boa forma"
+          value={`${seo.counts.good}/${seo.total}`}
+          hint={`${seo.edited} de ${seo.total} já passaram por edição manual no painel.`}
         />
         <StatCard
           label="SEO precisando de ajuste"
           value={seo.counts.bad + seo.counts.warning}
-          hint="Entre as páginas já revisadas no painel."
           color={seo.counts.bad > 0 ? t.destructive : seo.counts.warning > 0 ? t.warning : t.success}
         />
       </div>
@@ -64,18 +66,14 @@ export default function AdminDashboard() {
         <div className="p-6" style={{ borderRadius: t.radius, background: t.card, border: `1px solid ${t.border}` }}>
           <div className="flex items-center justify-between mb-5">
             <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 16, color: t.foreground }}>Páginas</p>
-            <Link to="/admin/paginas" className="flex items-center gap-1.5 hover:underline" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13, color: t.primary }}>
+            <Link to="/admin/seo" className="flex items-center gap-1.5 hover:underline" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13, color: t.primary }}>
               Ver todas <FileText size={14} />
             </Link>
           </div>
           <div className="space-y-2">
-            {PAGE_ROUTES.map((page) => {
-              const tKey = seoKey(page.slug, 'title');
-              const dKey = seoKey(page.slug, 'description');
-              return (
-                <PageRow key={page.slug} label={page.label} slug={page.slug} tKey={tKey} dKey={dKey} />
-              );
-            })}
+            {PAGE_ROUTES.map((page) => (
+              <PageRow key={page.slug} label={page.label} slug={page.slug} />
+            ))}
           </div>
         </div>
 
@@ -106,10 +104,16 @@ export default function AdminDashboard() {
   );
 }
 
-function PageRow({ label, slug, tKey, dKey }: { label: string; slug: string; tKey: string; dKey: string }) {
+function PageRow({ label, slug }: { label: string; slug: string }) {
   const { overrides, get } = useEditorStore();
-  const reviewed = tKey in overrides || dKey in overrides;
-  const level = reviewed ? quickSeoLevel({ title: get(tKey, ''), description: get(dKey, '') }) : null;
+  const tKey = seoKey(slug, 'title');
+  const dKey = seoKey(slug, 'description');
+  const fallback = SEO_DEFAULTS[slug || 'home'];
+  const level = quickSeoLevel({
+    title: get(tKey, fallback?.title ?? ''),
+    description: get(dKey, fallback?.description ?? ''),
+  });
+  const edited = (tKey in overrides) || (dKey in overrides);
 
   return (
     <Link
@@ -120,16 +124,13 @@ function PageRow({ label, slug, tKey, dKey }: { label: string; slug: string; tKe
       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
     >
       <span style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13.5, color: t.foreground }}>{label}</span>
-      {level ? (
+      <span className="flex items-center gap-2">
+        {edited && <span style={{ fontFamily: 'Inter', fontSize: 11, color: t.mutedForeground }}>editado</span>}
         <span className="flex items-center gap-1.5" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12, color: t[SEO_LEVEL_TOKEN[level]] }}>
           <span className="rounded-full" style={{ width: 7, height: 7, background: t[SEO_LEVEL_TOKEN[level]] }} />
           {SEO_LEVEL_LABEL[level]}
         </span>
-      ) : (
-        <span className="flex items-center gap-1.5" style={{ fontFamily: 'Inter', fontSize: 12, color: t.mutedForeground }}>
-          <Search size={12} /> Não revisado
-        </span>
-      )}
+      </span>
     </Link>
   );
 }

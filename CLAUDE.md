@@ -536,7 +536,37 @@ public/
       override no banco, então as sugestões ficaram só na conversa pro
       Bruno colar ele mesmo no painel.
 
----
+      **Palavra-chave genérica demais (feedback certeiro do Bruno)** —
+      primeira rodada usei frases técnicas corretas mas sem julgamento de
+      relevância real: "sem cartão de crédito" pro GovIA competia com um
+      universo de busca sem nada a ver com governo/IA. Reescrevi 4
+      (GovIA, PROINTER, Imprensa, Casos de Uso) pra frases mais
+      específicas e ancoradas na marca/produto real — não basta a frase
+      aparecer no título/descrição (checagem técnica), ela precisa
+      identificar a página de verdade (julgamento de relevância). Lição
+      pra próxima vez que sugerir palavra-chave: sempre os dois crivos
+      juntos.
+
+      **"Não revisado" não refletia a realidade (bug real, corrigido)** —
+      `quickSeoLevel()` só era calculado quando havia override de
+      título/descrição salvo (`AdminDashboard.tsx`/`AdminSeoList.tsx`);
+      como os textos das 10 páginas agora vêm prontos do código
+      (`SEO_DEFAULTS`), o Bruno editou só a palavra-chave (que não conta
+      pra esse cálculo) e viu 8 de 10 páginas presas em "não revisado"
+      mesmo com SEO correto. Corrigido: a nota agora é calculada SEMPRE
+      a partir do texto efetivo (`get(key, SEO_DEFAULTS[slug])` —
+      override se existir, senão o padrão do código), sem gate nenhum;
+      um badge "editado" à parte (não bloqueante) mostra quais páginas
+      já passaram por edição manual no painel, só como informação.
+
+      **Ajustes de navegação pedidos pelo Bruno**: linha inteira da
+      lista de SEO (`AdminSeoList.tsx`) agora é clicável (antes só o
+      link "Editar SEO"); os cards de H1/H2/Imagens na "Análise de SEO"
+      (`AdminSeoEditor.tsx`) viraram expansíveis — clicar mostra a lista
+      completa dos H1/H2 encontrados ou uma galeria com miniatura +
+      status de alt de cada imagem, sem precisar editar nada ali (o
+      Bruno foi explícito: só visualizar, edição de estrutura continua
+      fora do painel de propósito).
 
 ## Editor visual de conteúdo (/editar)
 
