@@ -17,11 +17,11 @@ export const SEO_DEFAULTS: Record<string, { title: string; description: string }
     description: 'O que é o HUB PAN? Conheça a história e as marcas fundadoras do ecossistema — de Belo Horizonte a Harvard Square, com mais de 100 projetos abrigados.',
   },
   prointer: {
-    title: 'PROINTER — Intercâmbio para Professores da Rede Pública',
+    title: 'PROINTER — Professores da Rede Pública e Afroempreendedores',
     description: 'Programa que leva professores da rede pública e afroempreendedores para Harvard Square, MIT e as Nações Unidas — passagem, hospedagem e curadoria completas.',
   },
   govia: {
-    title: 'GovIA — Plataforma de IA sem Cartão de Crédito',
+    title: 'GovIA — Assinatura Institucional de IA para Municípios',
     description: 'Assinatura institucional de IA para municípios, estados e consórcios públicos — sem cartão de crédito. Ferramentas, formação e Observatório de IA.',
   },
   'forum-mundial-ia': {
@@ -45,7 +45,7 @@ export const SEO_DEFAULTS: Record<string, { title: string; description: string }
     description: 'Press kit oficial do HUB PAN pra jornalistas e pesquisadores: dados do Observatório de IA, releases institucionais e contato com a assessoria.',
   },
   'casos-de-uso': {
-    title: 'Casos de Uso — Resultados Reais do Ecossistema HUB PAN',
-    description: 'Resultados reais de quem já viveu o que o HUB PAN propõe — dados e histórias documentadas, de professoras da rede pública a prefeituras e startups.',
+    title: 'Casos de Uso do HUB PAN — Resultados Reais',
+    description: 'Casos de uso do HUB PAN: resultados reais de professoras da rede pública, prefeituras e startups que já viveram o que propomos.',
   },
 };

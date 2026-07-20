@@ -71,7 +71,7 @@ function AppShell() {
               <PageMeta
                 slug="prointer"
                 path="/prointer"
-                title="PROINTER — Intercâmbio para Professores da Rede Pública"
+                title="PROINTER — Professores da Rede Pública e Afroempreendedores"
                 description="Programa que leva professores da rede pública e afroempreendedores para Harvard Square, MIT e as Nações Unidas — passagem, hospedagem e curadoria completas."
               />
               <Prointer />
@@ -80,7 +80,7 @@ function AppShell() {
               <PageMeta
                 slug="govia"
                 path="/govia"
-                title="GovIA — Plataforma de IA sem Cartão de Crédito"
+                title="GovIA — Assinatura Institucional de IA para Municípios"
                 description="Assinatura institucional de IA para municípios, estados e consórcios públicos — sem cartão de crédito. Ferramentas, formação e Observatório de IA."
               />
               <GovIA />
@@ -134,8 +134,8 @@ function AppShell() {
               <PageMeta
                 slug="casos-de-uso"
                 path="/casos-de-uso"
-                title="Casos de Uso — Resultados Reais do Ecossistema HUB PAN"
-                description="Resultados reais de quem já viveu o que o HUB PAN propõe — dados e histórias documentadas, de professoras da rede pública a prefeituras e startups."
+                title="Casos de Uso do HUB PAN — Resultados Reais"
+                description="Casos de uso do HUB PAN: resultados reais de professoras da rede pública, prefeituras e startups que já viveram o que propomos."
               />
               <CasosDeUso />
             </>} />
