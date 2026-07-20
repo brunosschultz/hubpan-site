@@ -280,6 +280,19 @@ public/
 - [ ] Rotas de edição por página (`/editar/govia` etc.) + instrumentar as 8
       páginas internas com ET/ERich/EImg/EIcon/useEditColor como na home.
       **Regra: toda página nova já nasce instrumentada com os campos editáveis.**
+- [ ] **PRIORIDADE PRÉ-LANÇAMENTO — SSG/pré-renderização + SEO técnico.** O site
+      é uma SPA (client-side rendering): Google indexa com atraso/risco e os
+      crawlers de IA (GPTBot etc.) veem página em branco. Plano: pré-renderizar
+      todas as rotas no build (HTML pronto + hidratação), buscando o conteúdo
+      PUBLICADO do Supabase em build-time; o botão Publicar passa a disparar um
+      Vercel Deploy Hook pra reconstruir o site (~2 min). Junto: metas por
+      página (title/description/og-image editáveis pelo painel), sitemap.xml,
+      robots.txt e dados estruturados. Fazer ANTES do lançamento oficial e de
+      qualquer campanha de SEO. As rotas /editar e /preview continuam
+      client-side (não pré-renderizar).
+- [ ] Painel admin `/admin` (estilo wp-admin moderno): Dashboard, Páginas,
+      Usuários (criar/remover editores — requer Edge Function com service key,
+      nunca no cliente), SEO por página, Histórico/Publicação, Configurações.
 
 ---
 
