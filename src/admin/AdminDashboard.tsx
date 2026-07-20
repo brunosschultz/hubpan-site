@@ -113,7 +113,7 @@ function PageRow({ label, slug, tKey, dKey }: { label: string; slug: string; tKe
 
   return (
     <Link
-      to={`/admin/seo/${slug}`}
+      to={`/admin/seo/${slug || 'home'}`}
       className="flex items-center justify-between transition"
       style={{ height: 44, borderRadius: t.radius, padding: '0 14px' }}
       onMouseEnter={(e) => { e.currentTarget.style.background = t.muted; }}

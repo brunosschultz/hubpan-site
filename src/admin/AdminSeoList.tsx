@@ -41,7 +41,7 @@ export default function AdminSeoList() {
                 </span>
               )}
 
-              <Link to={`/admin/seo/${page.slug}`} className="flex items-center gap-1.5 hover:underline w-fit" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: t.primary }}>
+              <Link to={`/admin/seo/${page.slug || 'home'}`} className="flex items-center gap-1.5 hover:underline w-fit" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: t.primary }}>
                 <PencilLine size={13} /> Editar SEO
               </Link>
             </div>
