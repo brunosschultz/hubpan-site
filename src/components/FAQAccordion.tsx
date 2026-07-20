@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 
 export interface FAQEntry {
-  q: string;
-  a: string;
+  q: ReactNode;
+  a: ReactNode;
 }
 
 /**

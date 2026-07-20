@@ -280,9 +280,25 @@ public/
       denied" silencioso em produção (edição parecia salvar mas sumia ao
       recarregar). `schema.sql` já inclui os `grant select/insert/update`
       necessários; qualquer tabela nova criada por SQL precisa do mesmo.
-- [ ] Rotas de edição por página (`/editar/govia` etc.) + instrumentar as 8
-      páginas internas com ET/ERich/EImg/EIcon/useEditColor como na home
-      (regra permanente disso documentada em "Editor visual de conteúdo" abaixo).
+- [x] **9 páginas internas instrumentadas com o editor visual** (O HUB PAN,
+      PROINTER, GovIA, Fórum Mundial de IA, Insights, Contato, Glossário,
+      Imprensa, Casos de Uso) — mesmo padrão ET/ERich/EImg/EIcon/useEditColor
+      da home, ~700 campos editáveis no total. Feito em paralelo via 6 agentes
+      em background; revisado, sem colisão de prefixo de key, `tsc -b`/
+      `npm run build` (com prerender das 10 rotas) limpos.
+      **Componentes compartilhados ajustados** pra fechar os dois furos que os
+      agentes reportaram de forma independente: `Hero80.tsx` (`eyebrow` e
+      `HeroStat.label` eram `string`, agora `ReactNode`) e `FAQAccordion.tsx`
+      (`FAQEntry.q`/`.a` eram `string`, agora `ReactNode`) — sem isso, eyebrow/
+      stats do hero e perguntas/respostas de FAQ não podiam virar `ET`/`ERich`.
+      `CTABanner.tsx`'s `sub` também virou `ReactNode` pelo mesmo motivo.
+      **Limitação que ficou de fora** (não corrigida, por ser mudança maior):
+      os 6 cards "Para Organizações" do PROINTER usam `GlassHoverCard`, cujo
+      `tag`/`titulo`/`desc` (string) e `Icon` (component reference, não JSX)
+      teriam que mudar de estrutura — não é só trocar o tipo — pra virar
+      editável; avaliar se vale a pena caso o Bruno peça.
+      (regra permanente de página nova já editável documentada em "Editor
+      visual de conteúdo" abaixo).
 - [x] **SSG/pré-renderização + SEO técnico — implementado.** `scripts/prerender.mjs`
       roda depois de `vite build` (`npm run build` já encadeia): abre Puppeteer
       headless, visita as 10 rotas públicas do `ROUTES` (lista duplicada em

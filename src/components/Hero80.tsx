@@ -32,7 +32,7 @@ export interface HeroStat {
   value: number | string;
   prefix?: string;
   suffix?: string;
-  label: string;
+  label: ReactNode;
   /** valor em destaque — usa a cor accent do tema da faixa */
   accent?: boolean;
 }
@@ -60,7 +60,7 @@ export const STRIP_THEMES: Record<'navy900' | 'blue' | 'navy' | 'lime' | 'light'
 interface Hero80Props {
   img: string;
   imgAlt?: string;
-  eyebrow: string;
+  eyebrow: ReactNode;
   /** Use <br /> pra quebras manuais e <span style={{color:'#d2e718'}}> no trecho lime */
   title: ReactNode;
   sub: ReactNode;
@@ -111,7 +111,7 @@ export default function Hero80({ img, imgAlt = '', eyebrow, title, sub, badge, a
         <div className="gutter w-full">
           <div className={`grid ${statsGridClass(stats.length)} gap-y-6`}>
             {stats.map((s, i) => (
-              <div key={s.label} className="text-center px-2" style={i > 0 ? { borderLeft: `1px solid ${strip.divider}` } : undefined}>
+              <div key={i} className="text-center px-2" style={i > 0 ? { borderLeft: `1px solid ${strip.divider}` } : undefined}>
                 <p style={{
                   fontFamily: 'Luxenta',
                   fontWeight: s.accent ? (strip.accentWeight ?? 400) : 400,

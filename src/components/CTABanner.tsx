@@ -5,7 +5,7 @@ import { useReveal } from './useReveal';
  * Banner de CTA no fim das páginas internas — fundo hubblue full-bleed,
  * título Luxenta à esquerda e botões à direita.
  */
-export default function CTABanner({ title, sub, actions }: { title: ReactNode; sub?: string; actions: ReactNode }) {
+export default function CTABanner({ title, sub, actions }: { title: ReactNode; sub?: ReactNode; actions: ReactNode }) {
   const ref = useReveal<HTMLElement>();
 
   return (
