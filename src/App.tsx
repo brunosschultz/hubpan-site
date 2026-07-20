@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { EditorProvider } from './editor/store'
 import EditorPage from './editor/EditorPage'
 import PreviewPage from './editor/PreviewPage'
+import AdminApp from './admin/AdminApp'
 import SmoothScroll from './components/SmoothScroll'
 import ScrollToTop from './components/ScrollToTop'
 import NavBar from './components/NavBar'
@@ -26,23 +27,40 @@ export default function App() {
   return (
     <BrowserRouter>
       <EditorProvider>
-      <SmoothScroll>
-        <ScrollToTop />
-        <NavBar />
-        <main className="w-full overflow-x-hidden">
-          <Routes>
-            <Route path="/" element={<>
+        <AppShell />
+      </EditorProvider>
+    </BrowserRouter>
+  )
+}
+
+/**
+ * O Painel Admin (/admin) tem sua própria casca visual (sidebar, sem
+ * NavBar/Newsletter/Footer do site público, sem GSAP ScrollSmoother) — o
+ * resto do site (incluindo /editar e /preview, que mostram páginas reais)
+ * usa o chrome normal. Precisa estar dentro do <BrowserRouter> pra usar
+ * useLocation().
+ */
+function AppShell() {
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith('/admin');
+
+  const routes = (
+    <Routes>
+      <Route path="/" element={<>
+        <PageMeta
+          slug=""
+          path="/"
+          title="HUB PAN — Plataforma Internacional de Inovação"
+          description="Unimos as Américas e África ao ecossistema global de inovação, educação, IA, impacto e cooperação. Conheça o HUB PAN."
+        />
+        <Home />
+      </>} />
+      <Route path="/editar/*" element={<><NoIndexMeta /><EditorPage /></>} />
+      <Route path="/preview/*" element={<><NoIndexMeta /><PreviewPage /></>} />
+      <Route path="/admin/*" element={<><NoIndexMeta /><AdminApp /></>} />
+      <Route path="/o-hub-pan" element={<>
               <PageMeta
-                path="/"
-                title="HUB PAN — Plataforma Internacional de Inovação"
-                description="Unimos as Américas e África ao ecossistema global de inovação, educação, IA, impacto e cooperação. Conheça o HUB PAN."
-              />
-              <Home />
-            </>} />
-            <Route path="/editar/*" element={<><NoIndexMeta /><EditorPage /></>} />
-            <Route path="/preview/*" element={<><NoIndexMeta /><PreviewPage /></>} />
-            <Route path="/o-hub-pan" element={<>
-              <PageMeta
+                slug="o-hub-pan"
                 path="/o-hub-pan"
                 title="O HUB PAN — Conheça o Ecossistema"
                 description="Seja como governo, empresa, educador, investidor ou comunidade — descubra o caminho certo pra você dentro do ecossistema HUB PAN."
@@ -51,6 +69,7 @@ export default function App() {
             </>} />
             <Route path="/prointer" element={<>
               <PageMeta
+                slug="prointer"
                 path="/prointer"
                 title="PROINTER — Intercâmbio de Impacto em Harvard e Nova York"
                 description="Programa gratuito que leva professores da rede pública e afroempreendedores para Harvard Square, MIT e as Nações Unidas — passagem, hospedagem e curadoria completas."
@@ -59,6 +78,7 @@ export default function App() {
             </>} />
             <Route path="/govia" element={<>
               <PageMeta
+                slug="govia"
                 path="/govia"
                 title="GovIA — Plataforma de IA para o Setor Público"
                 description="Assinatura institucional de inteligência artificial para municípios, estados e consórcios públicos — sem cartão de crédito. Ferramentas, formação e Observatório de IA."
@@ -67,6 +87,7 @@ export default function App() {
             </>} />
             <Route path="/forum-mundial-ia" element={<>
               <PageMeta
+                slug="forum-mundial-ia"
                 path="/forum-mundial-ia"
                 title="Fórum Mundial de Inteligência Artificial (WAIF) — Cambridge 2027"
                 description="O maior ativo estratégico do HUB PAN reúne players globais de IA, policy makers, pesquisadores e investidores em Cambridge, Massachusetts."
@@ -75,6 +96,7 @@ export default function App() {
             </>} />
             <Route path="/insights" element={<>
               <PageMeta
+                slug="insights"
                 path="/insights"
                 title="HUB PAN Insights — Observatórios, Pesquisas e White Papers"
                 description="Observatórios temáticos, pesquisas, artigos e relatórios sobre inovação, IA, governança, educação e cooperação internacional."
@@ -83,6 +105,7 @@ export default function App() {
             </>} />
             <Route path="/contato" element={<>
               <PageMeta
+                slug="contato"
                 path="/contato"
                 title="Contato — Fale com o HUB PAN"
                 description="Seja qual for seu perfil — governo, empresa, educador ou parceiro — encontre o caminho certo pra entrar no ecossistema HUB PAN."
@@ -91,6 +114,7 @@ export default function App() {
             </>} />
             <Route path="/glossario" element={<>
               <PageMeta
+                slug="glossario"
                 path="/glossario"
                 title="Glossário HUB PAN — Conceitos de Inovação, IA e Impacto"
                 description="Definições claras dos conceitos centrais do ecossistema HUB PAN — para qualquer pessoa entender o que fazemos e por quê."
@@ -99,6 +123,7 @@ export default function App() {
             </>} />
             <Route path="/imprensa" element={<>
               <PageMeta
+                slug="imprensa"
                 path="/imprensa"
                 title="Imprensa & Mídia — Press Kit HUB PAN"
                 description="Material estruturado para jornalistas e pesquisadores: dados do Observatório de IA, releases institucionais, press kit e contato com a assessoria."
@@ -107,19 +132,30 @@ export default function App() {
             </>} />
             <Route path="/casos-de-uso" element={<>
               <PageMeta
+                slug="casos-de-uso"
                 path="/casos-de-uso"
                 title="Casos de Uso — Resultados Reais do HUB PAN"
                 description="Dados, histórias e resultados documentados de quem já viveu o que o HUB PAN propõe."
               />
               <CasosDeUso />
             </>} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-          <S11Newsletter />
-          <Footer />
-        </main>
-      </SmoothScroll>
-      </EditorProvider>
-    </BrowserRouter>
-  )
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+
+  if (isAdmin) {
+    return <main className="w-full overflow-x-hidden">{routes}</main>;
+  }
+
+  return (
+    <SmoothScroll>
+      <ScrollToTop />
+      <NavBar />
+      <main className="w-full overflow-x-hidden">
+        {routes}
+        <S11Newsletter />
+        <Footer />
+      </main>
+    </SmoothScroll>
+  );
 }

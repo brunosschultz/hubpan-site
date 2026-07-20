@@ -14,7 +14,7 @@ import { glass, initials, label11, PALETTE, text13 } from './theme';
 
 /* ═══════════ Login ═══════════ */
 
-export function LoginScreen() {
+export function LoginScreen({ subtitle = 'Editor de conteúdo — acesso restrito', buttonLabel = 'Entrar no editor' }: { subtitle?: string; buttonLabel?: string }) {
   const { login, connected } = useEditorStore();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -52,7 +52,7 @@ export function LoginScreen() {
             HUB <span style={{ color: '#d2e718' }}>PAN</span>
           </p>
           <p className="mb-8 mt-2" style={{ fontFamily: 'Inter', fontSize: 14, color: '#8b90a3' }}>
-            Editor de conteúdo — acesso restrito
+            {subtitle}
           </p>
           <div className="space-y-3.5">
             <input placeholder="Nome completo" value={name} onChange={(e) => setName(e.target.value)} style={input} />
@@ -66,7 +66,7 @@ export function LoginScreen() {
             className="w-full mt-6 hover:brightness-95 transition disabled:opacity-60"
             style={{ height: 50, borderRadius: 60, background: '#d2e718', fontFamily: 'Inter', fontWeight: 600, fontSize: 15, color: '#152852' }}
           >
-            {busy ? 'Entrando…' : 'Entrar no editor'}
+            {busy ? 'Entrando…' : buttonLabel}
           </button>
           {connected ? (
             <div className="mt-6 flex items-center gap-2 justify-center">

@@ -68,6 +68,9 @@ interface EditorCtx {
   connected: boolean;
   publishing: boolean;
   hasUnpublished: boolean;
+  /** Quantidade de campos com rascunho diferente do publicado — aproximado
+   * (não sabe "de qual página" cada campo é), usado só como número geral. */
+  pendingCount: number;
   /** Mensagem se a última tentativa de salvar no servidor falhou (ex.: permissão
    * do banco faltando) — a edição fica só localmente até isso ser resolvido. */
   syncError: string | null;
@@ -135,8 +138,11 @@ const Ctx = createContext<EditorCtx | null>(null);
 
 export function EditorProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const channel: Channel = (location.pathname.startsWith('/editar') || location.pathname.startsWith('/preview'))
-    ? 'draft' : 'published';
+  const channel: Channel = (
+    location.pathname.startsWith('/editar') ||
+    location.pathname.startsWith('/preview') ||
+    location.pathname.startsWith('/admin')
+  ) ? 'draft' : 'published';
 
   const connected = isSupabaseConfigured;
 
@@ -344,10 +350,15 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     [rows]
   );
 
+  const pendingCount = useMemo(
+    () => Object.values(rows).filter((v) => v.draft !== v.published).length,
+    [rows]
+  );
+
   const value = useMemo<EditorCtx>(() => ({
-    overrides: flatOverrides, history, user, editMode, panel, channel, connected, publishing, hasUnpublished, syncError,
+    overrides: flatOverrides, history, user, editMode, panel, channel, connected, publishing, hasUnpublished, pendingCount, syncError,
     get, setValue, login, logout, setEditMode, openPanel, closePanel, publish, uploadImage,
-  }), [flatOverrides, history, user, editMode, panel, channel, connected, publishing, hasUnpublished, syncError,
+  }), [flatOverrides, history, user, editMode, panel, channel, connected, publishing, hasUnpublished, pendingCount, syncError,
       get, setValue, login, logout, setEditMode, openPanel, closePanel, publish, uploadImage]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

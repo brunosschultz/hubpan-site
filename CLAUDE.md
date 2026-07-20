@@ -345,12 +345,38 @@ public/
       Botão Publicar dispara `VITE_VERCEL_DEPLOY_HOOK` (Vercel → Settings →
       Git → Deploy Hooks) se configurada — sem ela, publicar funciona igual,
       só que o HTML estático só atualiza no próximo deploy de código.
-      **Pendente do Bruno:** criar o Deploy Hook e me passar a URL, e trocar
-      `SITE_URL` (em `PageMeta.tsx` e `prerender.mjs`) pelo domínio definitivo
-      quando conectado.
-- [ ] Painel admin `/admin` (estilo wp-admin moderno): Dashboard, Páginas,
-      Usuários (criar/remover editores — requer Edge Function com service key,
-      nunca no cliente), SEO por página, Histórico/Publicação, Configurações.
+      **Deploy Hook já configurado** (`.env.local`, testado em produção —
+      publicar dispara rebuild automático). Ainda pendente: trocar `SITE_URL`
+      (em `PageMeta.tsx` e `prerender.mjs`) pelo domínio definitivo quando
+      conectado.
+- [x] **Painel admin `/admin` — Fase 1: Dashboard + Páginas + SEO.**
+      Reaproveita a MESMA conta/login do editor visual (`useEditorStore`,
+      `<LoginScreen/>` com prop `subtitle`/`buttonLabel` pra copy diferente) —
+      sem sistema de auth novo. `channel` em `store.tsx` agora também é
+      `'draft'` em `/admin/*` (igual `/editar`/`/preview`): editar SEO no
+      painel é rascunho até publicar, mesmo botão/fluxo de sempre.
+      **SEO não tem tabela própria** — vira mais linhas em
+      `content_overrides`, chaves `seo.<slug>.title/description/noindex`
+      (`src/admin/seo.ts`: `seoKey()`, `computeSeoStatus()` heurística tipo
+      Yoast, título 40–60/descrição 120–160 chars ideal). Zero migração de
+      banco. `PageMeta.tsx` agora recebe `slug` (nova prop, uma por rota em
+      `App.tsx`) e prefere o override salvo sobre o texto hardcoded — **os
+      valores efetivos são calculados no corpo do componente e entram nas
+      deps do `useEffect`, não as props brutas**, senão o SSG (que não
+      navega, só carrega uma vez) captura sempre o valor hardcoded mesmo
+      com override salvo — bug sutil, já corrigido, não reintroduzir.
+      `src/editor/pageRoutes.ts` ganhou `path` por página (não título/
+      descrição — isso ficaria numa 3ª cópia da mesma string já duplicada
+      entre `App.tsx` e `prerender.mjs`; `src/admin/seoDefaults.ts` guarda
+      uma cópia só pra placeholder no formulário, não é fonte de verdade).
+      **`/admin` tem casca própria, sem NavBar/Footer/Newsletter/GSAP
+      ScrollSmoother do site público** — `App.tsx` virou um `AppShell` que
+      checa `location.pathname.startsWith('/admin')` e pula esse chrome
+      inteiro nesse caso (achado testando: sem isso o NavBar público e o
+      ScrollSmoother do site colidiam visualmente com o layout do painel).
+      Rotas pendentes de fase futura, já com "Em breve" no menu: Leads,
+      Configurações (Google Analytics/Search Console), Usuários (precisa
+      Edge Function com service key, nunca no cliente), Mídia.
 
 ---
 

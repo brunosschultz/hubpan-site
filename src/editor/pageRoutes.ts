@@ -11,22 +11,22 @@ import Imprensa from '../pages/utilitarias/Imprensa';
 import CasosDeUso from '../pages/utilitarias/CasosDeUso';
 
 /**
- * Mapa slug → página, usado por /editar/<slug> e /preview/<slug>.
- * Slug vazio ('') = home. Precisa espelhar as rotas públicas em `App.tsx`
- * (mesmo path, sem a barra inicial) — ao criar página nova, adicionar aqui
- * também pra ela ficar editável em /editar/<slug>.
+ * Mapa slug → página, usado por /editar/<slug>, /preview/<slug> e pelo
+ * Painel Admin (/admin/paginas). Slug vazio ('') = home. `path` espelha a
+ * rota pública em `App.tsx` (com a barra inicial) — ao criar página nova,
+ * adicionar aqui também pra ela ficar editável e aparecer no painel.
  */
-export const PAGE_ROUTES: { slug: string; label: string; Component: ComponentType }[] = [
-  { slug: '', label: 'Home', Component: Home },
-  { slug: 'o-hub-pan', label: 'O HUB PAN', Component: Institucional },
-  { slug: 'prointer', label: 'PROINTER', Component: Prointer },
-  { slug: 'govia', label: 'GovIA', Component: GovIA },
-  { slug: 'forum-mundial-ia', label: 'Fórum Mundial de IA', Component: ForumMundialIA },
-  { slug: 'insights', label: 'Insights', Component: Insights },
-  { slug: 'contato', label: 'Contato', Component: Contato },
-  { slug: 'glossario', label: 'Glossário', Component: Glossario },
-  { slug: 'imprensa', label: 'Imprensa', Component: Imprensa },
-  { slug: 'casos-de-uso', label: 'Casos de Uso', Component: CasosDeUso },
+export const PAGE_ROUTES: { slug: string; label: string; path: string; Component: ComponentType }[] = [
+  { slug: '', label: 'Home', path: '/', Component: Home },
+  { slug: 'o-hub-pan', label: 'O HUB PAN', path: '/o-hub-pan', Component: Institucional },
+  { slug: 'prointer', label: 'PROINTER', path: '/prointer', Component: Prointer },
+  { slug: 'govia', label: 'GovIA', path: '/govia', Component: GovIA },
+  { slug: 'forum-mundial-ia', label: 'Fórum Mundial de IA', path: '/forum-mundial-ia', Component: ForumMundialIA },
+  { slug: 'insights', label: 'Insights', path: '/insights', Component: Insights },
+  { slug: 'contato', label: 'Contato', path: '/contato', Component: Contato },
+  { slug: 'glossario', label: 'Glossário', path: '/glossario', Component: Glossario },
+  { slug: 'imprensa', label: 'Imprensa', path: '/imprensa', Component: Imprensa },
+  { slug: 'casos-de-uso', label: 'Casos de Uso', path: '/casos-de-uso', Component: CasosDeUso },
 ];
 
 export function pageForSlug(slug: string) {
