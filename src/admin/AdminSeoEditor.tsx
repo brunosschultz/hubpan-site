@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { AlertTriangle, ArrowLeft, Check, CheckCircle2, ClipboardCopy, ExternalLink, Loader2, RefreshCw } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Check, CheckCircle2, ClipboardCopy, ExternalLink, Loader2, MinusCircle, RefreshCw, XCircle } from 'lucide-react';
 import { useEditorStore, formatWhen } from '../editor/store';
 import { pageForSlug } from '../editor/pageRoutes';
 import { SEO_DEFAULTS } from './seoDefaults';
-import { seoKey, computeSeoStatus, SEO_LEVEL_LABEL, SEO_LEVEL_TOKEN, auditHtml, buildAuditSummary, type OnPageAudit } from './seo';
+import {
+  seoKey, auditHtml, buildSeoChecklist, overallLevel, buildAuditSummary,
+  SEO_LEVEL_LABEL, SEO_LEVEL_TOKEN, type OnPageAudit, type SeoCheck,
+} from './seo';
 import { SITE_URL } from '../components/PageMeta';
 import AdminLayout from './AdminLayout';
 import { t } from './theme';
@@ -69,7 +72,6 @@ export default function AdminSeoEditor() {
 
   const effectiveTitle = title || fallback?.title || page.label;
   const effectiveDescription = description || fallback?.description || '';
-  const status = computeSeoStatus({ title: effectiveTitle, description: effectiveDescription });
 
   const [html, setHtml] = useState<string | null>(null);
   const [auditLoading, setAuditLoading] = useState(false);
@@ -95,13 +97,18 @@ export default function AdminSeoEditor() {
 
   useEffect(() => { void loadAudit(); }, [loadAudit]);
 
-  const audit = useMemo(() => (html ? auditHtml(html, keyword) : null), [html, keyword]);
+  const audit = useMemo(() => (html ? auditHtml(html) : null), [html]);
+  const checks = useMemo(
+    () => (audit ? buildSeoChecklist({ title: effectiveTitle, description: effectiveDescription, keyword, audit }) : null),
+    [audit, effectiveTitle, effectiveDescription, keyword],
+  );
+  const level = checks ? overallLevel(checks) : null;
 
   const copySummary = () => {
-    if (!audit) return;
+    if (!audit || !checks) return;
     const summary = buildAuditSummary({
       pageLabel: page.label, url: `${SITE_URL}${page.path}`,
-      title: effectiveTitle, description: effectiveDescription, keyword, audit,
+      title: effectiveTitle, description: effectiveDescription, keyword, audit, checks,
     });
     navigator.clipboard.writeText(summary).then(() => {
       setCopied(true);
@@ -156,7 +163,7 @@ export default function AdminSeoEditor() {
           <div className="p-6" style={{ borderRadius: t.radius, background: t.card, border: `1px solid ${t.border}` }}>
             <label className="block mb-1.5" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: t.foreground }}>Palavra-chave principal (opcional)</label>
             <p className="mb-2" style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground }}>
-              A auditoria abaixo confere se ela aparece no título e no texto da página.
+              A análise abaixo confere se ela aparece no título, na descrição e no H1.
             </p>
             <input
               value={keyword}
@@ -184,43 +191,32 @@ export default function AdminSeoEditor() {
           </div>
         </div>
 
-        <div className="space-y-6">
-          <div className="p-6" style={{ borderRadius: t.radius, background: t.card, border: `1px solid ${t.border}` }}>
-            <p className="mb-4" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 12, letterSpacing: '0.6px', textTransform: 'uppercase', color: t.mutedForeground }}>Nota de SEO</p>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="rounded-full" style={{ width: 10, height: 10, background: t[SEO_LEVEL_TOKEN[status.level]] }} />
-              <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 17, color: t[SEO_LEVEL_TOKEN[status.level]] }}>{SEO_LEVEL_LABEL[status.level]}</span>
-            </div>
-            {status.issues.length > 0 ? (
-              <ul className="space-y-1.5">
-                {status.issues.map((issue) => (
-                  <li key={issue} style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground, lineHeight: '18px' }}>• {issue}</li>
-                ))}
-              </ul>
-            ) : (
-              <p style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground }}>Título e descrição dentro do tamanho ideal.</p>
-            )}
+        <div className="p-6" style={{ borderRadius: t.radius, background: t.card, border: `1px solid ${t.border}` }}>
+          <div className="flex items-center justify-between mb-4">
+            <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 12, letterSpacing: '0.6px', textTransform: 'uppercase', color: t.mutedForeground }}>Como aparece no Google</p>
+            <a href={page.path} target="_blank" rel="noreferrer" style={{ color: t.mutedForeground }}><ExternalLink size={13} /></a>
           </div>
-
-          <div className="p-6" style={{ borderRadius: t.radius, background: t.card, border: `1px solid ${t.border}` }}>
-            <div className="flex items-center justify-between mb-4">
-              <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 12, letterSpacing: '0.6px', textTransform: 'uppercase', color: t.mutedForeground }}>Como aparece no Google</p>
-              <a href={page.path} target="_blank" rel="noreferrer" style={{ color: t.mutedForeground }}><ExternalLink size={13} /></a>
-            </div>
-            <p style={{ fontFamily: 'Arial', fontSize: 13.5, color: '#202124' }}>{SITE_URL.replace('https://', '')}{page.path}</p>
-            <p className="mt-1 truncate" style={{ fontFamily: 'Arial', fontSize: 18, color: '#1a0dab', lineHeight: '22px' }}>{effectiveTitle}</p>
-            <p className="mt-1" style={{ fontFamily: 'Arial', fontSize: 13.5, color: '#4d5156', lineHeight: '20px' }}>
-              {effectiveDescription || 'Sem descrição definida.'}
-            </p>
-          </div>
+          <p style={{ fontFamily: 'Arial', fontSize: 13.5, color: '#202124' }}>{SITE_URL.replace('https://', '')}{page.path}</p>
+          <p className="mt-1 truncate" style={{ fontFamily: 'Arial', fontSize: 18, color: '#1a0dab', lineHeight: '22px' }}>{effectiveTitle}</p>
+          <p className="mt-1" style={{ fontFamily: 'Arial', fontSize: 13.5, color: '#4d5156', lineHeight: '20px' }}>
+            {effectiveDescription || 'Sem descrição definida.'}
+          </p>
         </div>
       </div>
 
       <div className="mt-6 p-6" style={{ borderRadius: t.radius, background: t.card, border: `1px solid ${t.border}` }}>
         <div className="flex items-center justify-between mb-1">
-          <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: t.foreground }}>Auditoria on-page</p>
+          <div className="flex items-center gap-3">
+            <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: t.foreground }}>Análise de SEO</p>
+            {level && (
+              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: t.muted }}>
+                <span className="rounded-full" style={{ width: 7, height: 7, background: t[SEO_LEVEL_TOKEN[level]] }} />
+                <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 11.5, color: t[SEO_LEVEL_TOKEN[level]] }}>{SEO_LEVEL_LABEL[level]}</span>
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-4">
-            {audit && (
+            {checks && (
               <button
                 onClick={copySummary}
                 className="flex items-center gap-1.5 transition hover:opacity-80"
@@ -242,8 +238,8 @@ export default function AdminSeoEditor() {
           </div>
         </div>
         <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground }}>
-          Lida direto da página publicada — título, H1/H2, imagens e palavra-chave. Isso não edita nada; pra corrigir
-          um item, use "Copiar resumo" e traga aqui no chat.
+          Lida direto da página publicada. Mostra tanto o que já está certo quanto o que precisa de ajuste — pra
+          corrigir algo, use "Copiar resumo" e traga aqui no chat.
           {lastChecked && <> Última checagem: {formatWhen(lastChecked)}. Depois de eu ajustar algo, espere o deploy
           (~1-2 min) e clique em "Atualizar" pra conferir se melhorou.</>}
         </p>
@@ -254,13 +250,16 @@ export default function AdminSeoEditor() {
         {!auditError && auditLoading && !audit && (
           <p style={{ fontFamily: 'Inter', fontSize: 13, color: t.mutedForeground }}>Analisando a página…</p>
         )}
-        {audit && <AuditResult audit={audit} />}
+        {audit && checks && <AuditResult audit={audit} checks={checks} />}
       </div>
     </AdminLayout>
   );
 }
 
-function AuditResult({ audit }: { audit: OnPageAudit }) {
+const CHECK_ICON = { good: CheckCircle2, warning: AlertTriangle, bad: XCircle, neutral: MinusCircle };
+const CHECK_COLOR_KEY = { good: 'success', warning: 'warning', bad: 'destructive', neutral: 'mutedForeground' } as const;
+
+function AuditResult({ audit, checks }: { audit: OnPageAudit; checks: SeoCheck[] }) {
   const imagesOk = audit.images.length - audit.imagesMissingAlt.length;
 
   return (
@@ -272,20 +271,21 @@ function AuditResult({ audit }: { audit: OnPageAudit }) {
         <MiniStat label="Imagens OK" value={`${imagesOk}/${audit.images.length}`} />
       </div>
 
-      {audit.issues.length === 0 ? (
-        <p className="flex items-center gap-2" style={{ fontFamily: 'Inter', fontSize: 13, color: t.success }}>
-          <CheckCircle2 size={16} /> Nenhum problema encontrado na auditoria.
-        </p>
-      ) : (
-        <ul className="space-y-2">
-          {audit.issues.map((issue) => (
-            <li key={issue} className="flex items-start gap-2" style={{ fontFamily: 'Inter', fontSize: 13, color: t.foreground }}>
-              <AlertTriangle size={15} style={{ color: t.warning, marginTop: 1, flexShrink: 0 }} />
-              {issue}
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="divide-y" style={{ borderColor: t.border }}>
+        {checks.map((c) => {
+          const Icon = CHECK_ICON[c.level];
+          const color = t[CHECK_COLOR_KEY[c.level]];
+          return (
+            <div key={c.id} className="flex items-start gap-3 py-3">
+              <Icon size={17} style={{ color, marginTop: 1, flexShrink: 0 }} />
+              <div>
+                <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: t.foreground }}>{c.label}</p>
+                <p style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground, lineHeight: '18px' }}>{c.detail}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

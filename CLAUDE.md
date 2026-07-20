@@ -456,6 +456,25 @@ public/
       regra vale: `alt=""` explícito pra decorativa, `alt="descrição"` pra
       imagem com conteúdo — nunca deixar o atributo simplesmente de fora.
 
+      **Checklist visual (não só uma lista de erros) — pedido explícito do
+      Bruno:** a versão anterior só mostrava números (contagem de H1/H2/
+      palavras/imagens) e uma lista de problemas — não dava pra ver o que
+      já estava certo. `src/admin/seo.ts` ganhou `buildSeoChecklist()`,
+      que troca `computeSeoStatus()`/os `issues: string[]` soltos por uma
+      lista de `SeoCheck` (`{id, label, level: 'good'|'warning'|'bad'|'neutral', detail}`)
+      — SEMPRE mostra todos os critérios (título, descrição, H1, H2,
+      contagem de palavras, imagens, e 4 checagens de palavra-chave se
+      definida), cada um com ícone próprio (✓ verde / ⚠ âmbar / ✗ vermelho
+      / – cinza pra "não avaliado"). `overallLevel()` deriva o badge geral
+      a partir do pior nível entre os checks. Dashboard e a lista de SEO
+      (que não buscam o HTML de todas as páginas, só título/descrição) usam
+      `quickSeoLevel()` — uma versão mais simples/rápida, só pra essas duas
+      telas; o checklist completo (com H1/H2/imagens/palavra-chave) só
+      existe na tela de edição de cada página, que já busca o HTML mesmo
+      assim pra auditoria. `buildAuditSummary()` (o botão "Copiar resumo")
+      também foi atualizado pra listar separadamente "Certo" e "Pra
+      revisar" a partir dos mesmos `SeoCheck[]`.
+
 ---
 
 ## Editor visual de conteúdo (/editar)

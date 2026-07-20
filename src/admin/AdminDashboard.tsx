@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { FileText, PencilLine, Search } from 'lucide-react';
 import { useEditorStore, formatWhen } from '../editor/store';
 import { PAGE_ROUTES } from '../editor/pageRoutes';
-import { seoKey, computeSeoStatus, SEO_LEVEL_LABEL, SEO_LEVEL_TOKEN, type SeoLevel } from './seo';
+import { seoKey, quickSeoLevel, SEO_LEVEL_LABEL, SEO_LEVEL_TOKEN, type SeoLevel } from './seo';
 import AdminLayout from './AdminLayout';
 import { t } from './theme';
 
@@ -16,7 +16,7 @@ function useSeoSummary() {
     const dKey = seoKey(page.slug, 'description');
     const reviewed = tKey in overrides || dKey in overrides;
     if (!reviewed) { unreviewed++; continue; }
-    const { level } = computeSeoStatus({ title: get(tKey, ''), description: get(dKey, '') });
+    const level = quickSeoLevel({ title: get(tKey, ''), description: get(dKey, '') });
     counts[level]++;
   }
   return { unreviewed, counts, total: PAGE_ROUTES.length };
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
 function PageRow({ label, slug, tKey, dKey }: { label: string; slug: string; tKey: string; dKey: string }) {
   const { overrides, get } = useEditorStore();
   const reviewed = tKey in overrides || dKey in overrides;
-  const status = reviewed ? computeSeoStatus({ title: get(tKey, ''), description: get(dKey, '') }) : null;
+  const level = reviewed ? quickSeoLevel({ title: get(tKey, ''), description: get(dKey, '') }) : null;
 
   return (
     <Link
@@ -120,10 +120,10 @@ function PageRow({ label, slug, tKey, dKey }: { label: string; slug: string; tKe
       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
     >
       <span style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13.5, color: t.foreground }}>{label}</span>
-      {status ? (
-        <span className="flex items-center gap-1.5" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12, color: t[SEO_LEVEL_TOKEN[status.level]] }}>
-          <span className="rounded-full" style={{ width: 7, height: 7, background: t[SEO_LEVEL_TOKEN[status.level]] }} />
-          {SEO_LEVEL_LABEL[status.level]}
+      {level ? (
+        <span className="flex items-center gap-1.5" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12, color: t[SEO_LEVEL_TOKEN[level]] }}>
+          <span className="rounded-full" style={{ width: 7, height: 7, background: t[SEO_LEVEL_TOKEN[level]] }} />
+          {SEO_LEVEL_LABEL[level]}
         </span>
       ) : (
         <span className="flex items-center gap-1.5" style={{ fontFamily: 'Inter', fontSize: 12, color: t.mutedForeground }}>
