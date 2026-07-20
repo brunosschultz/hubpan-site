@@ -75,6 +75,7 @@ export default function S4Autoridade() {
               l={`Autoridade — logo ${i + 1}`}
               spec={{ w: 300, h: 300, shape: 'quadrada', fit: 'contain', note: 'Logo institucional com fundo transparente (PNG ou SVG).' }}
               style={{ width: LOGO_BOX, height: LOGO_BOX, objectFit: 'contain' }}
+              alt={`Logo de parceiro institucional ${i + 1}`}
             />
           </span>
         ))}

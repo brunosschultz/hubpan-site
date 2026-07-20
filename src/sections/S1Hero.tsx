@@ -91,6 +91,7 @@ export default function S1Hero() {
             l="Hero — card flutuante 2, logo"
             spec={{ w: 240, h: 240, shape: 'quadrada', fit: 'contain', note: 'Logo com fundo transparente (PNG ou SVG).' }}
             style={{ width: 55, height: 55, objectFit: 'contain', flexShrink: 0 }}
+            alt="Logo de parceiro institucional"
           />
           <ET k="s1.g2.lbl" v={'Presença\ninstitucional'} l="Hero — card flutuante 2, rótulo" multiline style={lbl} />
         </GlassCard>

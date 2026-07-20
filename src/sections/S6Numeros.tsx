@@ -41,6 +41,7 @@ export default function S6Numeros() {
                   l={`Números — foto do card "${c.desc}"`}
                   spec={{ w: 800, h: 460, shape: 'paisagem', note: 'O número grande fica sobre a parte de baixo da foto.' }}
                   className="absolute inset-0 w-full h-full object-cover"
+                  alt={c.desc}
                 />
                 <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 32%, rgba(0,0,0,0.4))' }} />
                 <div className="relative flex items-end px-5 w-full pointer-events-none">

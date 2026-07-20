@@ -40,6 +40,7 @@ export default function S9Insights() {
                 l={`Insights — foto do card "${c.title.slice(0, 30)}…"`}
                 spec={{ w: 800, h: 560, shape: 'paisagem' }}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                alt={c.title}
               />
             </div>
             <p style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: 400, letterSpacing: '2.2px', color: '#2d4ebf', marginBottom: 12 }}>
