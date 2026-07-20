@@ -990,10 +990,48 @@ chunk próprio de 10-45KB. Prerender (`scripts/prerender.mjs`, via
 Puppeteer) continua funcionando normal com rotas lazy — o `Suspense`
 resolve antes do `networkidle0` que o script espera.
 
-**Ainda não confirmado se isso resolve o LCP de verdade** — só vou
-declarar sucesso depois de rodar a auditoria de novo em produção e olhar
-o detalhamento, não só a nota geral (mesma lição de cima, valendo a
-sério dessa vez).
+**Confirmado: code splitting sozinho não resolveu** — rodei a auditoria
+2x em produção depois desse deploy e conferi o detalhamento de novo
+(não só a nota): `elementRenderDelay` continuou ~2,5s, LCP continuou
+8,7-9,0s. `unused-javascript` caiu de 600ms pra 460ms (ganho real, mas
+pequeno demais pra explicar o gargalo). Isso me fez procurar mais fundo
+em vez de aceitar "não resolveu, deve ser variação" — achado real abaixo.
+
+### A causa raiz de verdade: `createRoot` jogava fora o HTML pré-renderizado
+
+Usei um agente Explore pra investigar 4 hipóteses (loading gate no
+`EditorProvider`, bloqueio do `SmoothScroll`/GSAP, `useReveal` escondendo
+conteúdo acima da dobra, e o ponto de entrada React) — as 3 primeiras
+foram descartadas por leitura direta do código. A real: **`src/main.tsx`
+usava `createRoot`, não `hydrateRoot`**. Isso significa que o HTML
+pré-renderizado (`scripts/prerender.mjs`, feito originalmente só pra
+SEO/robôs) era **descartado e reconstruído do zero pelo React** assim que
+o JavaScript carregava — o "atraso de renderização" que a auditoria
+mostrava desde a primeira tentativa **nunca foi imagem, animação ou
+tamanho de bundle: era sempre essa reconstrução completa**, e nenhuma das
+correções anteriores (que só reduziam o QUANTO tinha que ser
+reconstruído) atacava a causa em si.
+
+**Importante pro Bruno, registrado aqui pra não esquecer**: `hydrateRoot`
+**não afeta indexação/SEO** — o HTML que os robôs recebem é exatamente o
+mesmo, pré-renderizado igual antes. A única mudança é o React reaproveitar
+esse HTML em vez de jogar fora. É o padrão usado por padrão em Next.js/
+Astro/Remix — o setup anterior (pré-renderizar E depois descartar) que
+era a combinação incomum, não o inverso.
+
+**Fix** (`src/main.tsx`): `hydrateRoot(rootEl, app)` quando `#root` já tem
+conteúdo (rotas públicas, servidas com o HTML pré-renderizado);
+`createRoot` como fallback só quando `#root` está vazio (`npm run dev`,
+ou qualquer rota que não passou pela pré-renderização por algum motivo —
+hydratar um nó vazio gera aviso à toa).
+
+**Verificação rigorosa antes de declarar concluído** (pedido explícito do
+Bruno depois de 3 tentativas anteriores não confirmadas direito): subi um
+`vite preview` local servindo o `dist/` de verdade (com todo o HTML
+pré-renderizado — o `npm run dev` normal NÃO serve isso, só testa o
+fallback `createRoot`) e visitei as 10 rotas públicas uma por uma,
+checando console (zero avisos de hydration mismatch em todas) e
+conferindo visualmente. Só depois disso apliquei em produção.
 
 ## Editor visual de conteúdo (/editar)
 
