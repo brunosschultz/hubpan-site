@@ -45,7 +45,15 @@ export default function S1Hero() {
     const el = ref.current;
     if (!el) return;
     const ctx = gsap.context(() => {
-      gsap.from('[data-hero-text]', { y: 20, opacity: 0, duration: 0.6, stagger: 0.12, ease: 'power2.out', delay: 0.1 });
+      /* Sem opacity aqui de propósito: o texto do Hero já vem visível no HTML
+       * pré-renderizado (scripts/prerender.mjs marca isso como opacity:1 pro
+       * SEO/robôs) — animar a partir de opacity:0 fazia o GSAP escondê-lo de
+       * novo ao montar e só revelar depois, e o Google conta esse "reaparecer"
+       * como o momento real de LCP, inflando a métrica em segundos (achado
+       * real da auditoria de velocidade — o elemento de maior conteúdo
+       * visível era esse parágrafo, não a imagem de fundo). Mantém o leve
+       * deslizar (y) pelo acabamento visual, sem esconder o conteúdo. */
+      gsap.from('[data-hero-text]', { y: 20, duration: 0.6, stagger: 0.12, ease: 'power2.out', delay: 0.1 });
       gsap.from('[data-animate]', { opacity: 0, scale: 0.95, duration: 0.5, stagger: 0.15, ease: 'power2.out', delay: 0.5 });
     }, el);
     return () => ctx.revert();

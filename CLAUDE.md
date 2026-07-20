@@ -934,6 +934,40 @@ mobile) é o único item com trade-off de qualidade, por isso fica fora do
 lote "zero risco visual" e segue o combinado (comparativo antes/depois
 antes de publicar).
 
+### Correção real do LCP — a imagem NÃO era a causa (erro meu, corrigido)
+
+Depois de comprimir a imagem do Hero (126KB → 63KB, sem perda visível,
+comparado lado a lado antes de aplicar) e rodar a auditoria de novo, a
+nota não mudou nada (LCP continuou ~9,3-9,4s). Investiguei o motivo
+usando o detalhamento real da própria auditoria (`lcp-breakdown-insight`
+no JSON do PageSpeed) em vez de continuar supondo, e descobri que **o
+elemento medido como LCP nunca foi a imagem de fundo — é o parágrafo de
+texto do Hero** (`"Uma infraestrutura global que conecta talentos..."`).
+Eu tinha assumido que era a imagem (maior elemento visual da tela) sem
+confirmar contra o dado real — foi um erro meu, reconhecido pro Bruno.
+
+**Causa raiz de verdade**: `scripts/prerender.mjs` já marca
+`[data-hero-text]` como `opacity: 1` no HTML estático (pro SEO/robôs
+verem o texto sem JS). Mas o `gsap.from('[data-hero-text]', {..., opacity: 0, ...})`
+em `S1Hero.tsx` fazia o React, ao montar, **esconder de novo** esse texto
+(voltar pra opacity 0) só pra reanimar ele aparecendo — um clássico
+anti-padrão de performance: o navegador conta o momento em que o
+conteúdo REALMENTE fica visível de vez como o LCP, então esse
+"esconde → reaparece" inflava a métrica em segundos, mesmo o texto já
+estando pronto no HTML antes de qualquer JS rodar.
+
+**Fix**: removido `opacity: 0` do `gsap.from()` do Hero — mantém só o
+`y: 20` (leve deslizar de baixo pra cima), sem esconder o conteúdo do
+zero. Efeito visual quase idêntico (menos o fade), sem penalizar LCP.
+Confirmado visualmente antes de publicar: texto aparece imediatamente,
+sem "sumir e voltar".
+
+**Lição pra próxima vez**: quando uma correção não mexe no número
+esperado, usar o detalhamento (`*-breakdown-insight`, `largest-contentful-paint-element`
+no JSON cru do PageSpeed) pra confirmar QUAL elemento está sendo medido
+antes de seguir supondo — economiza uma rodada inteira de mudança na
+causa errada.
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no
