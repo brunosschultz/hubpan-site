@@ -50,8 +50,8 @@ function AppShell() {
         <PageMeta
           slug=""
           path="/"
-          title="HUB PAN — Ecossistema de Inovação nas Américas e África"
-          description="O HUB PAN une governos, empresas e educadores das Américas e África num ecossistema de inovação, IA, impacto social e cooperação internacional."
+          title="HUB PAN — Ecossistema Global de Inovação nas Américas"
+          description="O HUB PAN é o ecossistema global de inovação que une governos, empresas e educadores das Américas e África em IA, impacto social e cooperação."
         />
         <Home />
       </>} />
@@ -71,7 +71,7 @@ function AppShell() {
               <PageMeta
                 slug="prointer"
                 path="/prointer"
-                title="PROINTER — Intercâmbio de Impacto em Harvard e Nova York"
+                title="PROINTER — Intercâmbio para Professores da Rede Pública"
                 description="Programa que leva professores da rede pública e afroempreendedores para Harvard Square, MIT e as Nações Unidas — passagem, hospedagem e curadoria completas."
               />
               <Prointer />
@@ -80,7 +80,7 @@ function AppShell() {
               <PageMeta
                 slug="govia"
                 path="/govia"
-                title="GovIA — Plataforma de IA para o Setor Público"
+                title="GovIA — Plataforma de IA sem Cartão de Crédito"
                 description="Assinatura institucional de IA para municípios, estados e consórcios públicos — sem cartão de crédito. Ferramentas, formação e Observatório de IA."
               />
               <GovIA />
@@ -89,8 +89,8 @@ function AppShell() {
               <PageMeta
                 slug="forum-mundial-ia"
                 path="/forum-mundial-ia"
-                title="Fórum Mundial de IA (WAIF) — Cambridge 2027"
-                description="O maior ativo estratégico do HUB PAN reúne players globais de IA, policy makers, pesquisadores e investidores em Cambridge, Massachusetts, em 2027."
+                title="Fórum Mundial de Inteligência Artificial — Cambridge 2027"
+                description="O Fórum Mundial de Inteligência Artificial reúne players globais de IA, policy makers, pesquisadores e investidores em Cambridge, Massachusetts, em 2027."
               />
               <ForumMundialIA />
             </>} />
@@ -99,7 +99,7 @@ function AppShell() {
                 slug="insights"
                 path="/insights"
                 title="HUB PAN Insights — Observatório de IA e Inovação"
-                description="Observatórios temáticos, pesquisas, artigos e relatórios sobre inovação, inteligência artificial, governança, educação e cooperação internacional."
+                description="Observatório de IA e conteúdo do HUB PAN: pesquisas, artigos e relatórios sobre inovação, inteligência artificial, governança e cooperação internacional."
               />
               <Insights />
             </>} />
@@ -107,8 +107,8 @@ function AppShell() {
               <PageMeta
                 slug="contato"
                 path="/contato"
-                title="Contato — Fale com o Ecossistema HUB PAN"
-                description="Seja qual for seu perfil — governo, empresa, educador ou parceiro — encontre o caminho certo pra entrar no ecossistema HUB PAN."
+                title="Contato — Fale com o HUB PAN e o Ecossistema"
+                description="Fale com o HUB PAN: seja qual for seu perfil — governo, empresa, educador ou parceiro — encontre o caminho certo pra entrar no ecossistema."
               />
               <Contato />
             </>} />
@@ -117,7 +117,7 @@ function AppShell() {
                 slug="glossario"
                 path="/glossario"
                 title="Glossário HUB PAN — Conceitos de Inovação, IA e Impacto"
-                description="Definições claras dos conceitos centrais do ecossistema HUB PAN — para qualquer pessoa entender o que fazemos e por quê."
+                description="Glossário HUB PAN: definições claras dos conceitos centrais do ecossistema — pra qualquer pessoa entender o que fazemos e por quê."
               />
               <Glossario />
             </>} />
@@ -126,7 +126,7 @@ function AppShell() {
                 slug="imprensa"
                 path="/imprensa"
                 title="Imprensa & Mídia — Press Kit Oficial do HUB PAN"
-                description="Material estruturado para jornalistas e pesquisadores: dados do Observatório de IA, releases institucionais, press kit e contato com a assessoria."
+                description="Press kit oficial do HUB PAN pra jornalistas e pesquisadores: dados do Observatório de IA, releases institucionais e contato com a assessoria."
               />
               <Imprensa />
             </>} />
@@ -135,7 +135,7 @@ function AppShell() {
                 slug="casos-de-uso"
                 path="/casos-de-uso"
                 title="Casos de Uso — Resultados Reais do Ecossistema HUB PAN"
-                description="Dados, histórias e resultados documentados de quem já viveu o que o HUB PAN propõe — de professoras da rede pública a prefeituras e startups."
+                description="Resultados reais de quem já viveu o que o HUB PAN propõe — dados e histórias documentadas, de professoras da rede pública a prefeituras e startups."
               />
               <CasosDeUso />
             </>} />
