@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { AlertTriangle, ArrowLeft, Check, CheckCircle2, ExternalLink, Loader2, RefreshCw } from 'lucide-react';
-import { useEditorStore } from '../editor/store';
+import { AlertTriangle, ArrowLeft, Check, CheckCircle2, ClipboardCopy, ExternalLink, Loader2, RefreshCw } from 'lucide-react';
+import { useEditorStore, formatWhen } from '../editor/store';
 import { pageForSlug } from '../editor/pageRoutes';
 import { SEO_DEFAULTS } from './seoDefaults';
-import { seoKey, computeSeoStatus, SEO_LEVEL_LABEL, SEO_LEVEL_TOKEN, auditHtml, type OnPageAudit } from './seo';
+import { seoKey, computeSeoStatus, SEO_LEVEL_LABEL, SEO_LEVEL_TOKEN, auditHtml, buildAuditSummary, type OnPageAudit } from './seo';
 import { SITE_URL } from '../components/PageMeta';
 import AdminLayout from './AdminLayout';
 import { t } from './theme';
@@ -74,6 +74,8 @@ export default function AdminSeoEditor() {
   const [html, setHtml] = useState<string | null>(null);
   const [auditLoading, setAuditLoading] = useState(false);
   const [auditError, setAuditError] = useState<string | null>(null);
+  const [lastChecked, setLastChecked] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const loadAudit = useCallback(async () => {
     setAuditLoading(true);
@@ -82,6 +84,7 @@ export default function AdminSeoEditor() {
       const res = await fetch(`${SITE_URL}${page.path}`, { cache: 'no-store' });
       if (!res.ok) throw new Error(String(res.status));
       setHtml(await res.text());
+      setLastChecked(Date.now());
     } catch {
       setHtml(null);
       setAuditError('Não foi possível carregar a página publicada pra analisar. Tente de novo em instantes.');
@@ -93,6 +96,20 @@ export default function AdminSeoEditor() {
   useEffect(() => { void loadAudit(); }, [loadAudit]);
 
   const audit = useMemo(() => (html ? auditHtml(html, keyword) : null), [html, keyword]);
+
+  const copySummary = () => {
+    if (!audit) return;
+    const summary = buildAuditSummary({
+      pageLabel: page.label, url: `${SITE_URL}${page.path}`,
+      title: effectiveTitle, description: effectiveDescription, keyword, audit,
+    });
+    navigator.clipboard.writeText(summary).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    }).catch(() => {
+      setAuditError('Não foi possível copiar — selecione e copie manualmente pelo navegador.');
+    });
+  };
 
   return (
     <AdminLayout title={`SEO — ${page.label}`}>
@@ -202,19 +219,33 @@ export default function AdminSeoEditor() {
       <div className="mt-6 p-6" style={{ borderRadius: t.radius, background: t.card, border: `1px solid ${t.border}` }}>
         <div className="flex items-center justify-between mb-1">
           <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: t.foreground }}>Auditoria on-page</p>
-          <button
-            onClick={() => void loadAudit()}
-            disabled={auditLoading}
-            className="flex items-center gap-1.5 transition hover:opacity-80 disabled:opacity-50"
-            style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: t.primary }}
-          >
-            {auditLoading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
-            Atualizar
-          </button>
+          <div className="flex items-center gap-4">
+            {audit && (
+              <button
+                onClick={copySummary}
+                className="flex items-center gap-1.5 transition hover:opacity-80"
+                style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: copied ? t.success : t.primary }}
+              >
+                {copied ? <Check size={13} /> : <ClipboardCopy size={13} />}
+                {copied ? 'Copiado!' : 'Copiar resumo'}
+              </button>
+            )}
+            <button
+              onClick={() => void loadAudit()}
+              disabled={auditLoading}
+              className="flex items-center gap-1.5 transition hover:opacity-80 disabled:opacity-50"
+              style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: t.primary }}
+            >
+              {auditLoading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+              Atualizar
+            </button>
+          </div>
         </div>
         <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground }}>
           Lida direto da página publicada — título, H1/H2, imagens e palavra-chave. Isso não edita nada; pra corrigir
-          um item, é só trazer aqui no chat.
+          um item, use "Copiar resumo" e traga aqui no chat.
+          {lastChecked && <> Última checagem: {formatWhen(lastChecked)}. Depois de eu ajustar algo, espere o deploy
+          (~1-2 min) e clique em "Atualizar" pra conferir se melhorou.</>}
         </p>
 
         {auditError && (

@@ -432,6 +432,16 @@ public/
       editar alt text, pra não abrir brecha de quebrar a estrutura/design da
       página sem querer.
 
+      **Fluxo de uso pretendido** (o Bruno perguntou como ele funciona na
+      prática): botão "Copiar resumo" (`buildAuditSummary()` em `seo.ts`)
+      gera um texto pronto — título, descrição, palavras, H1/H2, imagens sem
+      alt, problemas — pra colar direto no chat. Depois que eu ajusto algo
+      no código e o deploy termina (~1-2 min), o Bruno clica "Atualizar" na
+      auditoria pra conferir se melhorou (mostra "última checagem: há X").
+      Cogitei automatizar isso com uma IA chamando a API da Anthropic direto
+      do painel, mas isso exigiria gerenciar uma chave paga só pra replicar
+      o que já existe de graça neste chat — não vale a pena por ora.
+
 ---
 
 ## Editor visual de conteúdo (/editar)

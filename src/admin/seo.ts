@@ -117,3 +117,36 @@ export function auditHtml(html: string, keyword: string): OnPageAudit {
 
   return { wordCount, h1, h2, images, issues };
 }
+
+/**
+ * Texto pronto pra colar no chat — o Bruno pediu um jeito rápido de trazer
+ * o diagnóstico da auditoria sem ter que descrever cada item manualmente.
+ */
+export function buildAuditSummary(input: {
+  pageLabel: string;
+  url: string;
+  title: string;
+  description: string;
+  keyword: string;
+  audit: OnPageAudit;
+}): string {
+  const { pageLabel, url, title, description, keyword, audit } = input;
+  const missingAlt = audit.images.filter((img) => !img.alt.trim());
+  const lines = [
+    `Página: ${pageLabel} (${url})`,
+    '',
+    `Título (${title.length} car.): ${title || '(sem título definido)'}`,
+    `Descrição (${description.length} car.): ${description || '(sem descrição definida)'}`,
+    keyword ? `Palavra-chave: ${keyword}` : 'Palavra-chave: (nenhuma definida)',
+    '',
+    `Palavras na página: ${audit.wordCount}`,
+    `H1 (${audit.h1.length}): ${audit.h1.join(' | ') || '—'}`,
+    `H2 (${audit.h2.length}): ${audit.h2.join(' | ') || '—'}`,
+    `Imagens: ${audit.images.length - missingAlt.length}/${audit.images.length} com alt`,
+  ];
+  if (missingAlt.length > 0) {
+    lines.push(`  Sem alt: ${missingAlt.map((img) => img.src.split('/').pop()).join(', ')}`);
+  }
+  lines.push('', audit.issues.length > 0 ? `Problemas encontrados:\n${audit.issues.map((i) => `- ${i}`).join('\n')}` : 'Nenhum problema encontrado na auditoria.');
+  return lines.join('\n');
+}
