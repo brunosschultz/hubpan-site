@@ -708,6 +708,8 @@ export function EImg({ k, v, l, spec, alt = '', className, style }: EImgProps) {
       alt={alt}
       className={className}
       style={style}
+      width={spec.w}
+      height={spec.h}
       data-eimg={editMode ? '' : undefined}
       onClick={editMode ? (e) => {
         e.stopPropagation();

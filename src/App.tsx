@@ -1,8 +1,6 @@
+import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { EditorProvider } from './editor/store'
-import EditorPage from './editor/EditorPage'
-import PreviewPage from './editor/PreviewPage'
-import AdminApp from './admin/AdminApp'
 import SmoothScroll from './components/SmoothScroll'
 import ScrollToTop from './components/ScrollToTop'
 import NavBar from './components/NavBar'
@@ -19,6 +17,14 @@ import Contato from './pages/contato'
 import Glossario from './pages/utilitarias/Glossario'
 import Imprensa from './pages/utilitarias/Imprensa'
 import CasosDeUso from './pages/utilitarias/CasosDeUso'
+
+/* Carregados sob demanda (não entram no bundle público) — editor visual e
+ * painel admin são código que só quem loga usa, nunca um visitante comum.
+ * Separar isso do bundle da Home reduz bastante o JavaScript que todo
+ * visitante baixa (achado real da auditoria de velocidade do painel). */
+const EditorPage = lazy(() => import('./editor/EditorPage'))
+const PreviewPage = lazy(() => import('./editor/PreviewPage'))
+const AdminApp = lazy(() => import('./admin/AdminApp'))
 
 /* Título/descrição por página — lidos também pela pré-renderização de build
  * (scripts/prerender.mjs) e pelo sitemap.xml gerado junto. Ao criar uma
@@ -55,9 +61,9 @@ function AppShell() {
         />
         <Home />
       </>} />
-      <Route path="/editar/*" element={<><NoIndexMeta /><EditorPage /></>} />
-      <Route path="/preview/*" element={<><NoIndexMeta /><PreviewPage /></>} />
-      <Route path="/admin/*" element={<><NoIndexMeta /><AdminApp /></>} />
+      <Route path="/editar/*" element={<><NoIndexMeta /><Suspense fallback={null}><EditorPage /></Suspense></>} />
+      <Route path="/preview/*" element={<><NoIndexMeta /><Suspense fallback={null}><PreviewPage /></Suspense></>} />
+      <Route path="/admin/*" element={<><NoIndexMeta /><Suspense fallback={null}><AdminApp /></Suspense></>} />
       <Route path="/o-hub-pan" element={<>
               <PageMeta
                 slug="o-hub-pan"

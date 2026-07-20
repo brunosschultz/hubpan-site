@@ -885,6 +885,55 @@ editor) entra como **rascunho** — nada fica público até ele clicar em
 "Publicar" no painel, então ele já tem uma checagem visual embutida no
 fluxo antes de qualquer coisa virar real.
 
+### Primeira rodada de correções reais a partir da auditoria — achados técnicos
+
+O Bruno colou o resultado da auditoria da Home (nota mobile 67/100) e
+pediu explicação em português simples antes de eu mexer em qualquer
+coisa — usei um agente Explore pra achar a causa raiz exata de cada item
+(não supor). Fixes aplicados nesta rodada, todos sem risco visual (o
+único item com risco de qualidade — imagem do Hero — ficou de fora,
+tratado à parte com comparativo antes/depois, como combinado):
+
+- **Code splitting real** (`App.tsx`): `EditorPage`, `PreviewPage`,
+  `AdminApp` eram importados direto (~3.334 linhas combinadas) e iam pro
+  MESMO bundle que qualquer visitante da Home baixa, mesmo sem nunca usar
+  o painel/editor. Trocado por `lazy()` + `<Suspense fallback={null}>` —
+  o build agora gera `AdminApp-*.js` (55KB) e `EditorPage-*.js` (22KB)
+  como pedaços separados, só baixados quando alguém acessa `/admin` ou
+  `/editar`. Bundle principal caiu de ~994KB pra ~917KB.
+- **Reflow forçado** (`src/components/useTilt.ts`): o efeito de
+  inclinação 3D dos cards chamava `getBoundingClientRect()` a cada
+  `mousemove` (dezenas de vezes/segundo), forçando o navegador a
+  recalcular layout toda hora. Corrigido: mede o retângulo só uma vez ao
+  entrar no card (`mouseenter`), reaproveita durante todo o hover — a
+  posição não muda nesse intervalo, então cachear é mais rápido E mais
+  correto (não muda o efeito visual).
+- **Imagens sem width/height** (`src/editor/fields.tsx`, `EImg`): o
+  componente já recebe uma `spec: ImageSpec` com `w`/`h` pretendidos pra
+  cada imagem (mesma spec que `processImage()` usa pra cropar o upload) —
+  só faltava repassar isso como atributos HTML `width`/`height` no
+  `<img>`. Zero risco: não são valores chutados, são a proporção real já
+  definida em cada uso do componente; o tamanho final exibido continua
+  sendo controlado por CSS (`className`/`style`), os atributos só
+  reservam o espaço certo antes da imagem carregar (evita layout pulando).
+  Ícones soltos com `style={{width,height}}` fixo (não passam por `EImg`)
+  ficaram de fora dessa rodada — risco/benefício não compensava.
+- **Descoberta da imagem do Hero** (`index.html`): o fundo do Hero é
+  aplicado via CSS `background-image` em runtime (não um `<img>`), então
+  o navegador só "descobre" essa imagem depois do JavaScript rodar —
+  atrasa o LCP. Adicionado `<link rel="preload" as="image" fetchpriority="high">`
+  pra `/images/s1-hero-bg.webp` no `<head>`, mesmo padrão já usado pras
+  fontes Luxenta. Trade-off aceito: em rotas que não são a Home, é uma
+  busca a mais que não será usada — mínimo, o navegador já cacheia entre
+  páginas na mesma visita.
+
+**Não incluído nesta rodada, tratado à parte**: a imagem do Hero
+(`s1-hero-bg.webp`, 126KB) está entregando a mesma resolução de desktop
+pro celular — a correção real (gerar uma versão mais leve específica pra
+mobile) é o único item com trade-off de qualidade, por isso fica fora do
+lote "zero risco visual" e segue o combinado (comparativo antes/depois
+antes de publicar).
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no
