@@ -39,8 +39,8 @@ export default function App() {
               />
               <Home />
             </>} />
-            <Route path="/editar" element={<><NoIndexMeta /><EditorPage /></>} />
-            <Route path="/preview" element={<><NoIndexMeta /><PreviewPage /></>} />
+            <Route path="/editar/*" element={<><NoIndexMeta /><EditorPage /></>} />
+            <Route path="/preview/*" element={<><NoIndexMeta /><PreviewPage /></>} />
             <Route path="/o-hub-pan" element={<>
               <PageMeta
                 path="/o-hub-pan"

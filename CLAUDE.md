@@ -296,6 +296,15 @@ public/
       foi ajustado: `Icon` (component reference) virou `icon: ReactNode` e
       `tag`/`titulo`/`desc`/`itens` viraram `ReactNode`/`ReactNode[]` — agora
       os 6 cards são 100% editáveis (ícone via `EIcon`, textos via `ET`/`ERich`).
+      **Rotas de edição por página** (`/editar/<slug>` e `/preview/<slug>`,
+      ex: `/editar/govia`) — antes `/editar` e `/preview` só renderizavam a
+      Home, então as 9 páginas ficaram sem UI de edição por várias sessões
+      até isso ser notado. Mapa slug→componente em `src/editor/pageRoutes.ts`
+      (ao criar página nova, adicionar aqui também); `EditorPage.tsx`/
+      `PreviewPage.tsx` leem `location.pathname` e escolhem a página. Rotas
+      em `App.tsx` mudaram de `/editar`/`/preview` (exatas) pra `/editar/*`/
+      `/preview/*`. URLs válidas: `/editar` ou `/editar/govia` (home =
+      slug vazio), idem `/preview`.
       (regra permanente de página nova já editável documentada em "Editor
       visual de conteúdo" abaixo).
 - [x] **SSG/pré-renderização + SEO técnico — implementado.** `scripts/prerender.mjs`
