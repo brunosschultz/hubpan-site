@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import gsap from 'gsap';
 import { useReveal } from './useReveal';
+import { ERich } from '../editor/fields';
 
 /* ═══════════ Contador animado (conta de 0 até o valor ao entrar na viewport) ═══════════ */
 
@@ -35,6 +36,10 @@ export interface HeroStat {
   label: ReactNode;
   /** valor em destaque — usa a cor accent do tema da faixa */
   accent?: boolean;
+  /** key do editor pro valor exibido — se ausente, o valor não é editável.
+   * Mantém a animação de contagem por padrão; só vira estático se editado. */
+  editKey?: string;
+  editLabel?: string;
 }
 
 export interface StripTheme {
@@ -71,6 +76,8 @@ interface Hero80Props {
   strip: StripTheme;
   /** posição do foco da imagem (object-position) */
   imgPosition?: string;
+  /** spread no container da faixa de números — usado pro useEditColor tornar o fundo clicável */
+  stripProps?: Record<string, unknown>;
 }
 
 /** Grid responsivo conforme a quantidade real de stats — nem toda página tem 6 */
@@ -81,7 +88,7 @@ function statsGridClass(n: number): string {
   return 'grid-cols-3 lg:grid-cols-6';
 }
 
-export default function Hero80({ img, imgAlt = '', eyebrow, title, sub, badge, actions, stats, strip, imgPosition }: Hero80Props) {
+export default function Hero80({ img, imgAlt = '', eyebrow, title, sub, badge, actions, stats, strip, imgPosition, stripProps }: Hero80Props) {
   const ref = useReveal<HTMLElement>();
   return (
     <section ref={ref} className="relative w-full">
@@ -107,7 +114,7 @@ export default function Hero80({ img, imgAlt = '', eyebrow, title, sub, badge, a
       </div>
 
       {/* Faixa de números — 20vh, cor por página (DESIGN-SYSTEM.md §5.5.5) */}
-      <div className="w-full h-[20vh] min-h-[150px] flex items-center" style={{ background: strip.bg, borderTop: strip.borderTop }}>
+      <div className="w-full h-[20vh] min-h-[150px] flex items-center" {...stripProps} style={{ background: strip.bg, borderTop: strip.borderTop }}>
         <div className="gutter w-full">
           <div className={`grid ${statsGridClass(stats.length)} gap-y-6`}>
             {stats.map((s, i) => (
@@ -119,7 +126,13 @@ export default function Hero80({ img, imgAlt = '', eyebrow, title, sub, badge, a
                   lineHeight: 1,
                   color: s.accent ? strip.accent : strip.num,
                 }}>
-                  {typeof s.value === 'number' ? <Counter value={s.value} prefix={s.prefix ?? ''} suffix={s.suffix ?? ''} /> : s.value}
+                  {s.editKey ? (
+                    <ERich k={s.editKey} l={s.editLabel ?? 'Hero — valor do stat'}>
+                      {typeof s.value === 'number' ? <Counter value={s.value} prefix={s.prefix ?? ''} suffix={s.suffix ?? ''} /> : s.value}
+                    </ERich>
+                  ) : (
+                    typeof s.value === 'number' ? <Counter value={s.value} prefix={s.prefix ?? ''} suffix={s.suffix ?? ''} /> : s.value
+                  )}
                 </p>
                 <p className="mt-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10.5, letterSpacing: '1.6px', textTransform: 'uppercase', color: strip.label }}>
                   {s.label}

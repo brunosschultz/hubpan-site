@@ -823,6 +823,7 @@ export function useEditColors(title: string, defs: ColorDef[]): [string[], Recor
     'data-esurface': '',
     onClick: (e: MouseEvent) => {
       e.stopPropagation();
+      e.preventDefault();
       openPanel({ type: 'colors', title, fields: defs });
     },
   } : {};

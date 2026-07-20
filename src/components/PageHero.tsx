@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useReveal } from './useReveal';
 
 interface PageHeroProps {
-  eyebrow: string;
+  eyebrow: ReactNode;
   /** Título — use <span> com cor lime (#d2e718) para os trechos de destaque */
   title: ReactNode;
   sub?: ReactNode;

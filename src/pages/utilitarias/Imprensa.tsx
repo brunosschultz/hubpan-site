@@ -60,7 +60,7 @@ export default function Imprensa() {
   return (
     <>
       <PageHero
-        eyebrow="SALA DE IMPRENSA · PRESS KIT · RELEASES · DADOS"
+        eyebrow={<ET k="imprensa.hero.eyebrow" v="SALA DE IMPRENSA · PRESS KIT · RELEASES · DADOS" l="Imprensa — rótulo do hero" />}
         title={<ERich k="imprensa.hero.titulo" l="Imprensa — título do hero">Imprensa & Mídia</ERich>}
         sub={<ERich k="imprensa.hero.sub" l="Imprensa — subtítulo do hero">Material estruturado para jornalistas, editores e pesquisadores. Dados do Observatório de IA, releases institucionais, press kit e contato direto com a assessoria de comunicação do HUB PAN.</ERich>}
         actions={<>

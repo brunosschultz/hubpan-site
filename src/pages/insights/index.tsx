@@ -15,11 +15,11 @@ gsap.registerPlugin(ScrollTrigger);
 /* Sem bloco de stats no wireframe original — números reais citados no próprio
    conteúdo da página (publicações, tempo de leitura, frequência da newsletter). */
 const STATS = [
-  { value: 24, label: <ET k="insights.hero.stat1.label" v="Publicações no acervo" l="Insights — hero stat 1 (rótulo)" /> },
-  { value: 6, label: <ET k="insights.hero.stat2.label" v="Categorias de conteúdo" l="Insights — hero stat 2 (rótulo)" /> },
-  { value: 'MG', label: <ET k="insights.hero.stat3.label" v="Observatório em campo" l="Insights — hero stat 3 (rótulo)" />, accent: true },
-  { value: 12, suffix: 'min', label: <ET k="insights.hero.stat4.label" v="Leitura · pesquisa em destaque" l="Insights — hero stat 4 (rótulo)" /> },
-  { value: 'Quinzenal', label: <ET k="insights.hero.stat5.label" v="Frequência da newsletter" l="Insights — hero stat 5 (rótulo)" /> },
+  { value: 24, editKey: 'insights.hero.stat1.valor', editLabel: 'Insights — hero stat 1 (valor)', label: <ET k="insights.hero.stat1.label" v="Publicações no acervo" l="Insights — hero stat 1 (rótulo)" /> },
+  { value: 6, editKey: 'insights.hero.stat2.valor', editLabel: 'Insights — hero stat 2 (valor)', label: <ET k="insights.hero.stat2.label" v="Categorias de conteúdo" l="Insights — hero stat 2 (rótulo)" /> },
+  { value: 'MG', editKey: 'insights.hero.stat3.valor', editLabel: 'Insights — hero stat 3 (valor)', label: <ET k="insights.hero.stat3.label" v="Observatório em campo" l="Insights — hero stat 3 (rótulo)" />, accent: true },
+  { value: 12, suffix: 'min', editKey: 'insights.hero.stat4.valor', editLabel: 'Insights — hero stat 4 (valor)', label: <ET k="insights.hero.stat4.label" v="Leitura · pesquisa em destaque" l="Insights — hero stat 4 (rótulo)" /> },
+  { value: 'Quinzenal', editKey: 'insights.hero.stat5.valor', editLabel: 'Insights — hero stat 5 (valor)', label: <ET k="insights.hero.stat5.label" v="Frequência da newsletter" l="Insights — hero stat 5 (rótulo)" /> },
 ];
 
 const FILTROS = [
@@ -239,6 +239,7 @@ function SecObservatorios() {
 /* ═══════════ Página ═══════════ */
 
 export default function Insights() {
+  const [stripBg, stripBgProps] = useEditColor('insights.hero.strip.bg', STRIP_THEMES.light.bg, 'Hero — fundo da faixa de números');
   return (
     <>
       <Hero80
@@ -252,7 +253,8 @@ export default function Insights() {
           <Link to="/#newsletter"><HubButton size="lg" variant="blue"><ET k="insights.hero.cta2" v="Assinar newsletter" l="Insights — botão do hero (secundário)" /></HubButton></Link>
         </>}
         stats={STATS}
-        strip={STRIP_THEMES.light}
+        strip={{ ...STRIP_THEMES.light, bg: stripBg }}
+        stripProps={stripBgProps}
       />
       <SecFiltros />
       <SecDestaque />

@@ -305,6 +305,25 @@ public/
       em `App.tsx` mudaram de `/editar`/`/preview` (exatas) pra `/editar/*`/
       `/preview/*`. URLs válidas: `/editar` ou `/editar/govia` (home =
       slug vazio), idem `/preview`.
+      **Ajustes reportados pelo Bruno depois de testar** (faixa de números do
+      hero, cor dos cards de Contato, rótulo de Glossário/Imprensa/Casos de
+      Uso): `PageHero.tsx`'s `eyebrow` também era `string` (mesmo furo do
+      Hero80/FAQAccordion, achado só quando o Bruno tentou editar). `Hero80.tsx`
+      ganhou `HeroStat.editKey`/`editLabel` (opcional — sem isso o valor do
+      stat não é clicável) e `stripProps` (spread no container da faixa, pra
+      dar pra tornar o fundo clicável via `useEditColor` sem editar Hero80 de
+      novo a cada página); os 4 usos (PROINTER/GovIA/Fórum/Insights) e a faixa
+      própria do institucional (antes com `bg-navy900` fixo, nunca conectado)
+      foram todos ligados. Em `contato/index.tsx`, os cards de "Onde estamos"
+      e "Imprensa & Mídia" viraram componentes próprios (`EnderecoCard`,
+      `ImprensaMidiaCard`) só pra poder chamar `useEditColor` (hooks não podem
+      rodar dentro de `.map()` inline). **Bug de verdade achado nesse processo**
+      (não repetir): `useEditColors` em `editor/fields.tsx` só chamava
+      `e.stopPropagation()` no clique, sem `e.preventDefault()` — qualquer
+      cor editável dentro de um `<Link>` (como os cards de Caminho) tanto
+      abria o painel de cor quanto navegava pra outra página ao mesmo tempo.
+      Corrigido na função genérica (afeta todo `useEditColor`/`useEditColors`
+      do projeto, não só Contato).
       (regra permanente de página nova já editável documentada em "Editor
       visual de conteúdo" abaixo).
 - [x] **SSG/pré-renderização + SEO técnico — implementado.** `scripts/prerender.mjs`

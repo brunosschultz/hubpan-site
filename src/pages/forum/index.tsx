@@ -15,11 +15,11 @@ gsap.registerPlugin(ScrollTrigger);
 /* ═══════════ Dados — extraídos do wireframe oficial (page-waif) ═══════════ */
 
 const STATS = [
-  { value: '2027', label: <ET k="forum.hero.stat1.label" v="Primeira edição" l="Hero — stat 1 (rótulo)" />, accent: true },
-  { value: 'CAM', label: <ET k="forum.hero.stat2.label" v="Cambridge, MA" l="Hero — stat 2 (rótulo)" /> },
-  { value: 'WAIF', label: <ET k="forum.hero.stat3.label" v="World AI Forum" l="Hero — stat 3 (rótulo)" /> },
-  { value: 'ONU', label: <ET k="forum.hero.stat4.label" v="Ancoragem institucional" l="Hero — stat 4 (rótulo)" /> },
-  { value: 100, suffix: '%', label: <ET k="forum.hero.stat5.label" v="Ativo proprietário" l="Hero — stat 5 (rótulo)" /> },
+  { value: '2027', editKey: 'forum.hero.stat1.valor', editLabel: 'Hero — stat 1 (valor)', label: <ET k="forum.hero.stat1.label" v="Primeira edição" l="Hero — stat 1 (rótulo)" />, accent: true },
+  { value: 'CAM', editKey: 'forum.hero.stat2.valor', editLabel: 'Hero — stat 2 (valor)', label: <ET k="forum.hero.stat2.label" v="Cambridge, MA" l="Hero — stat 2 (rótulo)" /> },
+  { value: 'WAIF', editKey: 'forum.hero.stat3.valor', editLabel: 'Hero — stat 3 (valor)', label: <ET k="forum.hero.stat3.label" v="World AI Forum" l="Hero — stat 3 (rótulo)" /> },
+  { value: 'ONU', editKey: 'forum.hero.stat4.valor', editLabel: 'Hero — stat 4 (valor)', label: <ET k="forum.hero.stat4.label" v="Ancoragem institucional" l="Hero — stat 4 (rótulo)" /> },
+  { value: 100, suffix: '%', editKey: 'forum.hero.stat5.valor', editLabel: 'Hero — stat 5 (valor)', label: <ET k="forum.hero.stat5.label" v="Ativo proprietário" l="Hero — stat 5 (rótulo)" /> },
 ];
 
 const PILARES: { sigla: string; titulo: string; desc: string; gera: string; color: 'white' | 'blue' | 'lime' | 'navy' }[] = [
@@ -486,6 +486,7 @@ export default function ForumMundialIA() {
     'forum.hero.img', '/images/forum-hero-mit.webp', 'Hero — imagem de fundo',
     { w: 2400, h: 1500, shape: 'paisagem', note: 'Imagem de fundo do hero — cobre toda a seção, com overlay escuro à esquerda.' }
   );
+  const [stripBg, stripBgProps] = useEditColor('forum.hero.strip.bg', STRIP_THEMES.lime.bg, 'Hero — fundo da faixa de números');
   return (
     <>
       <div style={{ position: 'relative' }}>
@@ -511,7 +512,8 @@ export default function ForumMundialIA() {
             </HubButton>
           </>}
           stats={STATS}
-          strip={STRIP_THEMES.lime}
+          strip={{ ...STRIP_THEMES.lime, bg: stripBg }}
+          stripProps={stripBgProps}
         />
         <BgEditChip
           k="forum.hero.img" v="/images/forum-hero-mit.webp" l="Hero — imagem de fundo"

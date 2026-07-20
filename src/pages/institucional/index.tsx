@@ -150,6 +150,7 @@ function HeroInst() {
     'inst.hero.bg', '/images/inst-hero-onu.webp', 'Hero institucional — imagem de fundo',
     { w: 2400, h: 1600, shape: 'paisagem', note: 'Fica atrás de um degradê escuro com texto branco por cima — prefira fotos com boa área escura à esquerda.' }
   );
+  const [stripBg, stripBgProps] = useEditColor('inst.stats.bg', '#060919', 'Faixa de números — fundo');
   return (
     <section ref={ref} className="relative w-full">
       <div className="relative w-full h-[80vh] min-h-[560px] flex items-center overflow-hidden">
@@ -189,7 +190,7 @@ function HeroInst() {
         </div>
       </div>
 
-      <div className="w-full bg-navy900 border-t border-white/10 h-[20vh] min-h-[150px] flex items-center">
+      <div className="w-full border-t border-white/10 h-[20vh] min-h-[150px] flex items-center" {...stripBgProps} style={{ background: stripBg }}>
         <div className="gutter w-full">
           <div className="grid grid-cols-3 lg:grid-cols-6 gap-y-6">
             {STATS.map((s, i) => (

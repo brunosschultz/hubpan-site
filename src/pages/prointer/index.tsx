@@ -19,11 +19,11 @@ gsap.registerPlugin(ScrollTrigger);
 /* ═══════════ Dados — conteúdo extraído do wireframe oficial (page-prointer) ═══════════ */
 
 const STATS = [
-  { value: 100, suffix: '%', label: <ET k="pro.hero.stat1.label" v="Gratuito para bolsistas" l="Hero — stat 1 (rótulo)" />, accent: true },
-  { value: 3, label: <ET k="pro.hero.stat2.label" v="Cidades na jornada" l="Hero — stat 2 (rótulo)" /> },
-  { value: 'ONU', label: <ET k="pro.hero.stat3.label" v="Acesso institucional" l="Hero — stat 3 (rótulo)" /> },
-  { value: '2027', label: <ET k="pro.hero.stat4.label" v="Primeira turma" l="Hero — stat 4 (rótulo)" /> },
-  { value: 'ESG', label: <ET k="pro.hero.stat5.label" v="Impacto comprovado" l="Hero — stat 5 (rótulo)" /> },
+  { value: 100, suffix: '%', editKey: 'pro.hero.stat1.valor', editLabel: 'Hero — stat 1 (valor)', label: <ET k="pro.hero.stat1.label" v="Gratuito para bolsistas" l="Hero — stat 1 (rótulo)" />, accent: true },
+  { value: 3, editKey: 'pro.hero.stat2.valor', editLabel: 'Hero — stat 2 (valor)', label: <ET k="pro.hero.stat2.label" v="Cidades na jornada" l="Hero — stat 2 (rótulo)" /> },
+  { value: 'ONU', editKey: 'pro.hero.stat3.valor', editLabel: 'Hero — stat 3 (valor)', label: <ET k="pro.hero.stat3.label" v="Acesso institucional" l="Hero — stat 3 (rótulo)" /> },
+  { value: '2027', editKey: 'pro.hero.stat4.valor', editLabel: 'Hero — stat 4 (valor)', label: <ET k="pro.hero.stat4.label" v="Primeira turma" l="Hero — stat 4 (rótulo)" /> },
+  { value: 'ESG', editKey: 'pro.hero.stat5.valor', editLabel: 'Hero — stat 5 (valor)', label: <ET k="pro.hero.stat5.label" v="Impacto comprovado" l="Hero — stat 5 (rótulo)" /> },
 ];
 
 const PUBLICOS = [
@@ -510,6 +510,7 @@ export default function Prointer() {
     'pro.hero.img', '/images/prointer-hero-cambridge.webp', 'PROINTER — imagem de fundo do hero',
     { w: 2400, h: 1500, shape: 'paisagem', note: 'Fica atrás do texto branco do hero — prefira fotos escuras ou com área escura à esquerda.' }
   );
+  const [stripBg, stripBgProps] = useEditColor('pro.hero.strip.bg', STRIP_THEMES.blue.bg, 'Hero — fundo da faixa de números');
   return (
     <>
       <div style={{ position: 'relative' }}>
@@ -545,7 +546,8 @@ export default function Prointer() {
             </HubButton>
           </>}
           stats={STATS}
-          strip={STRIP_THEMES.blue}
+          strip={{ ...STRIP_THEMES.blue, bg: stripBg }}
+          stripProps={stripBgProps}
         />
         <BgEditChip
           k="pro.hero.img" v="/images/prointer-hero-cambridge.webp" l="PROINTER — imagem de fundo do hero"

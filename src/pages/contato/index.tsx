@@ -38,9 +38,10 @@ function CaminhoCard({ c }: { c: (typeof CAMINHOS)[number] }) {
   const tilt = useTilt<HTMLDivElement>(4, 6);
   const { Icon } = c;
   const col = CAMINHO_COLORS[c.color];
+  const [cardBg, cardBgProps] = useEditColor(`contato.caminho.${c.sigla}.bg`, col.bg, `Contato — fundo do card "${c.titulo}"`);
   return (
     <Link to={c.to} className="block h-full">
-      <div ref={tilt} className="flex flex-col rounded-[20px] p-7 h-full group cursor-pointer" style={{ background: col.bg }} data-animate>
+      <div ref={tilt} className="flex flex-col rounded-[20px] p-7 h-full group cursor-pointer" {...cardBgProps} style={{ background: cardBg }} data-animate>
         <div className="flex items-center gap-3 mb-6">
           <span className="flex items-center justify-center rounded-full shrink-0" style={{ width: 48, height: 48, background: col.badgeBg }}>
             <EIcon k={`contato.caminho.${c.sigla}.icon`} l={`Contato — ícone do caminho "${c.titulo}"`} defaultSize={22}>
@@ -62,6 +63,54 @@ function CaminhoCard({ c }: { c: (typeof CAMINHOS)[number] }) {
         </p>
       </div>
     </Link>
+  );
+}
+
+/* ═══════════ Card de endereço ═══════════ */
+
+function EnderecoCard({ id, Icon, tag, linha1, linha2, lime }: (typeof ENDERECOS)[number]) {
+  const [cardBg, cardBgProps] = useEditColor(`contato.endereco.${id}.bg`, lime ? '#d2e718' : '#ffffff', `Contato — fundo do endereço "${tag}"`);
+  return (
+    <div
+      className="shrink-0 flex items-center gap-4 rounded-[20px] p-6"
+      {...cardBgProps}
+      style={{ background: cardBg, border: lime ? 'none' : '1px solid #ecedf0' }}
+    >
+      <span className="flex items-center justify-center rounded-full shrink-0" style={{ width: 44, height: 44, background: lime ? 'rgba(21,40,82,0.08)' : '#f5f5f5' }}>
+        <Icon size={20} strokeWidth={2} color={lime ? '#152852' : '#2d4ebf'} />
+      </span>
+      <div>
+        <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10, letterSpacing: '1.6px', textTransform: 'uppercase', color: lime ? 'rgba(21,40,82,0.65)' : '#a7a4a4' }}>
+          <ET k={`contato.endereco.${id}.tag`} v={tag} l={`Contato — rótulo do endereço "${tag}"`} />
+        </p>
+        <p style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 16, lineHeight: 1.3, color: '#152852' }}>
+          <ET k={`contato.endereco.${id}.linha1`} v={linha1} l={`Contato — linha 1 do endereço "${tag}"`} />
+        </p>
+        <p style={{ fontFamily: 'Inter', fontSize: 13, color: lime ? 'rgba(21,40,82,0.7)' : '#797979' }}>
+          <ET k={`contato.endereco.${id}.linha2`} v={linha2} l={`Contato — linha 2 do endereço "${tag}"`} />
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ImprensaMidiaCard() {
+  const [bg, bgProps] = useEditColor('contato.imprensa.bg', '#152852', 'Contato — fundo da caixa Imprensa & Mídia');
+  return (
+    <div className="flex-1 flex flex-col justify-center rounded-[20px] p-6" {...bgProps} style={{ background: bg }}>
+      <div className="flex items-center gap-4 mb-3">
+        <span className="flex items-center justify-center rounded-full shrink-0" style={{ width: 44, height: 44, background: 'rgba(255,255,255,0.08)' }}>
+          <Newspaper size={20} strokeWidth={2} color="#d2e718" />
+        </span>
+        <p style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 16, color: '#fff' }}>
+          <ET k="contato.imprensa.titulo" v="Imprensa & Mídia" l="Contato — título da caixa Imprensa & Mídia" />
+        </p>
+      </div>
+      <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 13.5, lineHeight: '22px', color: 'rgba(255,255,255,0.75)' }}>
+        <ERich k="contato.imprensa.desc" l="Contato — descrição da caixa Imprensa & Mídia">Para press kit, dados do Observatório de IA ou cobertura do lançamento do portal.</ERich>
+      </p>
+      <Link to="/imprensa"><HubButton size="sm" variant="lime"><ET k="contato.imprensa.btn" v="Baixar press kit" l="Contato — botão da caixa Imprensa & Mídia" /></HubButton></Link>
+    </div>
   );
 }
 
@@ -146,43 +195,9 @@ export default function Contato() {
               <ERich k="contato.enderecos.titulo" l="Contato — título da seção de endereços">Onde estamos.</ERich>
             </h3>
             <div className="flex-1 flex flex-col gap-4">
-              {ENDERECOS.map(({ id, Icon, tag, linha1, linha2, lime }) => (
-                <div
-                  key={id}
-                  className="shrink-0 flex items-center gap-4 rounded-[20px] p-6"
-                  style={{ background: lime ? '#d2e718' : '#fff', border: lime ? 'none' : '1px solid #ecedf0' }}
-                >
-                  <span className="flex items-center justify-center rounded-full shrink-0" style={{ width: 44, height: 44, background: lime ? 'rgba(21,40,82,0.08)' : '#f5f5f5' }}>
-                    <Icon size={20} strokeWidth={2} color={lime ? '#152852' : '#2d4ebf'} />
-                  </span>
-                  <div>
-                    <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10, letterSpacing: '1.6px', textTransform: 'uppercase', color: lime ? 'rgba(21,40,82,0.65)' : '#a7a4a4' }}>
-                      <ET k={`contato.endereco.${id}.tag`} v={tag} l={`Contato — rótulo do endereço "${tag}"`} />
-                    </p>
-                    <p style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 16, lineHeight: 1.3, color: '#152852' }}>
-                      <ET k={`contato.endereco.${id}.linha1`} v={linha1} l={`Contato — linha 1 do endereço "${tag}"`} />
-                    </p>
-                    <p style={{ fontFamily: 'Inter', fontSize: 13, color: lime ? 'rgba(21,40,82,0.7)' : '#797979' }}>
-                      <ET k={`contato.endereco.${id}.linha2`} v={linha2} l={`Contato — linha 2 do endereço "${tag}"`} />
-                    </p>
-                  </div>
-                </div>
-              ))}
+              {ENDERECOS.map((e) => <EnderecoCard key={e.id} {...e} />)}
 
-              <div className="flex-1 flex flex-col justify-center rounded-[20px] p-6 bg-navy">
-                <div className="flex items-center gap-4 mb-3">
-                  <span className="flex items-center justify-center rounded-full shrink-0" style={{ width: 44, height: 44, background: 'rgba(255,255,255,0.08)' }}>
-                    <Newspaper size={20} strokeWidth={2} color="#d2e718" />
-                  </span>
-                  <p style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 16, color: '#fff' }}>
-                    <ET k="contato.imprensa.titulo" v="Imprensa & Mídia" l="Contato — título da caixa Imprensa & Mídia" />
-                  </p>
-                </div>
-                <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 13.5, lineHeight: '22px', color: 'rgba(255,255,255,0.75)' }}>
-                  <ERich k="contato.imprensa.desc" l="Contato — descrição da caixa Imprensa & Mídia">Para press kit, dados do Observatório de IA ou cobertura do lançamento do portal.</ERich>
-                </p>
-                <Link to="/imprensa"><HubButton size="sm" variant="lime"><ET k="contato.imprensa.btn" v="Baixar press kit" l="Contato — botão da caixa Imprensa & Mídia" /></HubButton></Link>
-              </div>
+              <ImprensaMidiaCard />
             </div>
           </div>
 

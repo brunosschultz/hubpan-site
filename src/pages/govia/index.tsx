@@ -19,11 +19,11 @@ gsap.registerPlugin(ScrollTrigger);
 /* Sem bloco de stats no wireframe original — números abaixo são fatos reais citados
    no próprio texto da página (planos, demo, observatório), não estimativas novas. */
 const STATS = [
-  { value: 0, label: <ET k="govia.hero.stat1.label" v="Cartão de crédito exigido" l="Hero — stat 1 (rótulo)" /> },
-  { value: 4, label: <ET k="govia.hero.stat2.label" v="Eixos em um único contrato" l="Hero — stat 2 (rótulo)" /> },
-  { value: 'MG', label: <ET k="govia.hero.stat3.label" v="Observatório em campo" l="Hero — stat 3 (rótulo)" />, accent: true },
-  { value: 30, suffix: 'min', label: <ET k="govia.hero.stat4.label" v="Demonstração gratuita" l="Hero — stat 4 (rótulo)" /> },
-  { value: 1, label: <ET k="govia.hero.stat5.label" v="Dia útil de resposta" l="Hero — stat 5 (rótulo)" /> },
+  { value: 0, editKey: 'govia.hero.stat1.valor', editLabel: 'Hero — stat 1 (valor)', label: <ET k="govia.hero.stat1.label" v="Cartão de crédito exigido" l="Hero — stat 1 (rótulo)" /> },
+  { value: 4, editKey: 'govia.hero.stat2.valor', editLabel: 'Hero — stat 2 (valor)', label: <ET k="govia.hero.stat2.label" v="Eixos em um único contrato" l="Hero — stat 2 (rótulo)" /> },
+  { value: 'MG', editKey: 'govia.hero.stat3.valor', editLabel: 'Hero — stat 3 (valor)', label: <ET k="govia.hero.stat3.label" v="Observatório em campo" l="Hero — stat 3 (rótulo)" />, accent: true },
+  { value: 30, suffix: 'min', editKey: 'govia.hero.stat4.valor', editLabel: 'Hero — stat 4 (valor)', label: <ET k="govia.hero.stat4.label" v="Demonstração gratuita" l="Hero — stat 4 (rótulo)" /> },
+  { value: 1, editKey: 'govia.hero.stat5.valor', editLabel: 'Hero — stat 5 (valor)', label: <ET k="govia.hero.stat5.label" v="Dia útil de resposta" l="Hero — stat 5 (rótulo)" /> },
 ];
 
 const EIXOS: { slug: string; Icon: typeof BrainCircuit; titulo: string; desc: string; itens: string[] }[] = [
@@ -675,14 +675,10 @@ function SecFAQ() {
 
 /* ═══════════ Página ═══════════ */
 
-/* Hero — eyebrow e faixa de números (stats) NÃO são editáveis aqui de propósito:
-   Hero80 (componente compartilhado, fora do escopo desta instrumentação) tipa
-   `eyebrow`/`stats` como string/number simples, não ReactNode — não dá pra
-   embrulhar com ET/ERich sem alterar Hero80.tsx. Título, subtítulo, botões e a
-   imagem de fundo SÃO ReactNode/prop simples e foram instrumentados. */
 function GovIAHero() {
   const heroImgSpec = { w: 2400, h: 1500, shape: 'paisagem' as const, note: 'Fica atrás de um overlay escuro com o texto do hero por cima.' };
   const [heroImg] = useEditImage('govia.hero.bg', '/images/s8-governanca-bg.webp', 'Hero — imagem de fundo', heroImgSpec);
+  const [stripBg, stripBgProps] = useEditColor('govia.hero.strip.bg', STRIP_THEMES.navy.bg, 'Hero — fundo da faixa de números');
   return (
     <div style={{ position: 'relative' }}>
       <Hero80
@@ -697,7 +693,8 @@ function GovIAHero() {
           <HubButton size="lg" variant="outline-light" onClick={() => ScrollSmoother.get()?.scrollTo('#govia-obs', true)}><ET k="govia.hero.cta.observatorio" v="Observatório de IA" l="Hero — botão Observatório de IA" /></HubButton>
         </>}
         stats={STATS}
-        strip={STRIP_THEMES.navy}
+        strip={{ ...STRIP_THEMES.navy, bg: stripBg }}
+        stripProps={stripBgProps}
       />
       <BgEditChip k="govia.hero.bg" v="/images/s8-governanca-bg.webp" l="Hero — imagem de fundo" spec={heroImgSpec} style={{ top: 24, right: 24 }} />
     </div>
