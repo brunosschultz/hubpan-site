@@ -32,3 +32,5 @@ assets-cliente
 
 # Cache local do Supabase CLI (link do projeto, versões) — não versionar
 supabase/.temp
+.vercel
+.env*
