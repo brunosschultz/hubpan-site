@@ -267,16 +267,19 @@ public/
 - [ ] Revogar/rotacionar qualquer token do GitHub que tenha sido exposto durante setup.
 - [ ] Otimizar `public/images/s4-autoridade-video.webm` (~16MB) — pesado para web,
       considerar comprimir/reduzir bitrate mantendo o fundo transparente.
-- [x] **Editor visual (/editar) conectado ao Supabase** — schema em
-      `supabase/schema.sql`, login real (Supabase Auth), rascunho/publicado
-      separados (`content_overrides.draft_value`/`published_value`), upload de
-      imagens no Storage, histórico em `edit_history`, tempo real via
+- [x] **Editor visual (/editar) conectado ao Supabase — validado em produção.**
+      Login real, edição, rascunho→preview→publicar testados de ponta a ponta
+      em `hubpan-site.vercel.app`. Schema em `supabase/schema.sql`, login via
+      Supabase Auth, rascunho/publicado separados
+      (`content_overrides.draft_value`/`published_value`), upload de imagens
+      no Storage, histórico em `edit_history`, tempo real via
       `postgres_changes`. Projeto: `hubpan-site` na org BDDB, região São Paulo.
-      **Pendente do lado do Bruno** (painel do Supabase): (1) rodar
-      `supabase/schema.sql` no SQL Editor, (2) criar o usuário dele em
-      Authentication → Users, (3) configurar `VITE_SUPABASE_URL` e
-      `VITE_SUPABASE_ANON_KEY` nas env vars da Vercel + redeploy. Passo a
-      passo completo em `SETUP-EDITOR.md`.
+      **Pegadinha real já resolvida** (não repetir): tabelas criadas via SQL
+      puro fora do botão "New Table" do painel NÃO recebem GRANT automático
+      pra `anon`/`authenticated` — RLS sozinho não basta, causou "permission
+      denied" silencioso em produção (edição parecia salvar mas sumia ao
+      recarregar). `schema.sql` já inclui os `grant select/insert/update`
+      necessários; qualquer tabela nova criada por SQL precisa do mesmo.
 - [ ] Rotas de edição por página (`/editar/govia` etc.) + instrumentar as 8
       páginas internas com ET/ERich/EImg/EIcon/useEditColor como na home.
       **Regra: toda página nova já nasce instrumentada com os campos editáveis.**
