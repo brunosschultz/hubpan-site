@@ -48,30 +48,46 @@ function writeSitemap() {
   console.log('[prerender] sitemap.xml gerado.');
 }
 
+/** Local (Mac/Windows/Linux dev): puppeteer "completo" já baixa um Chrome que
+ * funciona direto. Build da Vercel: esse Chrome completo falha — falta
+ * biblioteca de sistema que a imagem de build não tem. @sparticuz/chromium é
+ * um Chromium enxuto, compilado especificamente pra rodar em ambientes assim
+ * (Vercel/AWS Lambda) — usa puppeteer-core (sem baixar Chrome próprio) mais
+ * esse binário. Detecta o ambiente pela env var VERCEL, que a própria Vercel
+ * define automaticamente durante o build. */
+async function launchBrowser() {
+  if (process.env.VERCEL) {
+    const [{ default: chromium }, { default: puppeteerCore }] = await Promise.all([
+      import('@sparticuz/chromium'),
+      import('puppeteer-core'),
+    ]);
+    return puppeteerCore.launch({
+      args: chromium.args,
+      executablePath: await chromium.executablePath(),
+      headless: true,
+    });
+  }
+  const { default: puppeteer } = await import('puppeteer');
+  return puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+  });
+}
+
 async function prerenderRoutes() {
   if (!existsSync(join(DIST, 'index.html'))) {
     console.warn('[prerender] dist/index.html não encontrado — rode vite build antes. Pulando.');
     return;
   }
 
-  let puppeteer, previewServer;
-  try {
-    ({ default: puppeteer } = await import('puppeteer'));
-  } catch {
-    console.warn('[prerender] puppeteer indisponível neste ambiente — pulando pré-renderização (site publica normal, só sem HTML estático).');
-    return;
-  }
-
+  let previewServer;
   try {
     const vite = await import('vite');
     previewServer = await vite.preview({ preview: { port: 4173, strictPort: false }, root: ROOT });
     const port = previewServer.config.preview.port;
     const base = `http://localhost:${port}`;
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-    });
+    const browser = await launchBrowser();
 
     try {
       for (const route of ROUTES) {
