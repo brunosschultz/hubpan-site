@@ -442,6 +442,20 @@ public/
       do painel, mas isso exigiria gerenciar uma chave paga só pra replicar
       o que já existe de graça neste chat — não vale a pena por ora.
 
+      **Alt "vazio de propósito" vs. "esquecido" (correção real de bug na
+      lógica da auditoria):** a primeira versão de `auditHtml()` tratava
+      `alt=""` (explícito, correto pra imagem decorativa — pede pro leitor
+      de tela pular) exatamente igual a não ter o atributo `alt` de jeito
+      nenhum (bug de acessibilidade de verdade). Isso fazia a Home aparecer
+      com "16 imagens sem alt" permanentemente, mesmo depois de eu revisar
+      cada uma e confirmar que são ícones decorativos com nome escrito do
+      lado (alt="" correto ali). Corrigido: `OnPageAudit.images` agora tem
+      `decorative: boolean` (`el.hasAttribute('alt') && !alt.trim()`), e só
+      `imagesMissingAlt` (atributo `alt` **ausente** de verdade) conta como
+      problema. Se um dia adicionar imagem nova em qualquer seção, mesma
+      regra vale: `alt=""` explícito pra decorativa, `alt="descrição"` pra
+      imagem com conteúdo — nunca deixar o atributo simplesmente de fora.
+
 ---
 
 ## Editor visual de conteúdo (/editar)

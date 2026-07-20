@@ -261,7 +261,7 @@ export default function AdminSeoEditor() {
 }
 
 function AuditResult({ audit }: { audit: OnPageAudit }) {
-  const imagesWithAlt = audit.images.filter((img) => img.alt.trim()).length;
+  const imagesOk = audit.images.length - audit.imagesMissingAlt.length;
 
   return (
     <div>
@@ -269,7 +269,7 @@ function AuditResult({ audit }: { audit: OnPageAudit }) {
         <MiniStat label="Palavras" value={audit.wordCount} />
         <MiniStat label="H1" value={audit.h1.length} />
         <MiniStat label="H2" value={audit.h2.length} />
-        <MiniStat label="Imagens c/ alt" value={`${imagesWithAlt}/${audit.images.length}`} />
+        <MiniStat label="Imagens OK" value={`${imagesOk}/${audit.images.length}`} />
       </div>
 
       {audit.issues.length === 0 ? (

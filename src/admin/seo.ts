@@ -81,7 +81,12 @@ export interface OnPageAudit {
   wordCount: number;
   h1: string[];
   h2: string[];
-  images: { src: string; alt: string }[];
+  /** `decorative` = tem `alt=""` explícito no HTML (correto pra imagem
+   * puramente decorativa — pede pro leitor de tela pular) — diferente de
+   * não ter o atributo `alt` de jeito nenhum, que é o problema de verdade. */
+  images: { src: string; alt: string; decorative: boolean }[];
+  /** Só as que realmente não têm o atributo `alt` — decorativas não contam. */
+  imagesMissingAlt: { src: string }[];
   issues: string[];
 }
 
@@ -95,10 +100,12 @@ export function auditHtml(html: string, keyword: string): OnPageAudit {
   const wordCount = text ? text.split(' ').length : 0;
   const h1 = [...scope.querySelectorAll('h1')].map((el) => (el.textContent ?? '').trim()).filter(Boolean);
   const h2 = [...scope.querySelectorAll('h2')].map((el) => (el.textContent ?? '').trim()).filter(Boolean);
-  const images = [...scope.querySelectorAll('img')].map((el) => ({
-    src: el.getAttribute('src') ?? '',
-    alt: el.getAttribute('alt') ?? '',
-  }));
+  const images = [...scope.querySelectorAll('img')].map((el) => {
+    const hasAlt = el.hasAttribute('alt');
+    const alt = el.getAttribute('alt') ?? '';
+    return { src: el.getAttribute('src') ?? '', alt, decorative: hasAlt && !alt.trim() };
+  });
+  const imagesMissingAlt = images.filter((img) => !img.decorative && !img.alt.trim()).map((img) => ({ src: img.src }));
 
   const issues: string[] = [];
   if (h1.length === 0) issues.push('Nenhum H1 encontrado na página.');
@@ -106,8 +113,7 @@ export function auditHtml(html: string, keyword: string): OnPageAudit {
   if (h2.length === 0) issues.push('Nenhum H2 encontrado — subtítulos ajudam a estruturar o conteúdo pro Google.');
   if (wordCount < MIN_WORDS) issues.push(`Só ${wordCount} palavras de texto na página — abaixo de ${MIN_WORDS} costuma rankear pior.`);
 
-  const missingAlt = images.filter((img) => !img.alt.trim());
-  if (missingAlt.length > 0) issues.push(`${missingAlt.length} de ${images.length} imagens sem texto alternativo (alt).`);
+  if (imagesMissingAlt.length > 0) issues.push(`${imagesMissingAlt.length} de ${images.length} imagens sem texto alternativo (alt).`);
 
   const kw = keyword.trim().toLowerCase();
   if (kw) {
@@ -115,7 +121,7 @@ export function auditHtml(html: string, keyword: string): OnPageAudit {
     if (!text.toLowerCase().includes(kw)) issues.push(`Palavra-chave "${keyword}" não aparece no texto da página.`);
   }
 
-  return { wordCount, h1, h2, images, issues };
+  return { wordCount, h1, h2, images, imagesMissingAlt, issues };
 }
 
 /**
@@ -131,7 +137,7 @@ export function buildAuditSummary(input: {
   audit: OnPageAudit;
 }): string {
   const { pageLabel, url, title, description, keyword, audit } = input;
-  const missingAlt = audit.images.filter((img) => !img.alt.trim());
+  const missingAlt = audit.imagesMissingAlt;
   const lines = [
     `Página: ${pageLabel} (${url})`,
     '',
