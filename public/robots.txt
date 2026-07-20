@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /editar
+Disallow: /preview
+
+Sitemap: https://hubpan-site.vercel.app/sitemap.xml

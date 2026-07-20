@@ -283,16 +283,28 @@ public/
 - [ ] Rotas de edição por página (`/editar/govia` etc.) + instrumentar as 8
       páginas internas com ET/ERich/EImg/EIcon/useEditColor como na home.
       **Regra: toda página nova já nasce instrumentada com os campos editáveis.**
-- [ ] **PRIORIDADE PRÉ-LANÇAMENTO — SSG/pré-renderização + SEO técnico.** O site
-      é uma SPA (client-side rendering): Google indexa com atraso/risco e os
-      crawlers de IA (GPTBot etc.) veem página em branco. Plano: pré-renderizar
-      todas as rotas no build (HTML pronto + hidratação), buscando o conteúdo
-      PUBLICADO do Supabase em build-time; o botão Publicar passa a disparar um
-      Vercel Deploy Hook pra reconstruir o site (~2 min). Junto: metas por
-      página (title/description/og-image editáveis pelo painel), sitemap.xml,
-      robots.txt e dados estruturados. Fazer ANTES do lançamento oficial e de
-      qualquer campanha de SEO. As rotas /editar e /preview continuam
-      client-side (não pré-renderizar).
+- [x] **SSG/pré-renderização + SEO técnico — implementado.** `scripts/prerender.mjs`
+      roda depois de `vite build` (`npm run build` já encadeia): abre Puppeteer
+      headless, visita as 10 rotas públicas do `ROUTES` (lista duplicada em
+      `App.tsx`/`prerender.mjs` — **atualizar as duas ao criar página nova**),
+      força visibilidade de `[data-animate]`/`[data-hero-text]` (senão texto
+      abaixo da dobra fica com opacity:0 no HTML capturado — animações de
+      entrada nunca disparam sem scroll real) e salva `dist/<rota>/index.html`.
+      `/` sobrescreve `dist/index.html`; `/editar` e `/preview` ficam de fora
+      de propósito (client-side puro, `<NoIndexMeta/>`). A Vercel serve o
+      arquivo estático por precedência de sistema de arquivos ANTES do rewrite
+      SPA do `vercel.json` — não precisou mexer nele. Título/descrição/OG por
+      página via `<PageMeta/>` (`src/components/PageMeta.tsx`) direto nas
+      rotas do `App.tsx`. `sitemap.xml` gerado no mesmo script; `robots.txt`
+      estático em `public/`. **Nunca falha o build** (try/catch em cada
+      camada, `process.exit(0)` sempre) — se o Chrome não abrir no ambiente
+      da Vercel, o script avisa e o deploy segue normal, só sem esse reforço.
+      Botão Publicar dispara `VITE_VERCEL_DEPLOY_HOOK` (Vercel → Settings →
+      Git → Deploy Hooks) se configurada — sem ela, publicar funciona igual,
+      só que o HTML estático só atualiza no próximo deploy de código.
+      **Pendente do Bruno:** criar o Deploy Hook e me passar a URL, e trocar
+      `SITE_URL` (em `PageMeta.tsx` e `prerender.mjs`) pelo domínio definitivo
+      quando conectado.
 - [ ] Painel admin `/admin` (estilo wp-admin moderno): Dashboard, Páginas,
       Usuários (criar/remover editores — requer Edge Function com service key,
       nunca no cliente), SEO por página, Histórico/Publicação, Configurações.

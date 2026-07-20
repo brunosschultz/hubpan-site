@@ -117,6 +117,18 @@ function traduzErroAuth(msg: string): string {
   return msg;
 }
 
+/** Dispara um novo build/deploy na Vercel após publicar — sem isso, o HTML
+ * estático (pré-renderizado pra SEO) só atualizaria no próximo push de código.
+ * Opcional: sem a env var configurada, publicar continua funcionando normal
+ * (só o conteúdo ao vivo muda; o HTML estático some atualiza no próximo deploy
+ * manual). Configurar em Vercel → Settings → Git → Deploy Hooks.
+ * Chamada "fire-and-forget": nunca deve travar nem falhar o fluxo de publicar. */
+function triggerRebuild() {
+  const hookUrl = import.meta.env.VITE_VERCEL_DEPLOY_HOOK as string | undefined;
+  if (!hookUrl) return;
+  fetch(hookUrl, { method: 'POST' }).catch((e) => console.warn('[editor] falha ao disparar rebuild:', e));
+}
+
 /* ---------- Provider ---------- */
 
 const Ctx = createContext<EditorCtx | null>(null);
@@ -292,6 +304,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         for (const [k, v] of Object.entries(prev)) next[k] = { ...v, published: v.draft };
         return next;
       });
+      triggerRebuild();
     } catch (e) {
       alert('Não foi possível publicar. Tente novamente em instantes.');
       console.error(e);

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/prerender.mjs",
     "lint": "oxlint",
     "preview": "vite preview"
   },
@@ -27,8 +27,12 @@
     "autoprefixer": "^10.5.4",
     "oxlint": "^1.71.0",
     "postcss": "^8.5.19",
+    "puppeteer": "^25.3.0",
     "tailwindcss": "^3.4.19",
     "typescript": "~6.0.2",
     "vite": "^8.1.1"
+  },
+  "allowScripts": {
+    "puppeteer@25.3.0": true
   }
 }
