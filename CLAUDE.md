@@ -568,6 +568,21 @@ public/
       Bruno foi explícito: só visualizar, edição de estrutura continua
       fora do painel de propósito).
 
+      **`<br>` colando palavras sem espaço na extração de texto (bug
+      real, corrigido)** — o Bruno reportou que o H1 da Home aparecia
+      como "ecossistemaglobal de inovação" (grudado) na auditoria,
+      achando que tinha perdido a palavra "global" numa edição antiga.
+      Conferi direto no banco (`content_overrides`, leitura pública via
+      REST) — o texto salvo estava correto nos dois canais (rascunho e
+      publicado): "...ecossistema<br>global de inovação." — a página
+      real renderiza certinho em duas linhas. O problema era só na
+      extração: `.textContent` ignora `<br>` (não insere espaço nem
+      quebra), então dois `<span>` separados por `<br>` colam ao
+      extrair texto. `auditHtml()` agora troca todo `<br>` por um
+      espaço no documento parseado antes de extrair H1/H2/texto —
+      afeta qualquer página que usa quebra de linha manual em título
+      (padrão comum no site, `<ERich>` com `<br/>`), não só a Home.
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no

@@ -71,6 +71,11 @@ export interface OnPageAudit {
 
 export function auditHtml(html: string): OnPageAudit {
   const doc = new DOMParser().parseFromString(html, 'text/html');
+  /* <br> não vira espaço em .textContent — sem isso, um título com quebra
+   * manual tipo "ecossistema<br>global de inovação" (renderiza certinho em
+   * duas linhas na página de verdade) vira "ecossistemaglobal de inovação"
+   * na extração de texto, um falso problema que não existe no site real. */
+  doc.querySelectorAll('br').forEach((br) => br.replaceWith(' '));
   const scope = doc.querySelector('main') ?? doc.body;
 
   const text = (scope.textContent ?? '').replace(/\s+/g, ' ').trim();
