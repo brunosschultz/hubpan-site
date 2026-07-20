@@ -47,11 +47,12 @@ export default function PageMeta({ slug, title, description, path, image }: Page
   const effectiveTitle = get(seoKey(slug, 'title'), title) || title;
   const effectiveDescription = get(seoKey(slug, 'description'), description) || description;
   const noindexOverride = get(seoKey(slug, 'noindex'), 'false') === 'true';
+  const effectiveImage = get(seoKey(slug, 'image'), image ?? DEFAULT_IMAGE);
 
   useEffect(() => {
     document.title = effectiveTitle;
     const url = `${SITE_URL}${path}`;
-    const img = image ?? DEFAULT_IMAGE;
+    const img = effectiveImage;
 
     const meta = (attr: 'name' | 'property', key: string, content: string) => {
       const el = upsertTag(`meta[${attr}="${key}"]`, () => {
@@ -81,7 +82,7 @@ export default function PageMeta({ slug, title, description, path, image }: Page
       return l;
     }) as HTMLLinkElement;
     canonical.setAttribute('href', url);
-  }, [effectiveTitle, effectiveDescription, noindexOverride, path, image]);
+  }, [effectiveTitle, effectiveDescription, noindexOverride, effectiveImage, path]);
 
   return null;
 }

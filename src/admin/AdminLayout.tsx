@@ -47,7 +47,7 @@ export default function AdminLayout({ title, children }: { title: string; childr
 
   return (
     <div className="admin-shell h-screen w-full flex overflow-hidden">
-      <aside className="w-64 shrink-0 h-full flex flex-col overflow-y-auto" style={{ background: t.sidebarBackground }}>
+      <aside className="w-64 shrink-0 h-full flex flex-col overflow-y-auto overscroll-contain" style={{ background: t.sidebarBackground }}>
         <div className="px-6 pt-7 pb-6">
           <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 18, lineHeight: 1, color: t.sidebarForeground }}>
             {ADMIN_SITE_NAME}
@@ -117,7 +117,7 @@ export default function AdminLayout({ title, children }: { title: string; childr
           <h1 style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 19, color: t.foreground }}>{title}</h1>
           <PublishButton />
         </header>
-        <main className="flex-1 overflow-y-auto p-8">{children}</main>
+        <main className="flex-1 overflow-y-auto overscroll-contain p-8">{children}</main>
       </div>
     </div>
   );

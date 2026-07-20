@@ -8,7 +8,7 @@ function normalizeSlug(slug: string): string {
   return slug || 'home';
 }
 
-export type SeoField = 'title' | 'description' | 'noindex' | 'keyword';
+export type SeoField = 'title' | 'description' | 'noindex' | 'keyword' | 'image';
 
 /** Chave em `content_overrides` pra um campo de SEO de uma página. */
 export function seoKey(slug: string, field: SeoField): string {

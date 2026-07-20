@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { AlertTriangle, ArrowLeft, Check, CheckCircle2, ClipboardCopy, ExternalLink, Loader2, MinusCircle, RefreshCw, XCircle } from 'lucide-react';
-import { useEditorStore, formatWhen } from '../editor/store';
+import { AlertTriangle, ArrowLeft, Check, CheckCircle2, ClipboardCopy, ExternalLink, Loader2, MinusCircle, RefreshCw, Upload, XCircle } from 'lucide-react';
+import { useEditorStore, formatWhen, processImage } from '../editor/store';
 import { pageForSlug } from '../editor/pageRoutes';
 import { SEO_DEFAULTS } from './seoDefaults';
 import {
@@ -11,6 +11,9 @@ import {
 import { SITE_URL } from '../components/PageMeta';
 import AdminLayout from './AdminLayout';
 import { t } from './theme';
+
+const OG_IMAGE_SPEC = { w: 1200, h: 630, shape: 'paisagem' as const, fit: 'cover' as const };
+const DEFAULT_OG_IMAGE = `${SITE_URL}/images/s1-hero-bg.webp`;
 
 function inputStyle(): React.CSSProperties {
   return {
@@ -30,44 +33,72 @@ export default function AdminSeoEditor() {
   const { slug = '' } = useParams();
   const page = pageForSlug(slug);
   const seoSlug = page.slug;
-  const { get, setValue } = useEditorStore();
+  const { get, setValue, uploadImage } = useEditorStore();
 
   const tKey = seoKey(seoSlug, 'title');
   const dKey = seoKey(seoSlug, 'description');
   const nKey = seoKey(seoSlug, 'noindex');
   const kKey = seoKey(seoSlug, 'keyword');
+  const iKey = seoKey(seoSlug, 'image');
   const fallback = SEO_DEFAULTS[seoSlug || 'home'];
 
-  const [title, setTitle] = useState(() => get(tKey, ''));
-  const [description, setDescription] = useState(() => get(dKey, ''));
-  const [keyword, setKeyword] = useState(() => get(kKey, ''));
+  /* Pré-preenche com o texto ATUAL (override salvo, ou o padrão do código
+   * se nunca foi editado) — editar aqui é ajustar o que já existe, não
+   * reescrever do zero. O "baseline" (valor de referência pra saber se
+   * mudou algo) é recalculado a cada render, então funciona tanto pra
+   * campo nunca tocado quanto pra campo já com override. */
+  const titleBaseline = get(tKey, fallback?.title ?? '');
+  const descriptionBaseline = get(dKey, fallback?.description ?? '');
+  const keywordBaseline = get(kKey, '');
+
+  const [title, setTitle] = useState(titleBaseline);
+  const [description, setDescription] = useState(descriptionBaseline);
+  const [keyword, setKeyword] = useState(keywordBaseline);
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => { setTitle(get(tKey, '')); }, [tKey]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { setDescription(get(dKey, '')); }, [dKey]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { setKeyword(get(kKey, '')); }, [kKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setTitle(titleBaseline); }, [tKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setDescription(descriptionBaseline); }, [dKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setKeyword(keywordBaseline); }, [kKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const noindex = get(nKey, 'false') === 'true';
   const flash = () => { setSaved(true); setTimeout(() => setSaved(false), 1400); };
 
   const commitTitle = () => {
-    if (title === get(tKey, '')) return;
+    if (title === titleBaseline) return;
     setValue(tKey, title.trim() ? title : null, { label: `SEO — título (${page.label})`, kind: 'text' });
     flash();
   };
   const commitDescription = () => {
-    if (description === get(dKey, '')) return;
+    if (description === descriptionBaseline) return;
     setValue(dKey, description.trim() ? description : null, { label: `SEO — descrição (${page.label})`, kind: 'text' });
     flash();
   };
   const commitKeyword = () => {
-    if (keyword === get(kKey, '')) return;
+    if (keyword === keywordBaseline) return;
     setValue(kKey, keyword.trim() ? keyword : null, { label: `SEO — palavra-chave (${page.label})`, kind: 'text' });
     flash();
   };
   const toggleNoindex = () => {
     setValue(nKey, noindex ? null : 'true', { label: `SEO — não indexar (${page.label})`, kind: 'text' });
     flash();
+  };
+
+  const ogImage = get(iKey, DEFAULT_OG_IMAGE);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const onPickImage = async (file: File) => {
+    setUploadingImage(true);
+    try {
+      const dataUrl = await processImage(file, OG_IMAGE_SPEC);
+      const url = await uploadImage(dataUrl, `${iKey}`);
+      setValue(iKey, url, { label: `SEO — imagem de compartilhamento (${page.label})`, kind: 'image' });
+      flash();
+    } catch {
+      setAuditError('Não foi possível processar essa imagem. Tente outro arquivo.');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const effectiveTitle = title || fallback?.title || page.label;
@@ -78,6 +109,7 @@ export default function AdminSeoEditor() {
   const [auditError, setAuditError] = useState<string | null>(null);
   const [lastChecked, setLastChecked] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
 
   const loadAudit = useCallback(async () => {
     setAuditLoading(true);
@@ -104,17 +136,22 @@ export default function AdminSeoEditor() {
   );
   const level = checks ? overallLevel(checks) : null;
 
-  const copySummary = () => {
-    if (!audit || !checks) return;
-    const summary = buildAuditSummary({
+  const summaryText = useMemo(() => {
+    if (!audit || !checks) return '';
+    return buildAuditSummary({
       pageLabel: page.label, url: `${SITE_URL}${page.path}`,
       title: effectiveTitle, description: effectiveDescription, keyword, audit, checks,
     });
-    navigator.clipboard.writeText(summary).then(() => {
+  }, [audit, checks, page.label, page.path, effectiveTitle, effectiveDescription, keyword]);
+
+  const copySummary = () => {
+    if (!summaryText) return;
+    navigator.clipboard.writeText(summaryText).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     }).catch(() => {
-      setAuditError('Não foi possível copiar — selecione e copie manualmente pelo navegador.');
+      setAuditError('Não foi possível copiar — selecione o texto abaixo e copie manualmente.');
+      setShowSummary(true);
     });
   };
 
@@ -123,6 +160,11 @@ export default function AdminSeoEditor() {
       <Link to="/admin/seo" className="inline-flex items-center gap-1.5 mb-6 hover:underline" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 13, color: t.mutedForeground }}>
         <ArrowLeft size={14} /> Todas as páginas
       </Link>
+
+      <p className="mb-6 px-4 py-3" style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground, background: t.muted, borderRadius: t.radius, maxWidth: 720 }}>
+        O que você edita aqui vira <b>rascunho</b> na hora — só passa a valer no site de verdade quando você clicar em
+        "Publicar alterações" no topo da tela.
+      </p>
 
       <div className="grid lg:grid-cols-[1fr_360px] gap-6 items-start">
         <div className="space-y-6">
@@ -135,12 +177,11 @@ export default function AdminSeoEditor() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               onBlur={commitTitle}
-              placeholder={fallback?.title ?? page.label}
               style={inputStyle()}
             />
             <div className="mt-2 flex items-center justify-between">
-              <CharCount value={title || fallback?.title || ''} min={40} max={60} />
-              {!title && <span style={{ fontFamily: 'Inter', fontSize: 12, color: t.mutedForeground }}>Usando o título padrão do código</span>}
+              <CharCount value={title} min={40} max={60} />
+              {title === (fallback?.title ?? '') && <span style={{ fontFamily: 'Inter', fontSize: 12, color: t.mutedForeground }}>Ainda é o título padrão do código</span>}
             </div>
           </div>
 
@@ -150,13 +191,12 @@ export default function AdminSeoEditor() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               onBlur={commitDescription}
-              placeholder={fallback?.description ?? ''}
               rows={4}
               style={{ ...inputStyle(), height: 'auto', padding: '12px 14px', resize: 'vertical', lineHeight: '22px' }}
             />
             <div className="mt-2 flex items-center justify-between">
-              <CharCount value={description || fallback?.description || ''} min={120} max={160} />
-              {!description && <span style={{ fontFamily: 'Inter', fontSize: 12, color: t.mutedForeground }}>Usando a descrição padrão do código</span>}
+              <CharCount value={description} min={120} max={160} />
+              {description === (fallback?.description ?? '') && <span style={{ fontFamily: 'Inter', fontSize: 12, color: t.mutedForeground }}>Ainda é a descrição padrão do código</span>}
             </div>
           </div>
 
@@ -172,6 +212,36 @@ export default function AdminSeoEditor() {
               placeholder="ex: plataforma de ia para governos"
               style={inputStyle()}
             />
+          </div>
+
+          <div className="p-6" style={{ borderRadius: t.radius, background: t.card, border: `1px solid ${t.border}` }}>
+            <label className="block mb-1.5" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: t.foreground }}>Imagem de compartilhamento</label>
+            <p className="mb-3" style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground }}>
+              Aparece quando o link dessa página é compartilhado no WhatsApp, LinkedIn, Facebook etc. Tamanho ideal: 1200×630.
+            </p>
+            <div className="flex items-center gap-4">
+              <div className="shrink-0 overflow-hidden" style={{ width: 140, height: 74, borderRadius: t.radius, background: t.muted, border: `1px solid ${t.border}` }}>
+                <img src={ogImage} alt="" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingImage}
+                  className="flex items-center gap-1.5 transition hover:opacity-80 disabled:opacity-50"
+                  style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: t.primary }}
+                >
+                  {uploadingImage ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+                  {uploadingImage ? 'Enviando…' : 'Trocar imagem'}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) void onPickImage(f); e.target.value = ''; }}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="p-6 flex items-center justify-between" style={{ borderRadius: t.radius, background: t.card, border: `1px solid ${t.border}` }}>
@@ -201,6 +271,17 @@ export default function AdminSeoEditor() {
           <p className="mt-1" style={{ fontFamily: 'Arial', fontSize: 13.5, color: '#4d5156', lineHeight: '20px' }}>
             {effectiveDescription || 'Sem descrição definida.'}
           </p>
+
+          <p className="mt-5 mb-2" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 12, letterSpacing: '0.6px', textTransform: 'uppercase', color: t.mutedForeground }}>Como aparece ao compartilhar</p>
+          <div className="overflow-hidden" style={{ borderRadius: t.radius, border: `1px solid ${t.border}` }}>
+            <div style={{ aspectRatio: '1200/630', background: t.muted }}>
+              <img src={ogImage} alt="" className="w-full h-full object-cover" />
+            </div>
+            <div className="p-2.5">
+              <p className="truncate" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 12.5, color: t.foreground }}>{effectiveTitle}</p>
+              <p style={{ fontFamily: 'Inter', fontSize: 11, color: t.mutedForeground }}>{SITE_URL.replace('https://', '')}</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -216,6 +297,15 @@ export default function AdminSeoEditor() {
             )}
           </div>
           <div className="flex items-center gap-4">
+            {checks && (
+              <button
+                onClick={() => setShowSummary((s) => !s)}
+                className="transition hover:opacity-80"
+                style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: t.primary }}
+              >
+                {showSummary ? 'Esconder resumo' : 'Ver resumo'}
+              </button>
+            )}
             {checks && (
               <button
                 onClick={copySummary}
@@ -243,6 +333,16 @@ export default function AdminSeoEditor() {
           {lastChecked && <> Última checagem: {formatWhen(lastChecked)}. Depois de eu ajustar algo, espere o deploy
           (~1-2 min) e clique em "Atualizar" pra conferir se melhorou.</>}
         </p>
+
+        {showSummary && summaryText && (
+          <textarea
+            readOnly
+            value={summaryText}
+            rows={10}
+            className="mb-5 w-full"
+            style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, padding: 14, borderRadius: t.radius, background: t.muted, border: `1px solid ${t.border}`, color: t.foreground, resize: 'vertical' }}
+          />
+        )}
 
         {auditError && (
           <p style={{ fontFamily: 'Inter', fontSize: 13, color: t.destructive }}>{auditError}</p>

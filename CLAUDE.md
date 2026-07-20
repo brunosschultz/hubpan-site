@@ -475,6 +475,43 @@ public/
       também foi atualizado pra listar separadamente "Certo" e "Pra
       revisar" a partir dos mesmos `SeoCheck[]`.
 
+      **Rodada seguinte de ajustes do Bruno, todos em `AdminSeoEditor.tsx`:**
+      - **Campo vazio em vez de pré-preenchido (bug real).** Os inputs de
+        título/descrição inicializavam com `get(key, '')` — se nunca editado
+        antes, o campo ficava em branco (só o placeholder cinza mostrava o
+        texto padrão), mesmo a análise ao lado já mostrando as contagens
+        desse texto. Editar virava reescrever do zero. Corrigido: o estado
+        agora inicializa com um "baseline" (`get(key, fallback ?? '')` —
+        override se existir, senão o texto padrão do código de verdade,
+        não só um placeholder) e o `commit*()` só salva se o valor mudou em
+        relação a esse baseline — abrir a tela e sair sem editar nada NÃO
+        cria um override à toa.
+      - **"Ver resumo"** — antes só "Copiar resumo" (cego, sem conferir
+        antes). Agora um toggle mostra o texto completo num textarea
+        readonly antes de copiar.
+      - **Imagem de compartilhamento (og:image)** — campo novo
+        (`seoKey(slug,'image')`), upload via `processImage()`+`uploadImage()`
+        (mesmas funções do editor visual, `editor/store.tsx`), preview de
+        como fica ao compartilhar (card 1200×630). `PageMeta.tsx` agora lê
+        esse override (fallback pro `DEFAULT_IMAGE` de sempre).
+      - **Aviso de rascunho vs. publicado** — nota fixa no topo da tela
+        ("vira rascunho, só publica de verdade quando clicar Publicar")
+        pra tirar a dúvida que o Bruno teve.
+      - **`<main>` duplicado (bug real de HTML)** — `AppShell` (App.tsx)
+        envolvia as rotas `/admin/*` num `<main>` próprio, mas
+        `AdminLayout.tsx` já tem o seu — dois `<main>` aninhados é HTML
+        inválido e pode confundir o cálculo de scroll do navegador. Rota
+        `/admin` agora usa `<div>` nesse wrapper, só o `AdminLayout` é
+        `<main>`.
+      - **Scroll "vazando" pro body ao chegar no fim de uma área rolável**
+        (relatado como "trava, dou mais um scroll e libera um espaço
+        gigante em branco") — `overscroll-behavior: contain` (Tailwind
+        `overscroll-contain`) no `<aside>` e no `<main>` do
+        `AdminLayout.tsx`. É a correção padrão do CSS pra esse sintoma
+        exato (scroll chaining pro elemento pai quando o filho rolável
+        chega no limite) — não reproduzi o gesto exato via automação pra
+        confirmar 100%, pedir confirmação do Bruno depois do deploy.
+
 ---
 
 ## Editor visual de conteúdo (/editar)

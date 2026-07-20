@@ -144,7 +144,10 @@ function AppShell() {
   );
 
   if (isAdmin) {
-    return <main className="w-full overflow-x-hidden">{routes}</main>;
+    // Sem <main> aqui: AdminLayout já é o próprio landmark <main> da página
+    // (ter dois <main> aninhados é HTML inválido e complica o cálculo de
+    // scroll do navegador).
+    return <div className="w-full overflow-x-hidden">{routes}</div>;
   }
 
   return (
