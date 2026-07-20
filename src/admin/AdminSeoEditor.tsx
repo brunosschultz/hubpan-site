@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Check, ExternalLink } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Check, CheckCircle2, ExternalLink, Loader2, RefreshCw } from 'lucide-react';
 import { useEditorStore } from '../editor/store';
 import { pageForSlug } from '../editor/pageRoutes';
 import { SEO_DEFAULTS } from './seoDefaults';
-import { seoKey, computeSeoStatus, SEO_LEVEL_LABEL, SEO_LEVEL_TOKEN } from './seo';
+import { seoKey, computeSeoStatus, SEO_LEVEL_LABEL, SEO_LEVEL_TOKEN, auditHtml, type OnPageAudit } from './seo';
 import { SITE_URL } from '../components/PageMeta';
 import AdminLayout from './AdminLayout';
 import { t } from './theme';
@@ -32,14 +32,17 @@ export default function AdminSeoEditor() {
   const tKey = seoKey(seoSlug, 'title');
   const dKey = seoKey(seoSlug, 'description');
   const nKey = seoKey(seoSlug, 'noindex');
+  const kKey = seoKey(seoSlug, 'keyword');
   const fallback = SEO_DEFAULTS[seoSlug || 'home'];
 
   const [title, setTitle] = useState(() => get(tKey, ''));
   const [description, setDescription] = useState(() => get(dKey, ''));
+  const [keyword, setKeyword] = useState(() => get(kKey, ''));
   const [saved, setSaved] = useState(false);
 
   useEffect(() => { setTitle(get(tKey, '')); }, [tKey]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { setDescription(get(dKey, '')); }, [dKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setKeyword(get(kKey, '')); }, [kKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const noindex = get(nKey, 'false') === 'true';
   const flash = () => { setSaved(true); setTimeout(() => setSaved(false), 1400); };
@@ -54,6 +57,11 @@ export default function AdminSeoEditor() {
     setValue(dKey, description.trim() ? description : null, { label: `SEO — descrição (${page.label})`, kind: 'text' });
     flash();
   };
+  const commitKeyword = () => {
+    if (keyword === get(kKey, '')) return;
+    setValue(kKey, keyword.trim() ? keyword : null, { label: `SEO — palavra-chave (${page.label})`, kind: 'text' });
+    flash();
+  };
   const toggleNoindex = () => {
     setValue(nKey, noindex ? null : 'true', { label: `SEO — não indexar (${page.label})`, kind: 'text' });
     flash();
@@ -62,6 +70,29 @@ export default function AdminSeoEditor() {
   const effectiveTitle = title || fallback?.title || page.label;
   const effectiveDescription = description || fallback?.description || '';
   const status = computeSeoStatus({ title: effectiveTitle, description: effectiveDescription });
+
+  const [html, setHtml] = useState<string | null>(null);
+  const [auditLoading, setAuditLoading] = useState(false);
+  const [auditError, setAuditError] = useState<string | null>(null);
+
+  const loadAudit = useCallback(async () => {
+    setAuditLoading(true);
+    setAuditError(null);
+    try {
+      const res = await fetch(`${SITE_URL}${page.path}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error(String(res.status));
+      setHtml(await res.text());
+    } catch {
+      setHtml(null);
+      setAuditError('Não foi possível carregar a página publicada pra analisar. Tente de novo em instantes.');
+    } finally {
+      setAuditLoading(false);
+    }
+  }, [page.path]);
+
+  useEffect(() => { void loadAudit(); }, [loadAudit]);
+
+  const audit = useMemo(() => (html ? auditHtml(html, keyword) : null), [html, keyword]);
 
   return (
     <AdminLayout title={`SEO — ${page.label}`}>
@@ -103,6 +134,20 @@ export default function AdminSeoEditor() {
               <CharCount value={description || fallback?.description || ''} min={120} max={160} />
               {!description && <span style={{ fontFamily: 'Inter', fontSize: 12, color: t.mutedForeground }}>Usando a descrição padrão do código</span>}
             </div>
+          </div>
+
+          <div className="p-6" style={{ borderRadius: t.radius, background: t.card, border: `1px solid ${t.border}` }}>
+            <label className="block mb-1.5" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: t.foreground }}>Palavra-chave principal (opcional)</label>
+            <p className="mb-2" style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground }}>
+              A auditoria abaixo confere se ela aparece no título e no texto da página.
+            </p>
+            <input
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onBlur={commitKeyword}
+              placeholder="ex: plataforma de ia para governos"
+              style={inputStyle()}
+            />
           </div>
 
           <div className="p-6 flex items-center justify-between" style={{ borderRadius: t.radius, background: t.card, border: `1px solid ${t.border}` }}>
@@ -153,6 +198,72 @@ export default function AdminSeoEditor() {
           </div>
         </div>
       </div>
+
+      <div className="mt-6 p-6" style={{ borderRadius: t.radius, background: t.card, border: `1px solid ${t.border}` }}>
+        <div className="flex items-center justify-between mb-1">
+          <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: t.foreground }}>Auditoria on-page</p>
+          <button
+            onClick={() => void loadAudit()}
+            disabled={auditLoading}
+            className="flex items-center gap-1.5 transition hover:opacity-80 disabled:opacity-50"
+            style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: t.primary }}
+          >
+            {auditLoading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+            Atualizar
+          </button>
+        </div>
+        <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground }}>
+          Lida direto da página publicada — título, H1/H2, imagens e palavra-chave. Isso não edita nada; pra corrigir
+          um item, é só trazer aqui no chat.
+        </p>
+
+        {auditError && (
+          <p style={{ fontFamily: 'Inter', fontSize: 13, color: t.destructive }}>{auditError}</p>
+        )}
+        {!auditError && auditLoading && !audit && (
+          <p style={{ fontFamily: 'Inter', fontSize: 13, color: t.mutedForeground }}>Analisando a página…</p>
+        )}
+        {audit && <AuditResult audit={audit} />}
+      </div>
     </AdminLayout>
+  );
+}
+
+function AuditResult({ audit }: { audit: OnPageAudit }) {
+  const imagesWithAlt = audit.images.filter((img) => img.alt.trim()).length;
+
+  return (
+    <div>
+      <div className="grid sm:grid-cols-4 gap-4 mb-5">
+        <MiniStat label="Palavras" value={audit.wordCount} />
+        <MiniStat label="H1" value={audit.h1.length} />
+        <MiniStat label="H2" value={audit.h2.length} />
+        <MiniStat label="Imagens c/ alt" value={`${imagesWithAlt}/${audit.images.length}`} />
+      </div>
+
+      {audit.issues.length === 0 ? (
+        <p className="flex items-center gap-2" style={{ fontFamily: 'Inter', fontSize: 13, color: t.success }}>
+          <CheckCircle2 size={16} /> Nenhum problema encontrado na auditoria.
+        </p>
+      ) : (
+        <ul className="space-y-2">
+          {audit.issues.map((issue) => (
+            <li key={issue} className="flex items-start gap-2" style={{ fontFamily: 'Inter', fontSize: 13, color: t.foreground }}>
+              <AlertTriangle size={15} style={{ color: t.warning, marginTop: 1, flexShrink: 0 }} />
+              {issue}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function MiniStat({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="p-3" style={{ borderRadius: t.radius, background: t.muted }}>
+      <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '0.4px', textTransform: 'uppercase', color: t.mutedForeground }}>{label}</p>
+      <p className="mt-1" style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 22, color: t.foreground }}>{value}</p>
+    </div>
   );
 }

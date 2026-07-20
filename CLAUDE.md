@@ -406,6 +406,32 @@ public/
       Configurações (Google Analytics/Search Console), Usuários (precisa
       Edge Function com service key, nunca no cliente), Mídia.
 
+      **Correção — link de SEO da Home:** links pra `/admin/seo/<slug>` da
+      Home usam `page.slug || 'home'` (nunca o slug vazio na URL) — uma URL
+      tipo `/admin/seo/` (vazio) casa com a rota exata `seo` (a lista) antes
+      de chegar em `seo/:slug`, então o link parecia "não fazer nada". A
+      chave salva no banco continua `seo.home.*` (slug interno de
+      `pageForSlug` continua `''` — só a URL usa `'home'`).
+
+      **Auditoria on-page (não é edição — é diagnóstico).** O Bruno pediu
+      algo tipo Yoast, mas Yoast é plugin de WordPress (PHP, preso à
+      arquitetura do WP) — não dá pra "instalar" aqui. Em vez de construir
+      telas de edição pra cada parâmetro (alt de imagem, estrutura de H1/H2,
+      contagem de palavras — o que seria bem mais trabalho), a seção
+      "Auditoria on-page" em `AdminSeoEditor.tsx` faz `fetch(SITE_URL + page.path)`
+      **na página PUBLICADA de verdade** (o HTML pré-renderizado pelo SSG) e
+      analisa com `auditHtml()` (`src/admin/seo.ts`, função pura com
+      `DOMParser`): contagem de palavras, quantos H1/H2 existem e seus
+      textos, cobertura de alt text nas imagens, e — se o Bruno preencher o
+      novo campo "palavra-chave principal" (`seo.<slug>.keyword`) — se ela
+      aparece no H1 e no texto. Tudo só leitura, sem CORS (mesma origem em
+      produção; testado e confirmado que também funciona em dev direto
+      contra o domínio da Vercel). Quando a auditoria aponta um problema
+      (ex: imagem sem alt), o ajuste é feito direto no código via chat — o
+      painel não tem (e não deve ganhar) uma tela pra reatribuir H1/H2 ou
+      editar alt text, pra não abrir brecha de quebrar a estrutura/design da
+      página sem querer.
+
 ---
 
 ## Editor visual de conteúdo (/editar)
