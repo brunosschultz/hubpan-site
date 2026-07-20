@@ -687,6 +687,67 @@ não repetir o erro):**
   anon) → trigger dispara → `net._http_response` mostra `status_code 200,
   content "ok"` → e-mail chega em bruno@bddb.com.br via Resend. Registros
   de teste apagados depois via `db query --linked` (delete simples).
+- **Reply-to do e-mail de aviso** (`notify-lead/index.ts`): o campo `reply_to`
+  do Resend precisa apontar pro `lead.email`, senão clicar em "Responder" no
+  Gmail cai no remetente genérico do Resend (`onboarding@resend.dev`), não
+  no lead de verdade — bug real, encontrado e corrigido depois do primeiro
+  teste do Bruno, confirmado funcionando num segundo teste.
+
+### Painel Admin — Auditoria de Velocidade (junto com SEO)
+
+A pedido do Bruno (velocidade de carregamento afeta ranqueamento e
+experiência — referência citada: site da Apple, pesado visualmente mas
+leve), a tela de SEO ganhou uma segunda seção "Velocidade" no MESMO card
+de "Análise" (`AdminSeoEditor.tsx`), não uma aba separada — decisão
+explícita dele, já que os dois fatores se relacionam pro Google.
+
+**`src/admin/perf.ts`** (novo, funções puras, mesmo padrão de `seo.ts`):
+`parsePerfResult()` (JSON cru do PageSpeed Insights → `PerfAudit` limpo:
+score, LCP/CLS/TBT, até 6 oportunidades ordenadas por economia estimada),
+`perfLevel()` (reaproveita o `SeoLevel` de `seo.ts` — mesmos 3 níveis,
+mesmos limiares do Lighthouse: ≥0.9 bom, ≥0.5 atenção, resto ruim — **não
+duplicar** esse enum), `buildPerfSummary()` (texto pronto pro "Copiar
+resumo", mesmo espírito do SEO).
+
+**Diferença importante do padrão de auditoria de SEO**: a de velocidade
+**nunca roda sozinha** — é sempre um clique manual ("Rodar auditoria de
+velocidade"). A API do PageSpeed roda um Lighthouse de verdade no servidor
+do Google a cada chamada, leva até 30s — auto-rodar ao abrir a tela (como
+o SEO faz, porque só busca HTML, é rápido) criaria uma espera ruim toda
+vez. Resumo/copiar da seção de Velocidade são **independentes** do resumo
+de SEO (não junta os dois num texto só, já que a auditoria de velocidade é
+opcional/pode nunca ter rodado).
+
+**Achado técnico real, testado direto**: a documentação do Google diz que
+a API key é "recomendada, mas opcional" — não é mais verdade na prática.
+Testei sem chave e a cota diária anônima está zerada
+(`"quota_limit_value": "0"`), retorna 429 sempre. **A chave
+`VITE_PAGESPEED_API_KEY` é obrigatória.** CORS foi confirmado funcionando
+direto do navegador (`access-control-allow-origin` reflete a origem da
+chamada), então não precisou de proxy/Edge Function.
+
+**Passos que só o Bruno pode fazer** (pendente, feature já implantada mas
+inativa até isso ser feito — o botão fica desabilitado com uma mensagem
+explicando o motivo, nunca falha silenciosamente):
+1. Google Cloud Console → criar projeto (grátis, sem cartão) → ativar API
+   "PageSpeed Insights" → Credenciais → criar chave de API.
+2. Restringir a chave por domínio (`hubpan-site.vercel.app/*`) — ela fica
+   visível no JS público do site (é uma `VITE_*`, sempre bundled no
+   cliente, mesmo padrão da chave anon do Supabase), então a restrição por
+   domínio evita uso indevido por terceiros mesmo com a chave exposta
+   (prática padrão pra chaves Google client-side, ex: Google Maps).
+3. Colar em `.env.local` como `VITE_PAGESPEED_API_KEY=...`.
+4. Adicionar a MESMA chave nas variáveis de ambiente do projeto na Vercel
+   (Dashboard → Settings → Environment Variables) — sem token equivalente
+   ao da Supabase configurado ainda pra essa parte, então esse passo
+   específico segue manual mesmo depois de tudo que automatizamos pra
+   Leads.
+
+**Achado à parte, fora do escopo desta fase**: o build já mostra bundle de
+~987 KB (acima do limite recomendado de 500 KB do Vite) — vai aparecer
+como uma das primeiras oportunidades que essa auditoria sinaliza quando
+rodar. A correção (code splitting) é trabalho futuro, só a auditoria foi
+construída aqui.
 
 ## Editor visual de conteúdo (/editar)
 
