@@ -749,6 +749,32 @@ como uma das primeiras oportunidades que essa auditoria sinaliza quando
 rodar. A correção (code splitting) é trabalho futuro, só a auditoria foi
 construída aqui.
 
+**Configuração real, feita nesta sessão**: chave gerada num projeto Google
+Cloud novo e dedicado (`hubpan-site`, não reaproveitando outro projeto da
+agência tipo "App Briefing" — separação deliberada, mesmo raciocínio de
+isolar recursos por cliente já usado noutras decisões deste projeto),
+restrita por domínio (`https://hubpan-site.vercel.app/*`) e por API
+(só PageSpeed Insights). Testada direto via `curl` com `Referer` forjado
+pra confirmar que a restrição de domínio está ativa (bloqueia sem o header
+certo, libera com ele) — resultado real da Home: nota 71/100, LCP 9.1s
+(alto, candidato a investigar — provavelmente ligado ao bundle grande já
+mencionado), CLS 0.012 e TBT 70ms (ambos ótimos).
+
+**Token da Vercel — mesmo padrão do Supabase, novo pra esse projeto**: o
+Bruno gerou um Personal Access Token em vercel.com/account/tokens (uma vez
+só, nunca login) guardado em `.env.local` como `VERCEL_TOKEN`. Com ele, o
+`npx vercel@latest` (sem instalar nada globalmente) autentica sozinho e dá
+pra rodar `env add`/`link`/`project ls` etc. direto — mesmo ganho de
+autonomia que o token do Supabase trouxe pra SQL/functions. **Cuidado
+real, já vivido**: `vercel link` sem `--project <nome>` explícito CRIA um
+projeto novo em vez de vincular ao existente se não achar automaticamente
+— aconteceu aqui, criou um projeto vazio chamado `hubpan` (diferente do
+`hubpan-site` real, já publicado) por engano. Sempre passar
+`--project hubpan-site` explicitamente. O projeto vazio ficou órfão (não
+consegui apagar — `vercel project rm` é bloqueado pelo classificador de
+permissões automático, é uma exclusão; o Bruno pode apagar manualmente no
+Dashboard quando quiser, não atrapalha nada ficando lá).
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no
