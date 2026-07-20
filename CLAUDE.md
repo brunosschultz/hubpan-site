@@ -350,11 +350,11 @@ public/
       (em `PageMeta.tsx` e `prerender.mjs`) pelo domínio definitivo quando
       conectado.
 - [x] **Painel admin `/admin` — Fase 1: Dashboard + Páginas + SEO.**
-      Reaproveita a MESMA conta/login do editor visual (`useEditorStore`,
-      `<LoginScreen/>` com prop `subtitle`/`buttonLabel` pra copy diferente) —
-      sem sistema de auth novo. `channel` em `store.tsx` agora também é
-      `'draft'` em `/admin/*` (igual `/editar`/`/preview`): editar SEO no
-      painel é rascunho até publicar, mesmo botão/fluxo de sempre.
+      Reaproveita a MESMA conta/login do editor visual (`useEditorStore`),
+      mas com tela de login PRÓPRIA (`AdminLoginScreen.tsx`, ver "White-label"
+      abaixo) — sem sistema de auth novo. `channel` em `store.tsx` agora
+      também é `'draft'` em `/admin/*` (igual `/editar`/`/preview`): editar
+      SEO no painel é rascunho até publicar, mesmo botão/fluxo de sempre.
       **SEO não tem tabela própria** — vira mais linhas em
       `content_overrides`, chaves `seo.<slug>.title/description/noindex`
       (`src/admin/seo.ts`: `seoKey()`, `computeSeoStatus()` heurística tipo
@@ -369,11 +369,39 @@ public/
       descrição — isso ficaria numa 3ª cópia da mesma string já duplicada
       entre `App.tsx` e `prerender.mjs`; `src/admin/seoDefaults.ts` guarda
       uma cópia só pra placeholder no formulário, não é fonte de verdade).
+      Menu: Dashboard, Páginas (link direto pra `/editar/<slug>`), **SEO**
+      (seção própria — `/admin/seo` lista + `/admin/seo/<slug>` edita, uma
+      aba dedicada porque o Bruno não achou o SEO quando estava só embutido
+      dentro de Páginas). Leads/Configurações aparecem cinza "Em breve".
+
+      **White-label (pedido do Bruno — o painel vai virar produto reusável
+      noutros projetos, não só o HUB PAN):** todo o visual do painel usa
+      tokens CSS em `src/admin/theme.css` (formato compatível com
+      tweakcn.com/shadcn — variáveis HSL tipo `--primary`, `--sidebar-*`,
+      etc., escopadas em `.admin-shell`, com helpers em `src/admin/theme.ts`)
+      em vez da identidade navy/lime/Luxenta do site. **Regra permanente:**
+      nenhum componente novo dentro de `src/admin/` deve usar cor/fonte
+      hardcoded do site (`#152852`, `#d2e718`, `'Luxenta'` etc.) — sempre os
+      tokens de `theme.ts`. Pra re-skinar o painel inteiro (quando o Bruno
+      mandar os parâmetros do tweakcn), só trocar os valores em `theme.css`.
+      Único texto "de marca" que sobrou é `ADMIN_SITE_NAME` (`theme.ts`).
+      Login do painel é a `AdminLoginScreen.tsx` (própria, tokens do admin)
+      — NÃO reaproveitar o `<LoginScreen/>` de `editor/ui.tsx`, que é
+      propositalmente navy/lime (identidade do site, usado só em `/editar`).
+
       **`/admin` tem casca própria, sem NavBar/Footer/Newsletter/GSAP
       ScrollSmoother do site público** — `App.tsx` virou um `AppShell` que
       checa `location.pathname.startsWith('/admin')` e pula esse chrome
       inteiro nesse caso (achado testando: sem isso o NavBar público e o
       ScrollSmoother do site colidiam visualmente com o layout do painel).
+      `AdminLayout.tsx` usa shell de altura travada (`h-screen overflow-hidden`
+      no container raiz, sidebar e `<main>` cada um com seu próprio
+      `overflow-y-auto`) em vez de `min-h-screen` — o corpo da página NUNCA
+      rola, só a área de conteúdo interna. Isso corrigiu um scroll gigante
+      com espaço em branco embaixo que o Bruno reportou (não reproduzi a
+      causa exata, mas esse padrão de shell é a forma robusta de garantir
+      que não aconteça de novo, independente da causa).
+
       Rotas pendentes de fase futura, já com "Em breve" no menu: Leads,
       Configurações (Google Analytics/Search Console), Usuários (precisa
       Edge Function com service key, nunca no cliente), Mídia.

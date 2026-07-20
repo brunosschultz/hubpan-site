@@ -62,8 +62,10 @@ export const SEO_LEVEL_LABEL: Record<SeoLevel, string> = {
   bad: 'Precisa de ajuste',
 };
 
-export const SEO_LEVEL_COLOR: Record<SeoLevel, string> = {
-  good: '#1fae5e',
-  warning: '#d99a1c',
-  bad: '#e5484d',
+/** Chaves de `t` (theme.ts) — resolvidas no componente pra não importar
+ * React/CSS aqui, mantendo `seo.ts` uma função pura sem dependências. */
+export const SEO_LEVEL_TOKEN: Record<SeoLevel, 'success' | 'warning' | 'destructive'> = {
+  good: 'success',
+  warning: 'warning',
+  bad: 'destructive',
 };
