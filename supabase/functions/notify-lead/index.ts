@@ -56,6 +56,9 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       from: FROM,
       to: [NOTIFY_TO],
+      // Clicar em "Responder" no e-mail já cai direto no lead, não no
+      // remetente genérico do Resend.
+      reply_to: lead.email,
       subject: `Novo lead — ${SOURCE_LABEL[lead.source]}${lead.nome ? ` (${lead.nome})` : ''}`,
       text: buildBody(lead),
     }),
