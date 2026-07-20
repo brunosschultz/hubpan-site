@@ -9,7 +9,7 @@ import {
   SEO_LEVEL_LABEL, SEO_LEVEL_TOKEN, type OnPageAudit, type SeoCheck, type SeoLevel,
 } from './seo';
 import {
-  parsePerfResult, perfLevel, buildPerfSummary,
+  parsePerfResult, perfLevel, buildPerfSummary, filterAuditChecks,
   type PerfAudit, type PerfAuditPair, type PerfCheck, type PerfMetric,
 } from './perf';
 import { SITE_URL } from '../components/PageMeta';
@@ -144,22 +144,30 @@ export default function AdminSeoEditor() {
   const [perfError, setPerfError] = useState<string | null>(null);
   const [perfChecked, setPerfChecked] = useState<number | null>(null);
   const [perfCopied, setPerfCopied] = useState(false);
-  const [showPerfSummary, setShowPerfSummary] = useState(false);
+  /* Quais checks o Bruno quer mesmo incluir no texto que vai copiar —
+   * começa com tudo marcado (mesmo comportamento de antes, "copiar tudo"),
+   * ele desmarca o que não quer pedir agora. Por aba, porque mobile e
+   * desktop têm achados diferentes. */
+  const [selectedChecks, setSelectedChecks] = useState<Record<'mobile' | 'desktop', Set<string>>>({ mobile: new Set(), desktop: new Set() });
 
   /* Mobile e desktop rodam juntos, no mesmo clique — evita dobrar a
    * espera (cada chamada já leva até 30s sozinha) e deixa as duas prontas
-   * pra alternar por aba sem precisar rodar de novo. */
+   * pra alternar por aba sem precisar rodar de novo. `locale=pt_BR` pede
+   * pro próprio Google já traduzir título/descrição de cada audit. */
   const loadPerf = useCallback(async () => {
     if (!psiKey) return;
     setPerfLoading(true);
     setPerfError(null);
     try {
       const pageUrl = `${SITE_URL}${page.path}`;
-      const urlFor = (strategy: 'mobile' | 'desktop') => `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(pageUrl)}&strategy=${strategy}&category=performance&key=${psiKey}`;
+      const urlFor = (strategy: 'mobile' | 'desktop') => `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(pageUrl)}&strategy=${strategy}&category=performance&locale=pt_BR&key=${psiKey}`;
       const [mobileRes, desktopRes] = await Promise.all([fetch(urlFor('mobile')), fetch(urlFor('desktop'))]);
       if (!mobileRes.ok || !desktopRes.ok) throw new Error('psi-error');
       const [mobileJson, desktopJson] = await Promise.all([mobileRes.json(), desktopRes.json()]);
-      setPerfPair({ mobile: parsePerfResult(mobileJson), desktop: parsePerfResult(desktopJson) });
+      const mobile = parsePerfResult(mobileJson);
+      const desktop = parsePerfResult(desktopJson);
+      setPerfPair({ mobile, desktop });
+      setSelectedChecks({ mobile: new Set(mobile.checks.map((c) => c.id)), desktop: new Set(desktop.checks.map((c) => c.id)) });
       setPerfChecked(Date.now());
     } catch {
       setPerfPair(null);
@@ -169,10 +177,28 @@ export default function AdminSeoEditor() {
     }
   }, [page.path, psiKey]);
 
+  const togglePerfCheck = (id: string) => {
+    setSelectedChecks((cur) => {
+      const next = new Set(cur[perfTab]);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return { ...cur, [perfTab]: next };
+    });
+  };
+  const setAllPerfChecks = (checked: boolean) => {
+    if (!perfPair) return;
+    setSelectedChecks((cur) => ({ ...cur, [perfTab]: checked ? new Set(perfPair[perfTab].checks.map((c) => c.id)) : new Set() }));
+  };
+
   const perfSummaryText = useMemo(() => {
     if (!perfPair) return '';
-    return buildPerfSummary({ pageLabel: page.label, url: `${SITE_URL}${page.path}`, pair: perfPair });
-  }, [perfPair, page.label, page.path]);
+    const filteredPair: PerfAuditPair = {
+      mobile: filterAuditChecks(perfPair.mobile, selectedChecks.mobile),
+      desktop: filterAuditChecks(perfPair.desktop, selectedChecks.desktop),
+    };
+    return buildPerfSummary({ pageLabel: page.label, url: `${SITE_URL}${page.path}`, pair: filteredPair });
+  }, [perfPair, selectedChecks, page.label, page.path]);
+
+  const selectedPerfCount = selectedChecks[perfTab].size;
 
   const copyPerfSummary = () => {
     if (!perfSummaryText) return;
@@ -181,7 +207,6 @@ export default function AdminSeoEditor() {
       setTimeout(() => setPerfCopied(false), 1800);
     }).catch(() => {
       setPerfError('Não foi possível copiar — selecione o texto abaixo e copie manualmente.');
-      setShowPerfSummary(true);
     });
   };
 
@@ -436,21 +461,12 @@ export default function AdminSeoEditor() {
           <div className="flex items-center gap-4">
             {perfPair && (
               <button
-                onClick={() => setShowPerfSummary((s) => !s)}
-                className="transition hover:opacity-80"
-                style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: t.primary }}
-              >
-                {showPerfSummary ? 'Esconder resumo' : 'Ver resumo'}
-              </button>
-            )}
-            {perfPair && (
-              <button
                 onClick={copyPerfSummary}
                 className="flex items-center gap-1.5 transition hover:opacity-80"
                 style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: perfCopied ? t.success : t.primary }}
               >
                 {perfCopied ? <Check size={13} /> : <ClipboardCopy size={13} />}
-                {perfCopied ? 'Copiado!' : 'Copiar resumo'}
+                {perfCopied ? 'Copiado!' : `Copiar seleção (${selectedPerfCount})`}
               </button>
             )}
             <button
@@ -467,26 +483,39 @@ export default function AdminSeoEditor() {
         <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground }}>
           Usa o PageSpeed Insights do Google (o mesmo motor por trás do Lighthouse), testando mobile e desktop juntos
           — pode levar até 30 segundos, é um teste de verdade rodando no servidor do Google, por isso não roda
-          sozinho ao abrir a tela.
+          sozinho ao abrir a tela. Desmarque abaixo o que não quer pedir agora — só o que estiver marcado entra no
+          texto de copiar.
           {!psiKey && <> Chave de API não configurada — peça pro Claude configurar <code>VITE_PAGESPEED_API_KEY</code>.</>}
           {perfChecked && <> Última checagem: {formatWhen(perfChecked)}.</>}
         </p>
-
-        {showPerfSummary && perfSummaryText && (
-          <textarea
-            readOnly
-            value={perfSummaryText}
-            rows={14}
-            className="mb-5 w-full"
-            style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, padding: 14, borderRadius: t.radius, background: t.muted, border: `1px solid ${t.border}`, color: t.foreground, resize: 'vertical' }}
-          />
-        )}
 
         {perfError && <p style={{ fontFamily: 'Inter', fontSize: 13, color: t.destructive }}>{perfError}</p>}
         {perfLoading && !perfPair && (
           <p style={{ fontFamily: 'Inter', fontSize: 13, color: t.mutedForeground }}>Rodando auditoria de velocidade em mobile e desktop (até 30s)…</p>
         )}
-        {perfPair && <PerfResult audit={perfPair[perfTab]} />}
+        {perfPair && (
+          <>
+            <PerfResult
+              audit={perfPair[perfTab]}
+              selected={selectedChecks[perfTab]}
+              onToggle={togglePerfCheck}
+              onSelectAll={() => setAllPerfChecks(true)}
+              onSelectNone={() => setAllPerfChecks(false)}
+            />
+            <div className="mt-6 pt-5" style={{ borderTop: `1px solid ${t.border}` }}>
+              <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 12.5, color: t.foreground }}>
+                Isso é o que vai ser copiado pro chat ({selectedPerfCount} {selectedPerfCount === 1 ? 'item selecionado' : 'itens selecionados'}):
+              </p>
+              <textarea
+                readOnly
+                value={perfSummaryText}
+                rows={12}
+                className="w-full"
+                style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, padding: 14, borderRadius: t.radius, background: t.muted, border: `1px solid ${t.border}`, color: t.foreground, resize: 'vertical' }}
+              />
+            </div>
+          </>
+        )}
       </div>
     </AdminLayout>
   );
@@ -579,7 +608,9 @@ function ImageGallery({ images }: { images: OnPageAudit['images'] }) {
   );
 }
 
-function PerfResult({ audit }: { audit: PerfAudit }) {
+function PerfResult({
+  audit, selected, onToggle, onSelectAll, onSelectNone,
+}: { audit: PerfAudit; selected: Set<string>; onToggle: (id: string) => void; onSelectAll: () => void; onSelectNone: () => void }) {
   const lvl = perfLevel(audit.score);
   return (
     <div className="grid lg:grid-cols-[auto_1fr] gap-8 items-start">
@@ -597,12 +628,20 @@ function PerfResult({ audit }: { audit: PerfAudit }) {
         )}
         {audit.checks.length > 0 && (
           <>
-            <p className="mb-3" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 12.5, color: t.mutedForeground }}>
-              Onde melhorar — do maior pro menor impacto
-              {audit.passedCount > 0 && ` (${audit.passedCount} outras verificações passaram sem problema)`}:
-            </p>
+            <div className="flex items-center justify-between mb-3">
+              <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 12.5, color: t.mutedForeground }}>
+                Onde melhorar — do maior pro menor impacto
+                {audit.passedCount > 0 && ` (${audit.passedCount} outras verificações passaram sem problema)`}:
+              </p>
+              <div className="flex items-center gap-3 shrink-0">
+                <button onClick={onSelectAll} className="transition hover:opacity-80" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12, color: t.primary }}>Marcar todos</button>
+                <button onClick={onSelectNone} className="transition hover:opacity-80" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12, color: t.primary }}>Desmarcar todos</button>
+              </div>
+            </div>
             <div className="divide-y" style={{ borderColor: t.border }}>
-              {audit.checks.map((c, i) => <PerfCheckRow key={c.id} check={c} priority={i === 0} />)}
+              {audit.checks.map((c, i) => (
+                <PerfCheckRow key={c.id} check={c} priority={i === 0} checked={selected.has(c.id)} onToggle={() => onToggle(c.id)} />
+              ))}
             </div>
           </>
         )}
@@ -611,24 +650,38 @@ function PerfResult({ audit }: { audit: PerfAudit }) {
   );
 }
 
-function PerfCheckRow({ check, priority }: { check: PerfCheck; priority: boolean }) {
+function PerfCheckRow({
+  check, priority, checked, onToggle,
+}: { check: PerfCheck; priority: boolean; checked: boolean; onToggle: () => void }) {
   const Icon = check.level === 'bad' ? XCircle : AlertTriangle;
   const color = check.level === 'bad' ? t.destructive : t.warning;
   return (
-    <div className="flex items-start gap-3 py-3">
+    <label className="flex items-start gap-3 py-3 cursor-pointer">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={onToggle}
+        className="mt-1 shrink-0"
+        style={{ width: 15, height: 15, accentColor: t.primary }}
+      />
       <Icon size={17} style={{ color, marginTop: 1, flexShrink: 0 }} />
       <div>
-        <p className="flex items-center gap-2" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: t.foreground }}>
+        <p className="flex items-center gap-2 flex-wrap" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: t.foreground }}>
           {check.label}
           {priority && (
             <span className="px-1.5 py-0.5 rounded" style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 9.5, letterSpacing: '0.4px', textTransform: 'uppercase', background: t.destructive, color: '#fff' }}>
               Prioridade
             </span>
           )}
+          {check.isImage && (
+            <span className="px-1.5 py-0.5 rounded" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 10, background: t.muted, color: t.mutedForeground }}>
+              🖼 Imagem
+            </span>
+          )}
         </p>
         <p style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground, lineHeight: '18px' }}>{check.detail}</p>
       </div>
-    </div>
+    </label>
   );
 }
 

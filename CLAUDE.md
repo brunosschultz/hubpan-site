@@ -843,6 +843,48 @@ interceptar a chamada real e devolver esses arquivos locais — o app roda o
 código de produção normalmente, só a origem do dado é trocada. Arquivos de
 teste removidos depois, nunca commitados.
 
+### Auditoria de Velocidade v3 — tradução real, seleção explícita, tag de imagem
+
+Depois de usar a v2 em produção, o Bruno trouxe mais 3 pontos: textos em
+inglês, resumo "escondido" atrás de um toggle, e falta de controle
+explícito sobre o que exatamente vai me pedir pra mudar (principalmente
+em achados de imagem, onde ele quer comparar antes/depois antes de
+aprovar).
+
+- **Tradução real, sem tabela manual**: a PageSpeed Insights API aceita
+  `&locale=pt_BR` e devolve `title`/`description` de cada audit já
+  traduzidos pelo próprio Google (testado e confirmado: frases completas
+  em português, não só palavras soltas) — só adicionar o parâmetro nas
+  duas URLs de `loadPerf()`. Muito mais robusto que eu tentar traduzir
+  ~47 audits possíveis na mão.
+- **Checkbox em cada item do checklist** (`selectedChecks`, um `Set` por
+  aba — mobile e desktop têm achados diferentes, seleção independente),
+  todos marcados por padrão. O texto de "Copiar seleção" reflete só o
+  que está marcado, recalculado em tempo real via `filterAuditChecks()`
+  (`perf.ts`, nova função — filtra só `checks`, métricas sempre entram
+  inteiras). **O preview desse texto ficou sempre visível** (removi o
+  toggle "Ver resumo"/"Esconder resumo") — resolve o pedido de "não
+  ficar escondido" e dá visibilidade + controle no mesmo lugar.
+- **Tag "🖼 Imagem"** nos achados relacionados a imagem — detectado pelo
+  `id` do audit do Lighthouse (`id.includes('image') || id.includes('img')`,
+  novo campo `PerfCheck.isImage`), nunca pelo texto traduzido (o `id` é
+  um identificador interno, não muda de idioma). Cobre
+  `uses-optimized-images`, `unsized-images`, `image-delivery-insight`
+  etc.
+
+**Regra permanente sobre mudança de imagem (não é código, é forma de
+trabalhar — vale documentar aqui pra não esquecer em sessão futura)**:
+quando um pedido do Bruno (vindo dessa auditoria ou não) envolver
+comprimir/trocar qualidade de imagem, sempre descrever exatamente o que
+vai mudar e, quando der, mostrar um comparativo antes/depois antes de
+qualquer coisa ir pro ar — ele foi explícito que precisa desse
+comparativo pra decidir se o meio-termo qualidade-vs-peso ficou bom.
+Detalhe que já ajuda bastante aqui e vale sempre lembrar o Bruno: toda
+edição de conteúdo (inclusive imagem, via `setValue`/`uploadImage` do
+editor) entra como **rascunho** — nada fica público até ele clicar em
+"Publicar" no painel, então ele já tem uma checagem visual embutida no
+fluxo antes de qualquer coisa virar real.
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no

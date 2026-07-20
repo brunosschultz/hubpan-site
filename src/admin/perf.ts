@@ -65,6 +65,12 @@ export interface PerfCheck {
   label: string;
   level: SeoLevel;
   detail: string;
+  /** true pra achados relacionados a imagem (ex: uses-optimized-images,
+   * unsized-images) — merece atenção especial: mudar isso quase sempre
+   * envolve um trade-off de qualidade visual, diferente de um ajuste
+   * puramente técnico de código. Detectado pelo `id` do audit (nunca
+   * muda de idioma, ao contrário do `label`). */
+  isImage: boolean;
 }
 
 export interface PerfAudit {
@@ -107,10 +113,11 @@ export function parsePerfResult(json: any): PerfAudit {
     .map(([id, a]) => {
       const savingsMs = a.details?.overallSavingsMs;
       const detail = stripMarkdownLink(a.description ?? '') + (savingsMs > 0 ? ` (~${Math.round(savingsMs)}ms de economia estimada)` : '');
-      return { id, label: a.title ?? id, level: perfLevel(a.score), detail, savingsMs: savingsMs ?? 0 };
+      const isImage = id.includes('image') || id.includes('img');
+      return { id, label: a.title ?? id, level: perfLevel(a.score), detail, isImage, savingsMs: savingsMs ?? 0 };
     })
     .sort((a, b) => (a.level === b.level ? b.savingsMs - a.savingsMs : (a.level === 'bad' ? -1 : 1)))
-    .map(({ id, label, level, detail }) => ({ id, label, level, detail }));
+    .map(({ id, label, level, detail, isImage }) => ({ id, label, level, detail, isImage }));
 
   const passedCount = Object.entries(audits).filter(([id, a]: [string, any]) => (
     !METRIC_IDS.has(id) && a?.score !== null && a?.score !== undefined
@@ -118,6 +125,14 @@ export function parsePerfResult(json: any): PerfAudit {
   )).length;
 
   return { score, metrics, checks, passedCount };
+}
+
+/** Cópia do audit só com os `checks` cujo id está em `selectedIds` — as
+ * métricas-base sempre entram inteiras (não fazem sentido "desmarcar" uma
+ * métrica). Usada só na hora de montar o texto de copiar; a exibição do
+ * checklist continua mostrando tudo, marcado ou não. */
+export function filterAuditChecks(audit: PerfAudit, selectedIds: Set<string>): PerfAudit {
+  return { ...audit, checks: audit.checks.filter((c) => selectedIds.has(c.id)) };
 }
 
 function buildPlatformSummary(label: string, audit: PerfAudit): string[] {
