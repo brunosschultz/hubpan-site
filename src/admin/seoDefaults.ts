@@ -13,8 +13,8 @@ export const SEO_DEFAULTS: Record<string, { title: string; description: string }
     description: 'O HUB PAN une governos, empresas e educadores das Américas e África num ecossistema de inovação, IA, impacto social e cooperação internacional.',
   },
   'o-hub-pan': {
-    title: 'O HUB PAN — Ecossistema de Inovação desde 2017',
-    description: 'Conheça a história e as marcas fundadoras do HUB PAN — de Belo Horizonte a Harvard Square, com mais de 100 projetos de inovação abrigados.',
+    title: 'O Que É o HUB PAN? Ecossistema de Inovação',
+    description: 'O que é o HUB PAN? Conheça a história e as marcas fundadoras do ecossistema — de Belo Horizonte a Harvard Square, com mais de 100 projetos abrigados.',
   },
   prointer: {
     title: 'PROINTER — Intercâmbio de Impacto em Harvard e Nova York',

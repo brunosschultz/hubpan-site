@@ -62,8 +62,8 @@ function AppShell() {
               <PageMeta
                 slug="o-hub-pan"
                 path="/o-hub-pan"
-                title="O HUB PAN — Ecossistema de Inovação desde 2017"
-                description="Conheça a história e as marcas fundadoras do HUB PAN — de Belo Horizonte a Harvard Square, com mais de 100 projetos de inovação abrigados."
+                title="O Que É o HUB PAN? Ecossistema de Inovação"
+                description="O que é o HUB PAN? Conheça a história e as marcas fundadoras do ecossistema — de Belo Horizonte a Harvard Square, com mais de 100 projetos abrigados."
               />
               <Institucional />
             </>} />
