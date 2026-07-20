@@ -6,9 +6,12 @@ import { pageForSlug } from '../editor/pageRoutes';
 import { SEO_DEFAULTS } from './seoDefaults';
 import {
   seoKey, auditHtml, buildSeoChecklist, overallLevel, buildAuditSummary,
-  SEO_LEVEL_LABEL, SEO_LEVEL_TOKEN, type OnPageAudit, type SeoCheck,
+  SEO_LEVEL_LABEL, SEO_LEVEL_TOKEN, type OnPageAudit, type SeoCheck, type SeoLevel,
 } from './seo';
-import { parsePerfResult, perfLevel, buildPerfSummary, type PerfAudit, type PerfOpportunity } from './perf';
+import {
+  parsePerfResult, perfLevel, buildPerfSummary,
+  type PerfAudit, type PerfAuditPair, type PerfCheck, type PerfMetric,
+} from './perf';
 import { SITE_URL } from '../components/PageMeta';
 import AdminLayout from './AdminLayout';
 import { t } from './theme';
@@ -135,26 +138,31 @@ export default function AdminSeoEditor() {
    * acima): o PageSpeed Insights roda um Lighthouse de verdade no servidor
    * do Google, leva até 30s, custaria uma espera ruim toda vez que a tela
    * abre. */
-  const [perf, setPerf] = useState<PerfAudit | null>(null);
+  const [perfPair, setPerfPair] = useState<PerfAuditPair | null>(null);
+  const [perfTab, setPerfTab] = useState<'mobile' | 'desktop'>('mobile');
   const [perfLoading, setPerfLoading] = useState(false);
   const [perfError, setPerfError] = useState<string | null>(null);
   const [perfChecked, setPerfChecked] = useState<number | null>(null);
   const [perfCopied, setPerfCopied] = useState(false);
   const [showPerfSummary, setShowPerfSummary] = useState(false);
 
+  /* Mobile e desktop rodam juntos, no mesmo clique — evita dobrar a
+   * espera (cada chamada já leva até 30s sozinha) e deixa as duas prontas
+   * pra alternar por aba sem precisar rodar de novo. */
   const loadPerf = useCallback(async () => {
     if (!psiKey) return;
     setPerfLoading(true);
     setPerfError(null);
     try {
       const pageUrl = `${SITE_URL}${page.path}`;
-      const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(pageUrl)}&strategy=mobile&category=performance&key=${psiKey}`;
-      const res = await fetch(apiUrl);
-      if (!res.ok) throw new Error(String(res.status));
-      setPerf(parsePerfResult(await res.json()));
+      const urlFor = (strategy: 'mobile' | 'desktop') => `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(pageUrl)}&strategy=${strategy}&category=performance&key=${psiKey}`;
+      const [mobileRes, desktopRes] = await Promise.all([fetch(urlFor('mobile')), fetch(urlFor('desktop'))]);
+      if (!mobileRes.ok || !desktopRes.ok) throw new Error('psi-error');
+      const [mobileJson, desktopJson] = await Promise.all([mobileRes.json(), desktopRes.json()]);
+      setPerfPair({ mobile: parsePerfResult(mobileJson), desktop: parsePerfResult(desktopJson) });
       setPerfChecked(Date.now());
     } catch {
-      setPerf(null);
+      setPerfPair(null);
       setPerfError('Não foi possível rodar a auditoria de velocidade agora. Tente de novo em instantes.');
     } finally {
       setPerfLoading(false);
@@ -162,11 +170,9 @@ export default function AdminSeoEditor() {
   }, [page.path, psiKey]);
 
   const perfSummaryText = useMemo(() => {
-    if (!perf) return '';
-    return buildPerfSummary({
-      pageLabel: page.label, url: `${SITE_URL}${page.path}`, audit: perf, levelLabel: SEO_LEVEL_LABEL[perfLevel(perf.score)],
-    });
-  }, [perf, page.label, page.path]);
+    if (!perfPair) return '';
+    return buildPerfSummary({ pageLabel: page.label, url: `${SITE_URL}${page.path}`, pair: perfPair });
+  }, [perfPair, page.label, page.path]);
 
   const copyPerfSummary = () => {
     if (!perfSummaryText) return;
@@ -401,74 +407,86 @@ export default function AdminSeoEditor() {
           <p style={{ fontFamily: 'Inter', fontSize: 13, color: t.mutedForeground }}>Analisando a página…</p>
         )}
         {audit && checks && <AuditResult audit={audit} checks={checks} />}
+      </div>
 
-        <div className="mt-8 pt-6" style={{ borderTop: `1px solid ${t.border}` }}>
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-3">
-              <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: t.foreground }}>Velocidade</p>
-              {perf && (
-                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: t.muted }}>
-                  <span className="rounded-full" style={{ width: 7, height: 7, background: t[SEO_LEVEL_TOKEN[perfLevel(perf.score)]] }} />
-                  <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 11.5, color: t[SEO_LEVEL_TOKEN[perfLevel(perf.score)]] }}>
-                    {SEO_LEVEL_LABEL[perfLevel(perf.score)]}
-                  </span>
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-4">
-              {perf && (
-                <button
-                  onClick={() => setShowPerfSummary((s) => !s)}
-                  className="transition hover:opacity-80"
-                  style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: t.primary }}
-                >
-                  {showPerfSummary ? 'Esconder resumo' : 'Ver resumo'}
-                </button>
-              )}
-              {perf && (
-                <button
-                  onClick={copyPerfSummary}
-                  className="flex items-center gap-1.5 transition hover:opacity-80"
-                  style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: perfCopied ? t.success : t.primary }}
-                >
-                  {perfCopied ? <Check size={13} /> : <ClipboardCopy size={13} />}
-                  {perfCopied ? 'Copiado!' : 'Copiar resumo'}
-                </button>
-              )}
+      <div className="mt-6 p-6" style={{ borderRadius: t.radius, background: t.card, border: `1px solid ${t.border}` }}>
+        <div className="flex items-center justify-between mb-1 flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: t.foreground }}>Velocidade</p>
+            {perfPair && (
+              <div className="flex items-center rounded-full p-0.5" style={{ background: t.muted }}>
+                {(['mobile', 'desktop'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setPerfTab(tab)}
+                    className="px-3 py-1 rounded-full transition"
+                    style={{
+                      fontFamily: 'Inter', fontWeight: 600, fontSize: 11.5,
+                      background: perfTab === tab ? t.card : 'transparent',
+                      color: perfTab === tab ? t.foreground : t.mutedForeground,
+                      boxShadow: perfTab === tab ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                    }}
+                  >
+                    {tab === 'mobile' ? 'Mobile' : 'Desktop'}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-4">
+            {perfPair && (
               <button
-                onClick={() => void loadPerf()}
-                disabled={perfLoading || !psiKey}
-                className="flex items-center gap-1.5 transition hover:opacity-80 disabled:opacity-50"
+                onClick={() => setShowPerfSummary((s) => !s)}
+                className="transition hover:opacity-80"
                 style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: t.primary }}
               >
-                {perfLoading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
-                {perf ? 'Rodar de novo' : 'Rodar auditoria de velocidade'}
+                {showPerfSummary ? 'Esconder resumo' : 'Ver resumo'}
               </button>
-            </div>
+            )}
+            {perfPair && (
+              <button
+                onClick={copyPerfSummary}
+                className="flex items-center gap-1.5 transition hover:opacity-80"
+                style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: perfCopied ? t.success : t.primary }}
+              >
+                {perfCopied ? <Check size={13} /> : <ClipboardCopy size={13} />}
+                {perfCopied ? 'Copiado!' : 'Copiar resumo'}
+              </button>
+            )}
+            <button
+              onClick={() => void loadPerf()}
+              disabled={perfLoading || !psiKey}
+              className="flex items-center gap-1.5 transition hover:opacity-80 disabled:opacity-50"
+              style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: t.primary }}
+            >
+              {perfLoading ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+              {perfPair ? 'Rodar de novo' : 'Rodar auditoria de velocidade'}
+            </button>
           </div>
-          <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground }}>
-            Usa o PageSpeed Insights do Google (o mesmo motor por trás do Lighthouse) — pode levar até 30 segundos,
-            é um teste de verdade rodando no servidor do Google, por isso não roda sozinho ao abrir a tela.
-            {!psiKey && <> Chave de API não configurada — peça pro Claude configurar <code>VITE_PAGESPEED_API_KEY</code>.</>}
-            {perfChecked && <> Última checagem: {formatWhen(perfChecked)}.</>}
-          </p>
-
-          {showPerfSummary && perfSummaryText && (
-            <textarea
-              readOnly
-              value={perfSummaryText}
-              rows={10}
-              className="mb-5 w-full"
-              style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, padding: 14, borderRadius: t.radius, background: t.muted, border: `1px solid ${t.border}`, color: t.foreground, resize: 'vertical' }}
-            />
-          )}
-
-          {perfError && <p style={{ fontFamily: 'Inter', fontSize: 13, color: t.destructive }}>{perfError}</p>}
-          {perfLoading && !perf && (
-            <p style={{ fontFamily: 'Inter', fontSize: 13, color: t.mutedForeground }}>Rodando auditoria de velocidade (até 30s)…</p>
-          )}
-          {perf && <PerfResult perf={perf} />}
         </div>
+        <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground }}>
+          Usa o PageSpeed Insights do Google (o mesmo motor por trás do Lighthouse), testando mobile e desktop juntos
+          — pode levar até 30 segundos, é um teste de verdade rodando no servidor do Google, por isso não roda
+          sozinho ao abrir a tela.
+          {!psiKey && <> Chave de API não configurada — peça pro Claude configurar <code>VITE_PAGESPEED_API_KEY</code>.</>}
+          {perfChecked && <> Última checagem: {formatWhen(perfChecked)}.</>}
+        </p>
+
+        {showPerfSummary && perfSummaryText && (
+          <textarea
+            readOnly
+            value={perfSummaryText}
+            rows={14}
+            className="mb-5 w-full"
+            style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, padding: 14, borderRadius: t.radius, background: t.muted, border: `1px solid ${t.border}`, color: t.foreground, resize: 'vertical' }}
+          />
+        )}
+
+        {perfError && <p style={{ fontFamily: 'Inter', fontSize: 13, color: t.destructive }}>{perfError}</p>}
+        {perfLoading && !perfPair && (
+          <p style={{ fontFamily: 'Inter', fontSize: 13, color: t.mutedForeground }}>Rodando auditoria de velocidade em mobile e desktop (até 30s)…</p>
+        )}
+        {perfPair && <PerfResult audit={perfPair[perfTab]} />}
       </div>
     </AdminLayout>
   );
@@ -561,39 +579,97 @@ function ImageGallery({ images }: { images: OnPageAudit['images'] }) {
   );
 }
 
-function PerfResult({ perf }: { perf: PerfAudit }) {
+function PerfResult({ audit }: { audit: PerfAudit }) {
+  const lvl = perfLevel(audit.score);
   return (
-    <div>
-      <div className="grid sm:grid-cols-4 gap-4 mb-3">
-        <MiniStat label="Pontuação" value={`${Math.round(perf.score * 100)}/100`} />
-        <MiniStat label="LCP" value={`${(perf.lcpMs / 1000).toFixed(1)}s`} />
-        <MiniStat label="CLS" value={perf.cls.toFixed(3)} />
-        <MiniStat label="TBT" value={`${Math.round(perf.tbtMs)}ms`} />
+    <div className="grid lg:grid-cols-[auto_1fr] gap-8 items-start">
+      <ScoreGauge score={audit.score} level={lvl} />
+
+      <div>
+        <div className="grid sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-5">
+          {audit.metrics.map((m) => <MetricChip key={m.id} metric={m} />)}
+        </div>
+
+        {audit.checks.length === 0 && audit.passedCount > 0 && (
+          <p style={{ fontFamily: 'Inter', fontSize: 13, color: t.success }}>
+            Nenhum problema relevante encontrado — {audit.passedCount} outras verificações passaram.
+          </p>
+        )}
+        {audit.checks.length > 0 && (
+          <>
+            <p className="mb-3" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 12.5, color: t.mutedForeground }}>
+              Onde melhorar — do maior pro menor impacto
+              {audit.passedCount > 0 && ` (${audit.passedCount} outras verificações passaram sem problema)`}:
+            </p>
+            <div className="divide-y" style={{ borderColor: t.border }}>
+              {audit.checks.map((c, i) => <PerfCheckRow key={c.id} check={c} priority={i === 0} />)}
+            </div>
+          </>
+        )}
       </div>
-      {perf.opportunities.length > 0 ? (
-        <ul className="space-y-2 mt-4">
-          {perf.opportunities.map((o) => <OpportunityRow key={o.id} opportunity={o} />)}
-        </ul>
-      ) : (
-        <p className="mt-4" style={{ fontFamily: 'Inter', fontSize: 13, color: t.mutedForeground }}>
-          Nenhuma oportunidade relevante de melhoria encontrada.
-        </p>
-      )}
     </div>
   );
 }
 
-function OpportunityRow({ opportunity }: { opportunity: PerfOpportunity }) {
+function PerfCheckRow({ check, priority }: { check: PerfCheck; priority: boolean }) {
+  const Icon = check.level === 'bad' ? XCircle : AlertTriangle;
+  const color = check.level === 'bad' ? t.destructive : t.warning;
   return (
-    <li className="flex items-start gap-3 py-2" style={{ borderBottom: `1px solid ${t.border}` }}>
-      <AlertTriangle size={16} style={{ color: t.warning, marginTop: 1, flexShrink: 0 }} />
+    <div className="flex items-start gap-3 py-3">
+      <Icon size={17} style={{ color, marginTop: 1, flexShrink: 0 }} />
       <div>
-        <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: t.foreground }}>{opportunity.title}</p>
-        <p style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground }}>
-          ~{Math.round(opportunity.savingsMs)}ms de economia estimada
+        <p className="flex items-center gap-2" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: t.foreground }}>
+          {check.label}
+          {priority && (
+            <span className="px-1.5 py-0.5 rounded" style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 9.5, letterSpacing: '0.4px', textTransform: 'uppercase', background: t.destructive, color: '#fff' }}>
+              Prioridade
+            </span>
+          )}
         </p>
+        <p style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground, lineHeight: '18px' }}>{check.detail}</p>
       </div>
-    </li>
+    </div>
+  );
+}
+
+/** Medidor circular estilo PageSpeed Insights — anel de progresso em SVG,
+ * cor conforme o nível, nota grande no centro. */
+function ScoreGauge({ score, level }: { score: number; level: SeoLevel }) {
+  const pct = Math.round(score * 100);
+  const color = t[SEO_LEVEL_TOKEN[level]];
+  const size = 120;
+  const stroke = 10;
+  const r = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * r;
+  const offset = circumference * (1 - score);
+
+  return (
+    <div className="shrink-0 mx-auto lg:mx-0" style={{ width: size, height: size, position: 'relative' }}>
+      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={t.muted} strokeWidth={stroke} />
+        <circle
+          cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke}
+          strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round"
+          style={{ transition: 'stroke-dashoffset 0.6s ease-out' }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <p style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 30, color, lineHeight: 1 }}>{pct}</p>
+        <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 10.5, color: t.mutedForeground }}>/100</p>
+      </div>
+    </div>
+  );
+}
+
+function MetricChip({ metric }: { metric: PerfMetric }) {
+  const color = t[SEO_LEVEL_TOKEN[metric.level]];
+  const tint = metric.level === 'good' ? 'rgba(34,197,94,0.08)' : metric.level === 'warning' ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.08)';
+  return (
+    <div className="p-3" style={{ borderRadius: t.radius, background: tint, border: `1px solid ${color}33` }} title={metric.explanation}>
+      <p style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 11, letterSpacing: '0.4px', color }}>{metric.label}</p>
+      <p className="mt-1" style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 18, color: t.foreground }}>{metric.value}</p>
+      <p className="mt-1" style={{ fontFamily: 'Inter', fontSize: 10.5, color: t.mutedForeground, lineHeight: '13px' }}>{metric.explanation}</p>
+    </div>
   );
 }
 

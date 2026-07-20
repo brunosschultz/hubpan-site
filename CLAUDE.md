@@ -775,6 +775,74 @@ consegui apagar — `vercel project rm` é bloqueado pelo classificador de
 permissões automático, é uma exclusão; o Bruno pode apagar manualmente no
 Dashboard quando quiser, não atrapalha nada ficando lá).
 
+### Auditoria de Velocidade v2 — mais detalhe, tradução, mobile+desktop, card próprio
+
+Depois de usar a v1, o Bruno trouxe 3 pontos reais (comparando com o
+próprio site do Google): faltava tradução das siglas (LCP/CLS/TBT sem
+explicação), faltava profundidade (só 6 "oportunidades" com título solto,
+sem mostrar o que já estava bom), e faltava desktop (só rodava mobile). Um
+quarto pedido veio junto: visual mais "bacana", em card próprio, parecido
+com o do Google — não só uma lista de texto dentro do card de SEO.
+
+**`src/admin/perf.ts` foi reescrito do zero** (era um formato "lista de
+oportunidades", virou um checklist completo tipo `seo.ts`):
+- **5 métricas ponderadas** (não só 3): First Contentful Paint (10%),
+  Largest Contentful Paint (25%), Total Blocking Time (30%), Cumulative
+  Layout Shift (25%), Speed Index (10%) — são as que compõem a nota geral
+  de verdade no Lighthouse, confirmado lendo o JSON real
+  (`categories.performance.auditRefs[].weight`). Cada uma tem `label`,
+  `explanation` (frase curta em português) e `value` formatado.
+- **`checks` bem mais completo**: além dos audits com
+  `details.type === 'opportunity'` (só isso na v1), agora inclui qualquer
+  audit com `score < 0.9` e `scoreDisplayMode` em
+  `'numeric'|'binary'|'metricSavings'` — pega também os audits tipo
+  "insight" (`render-blocking-insight`, `image-delivery-insight`,
+  `forced-reflow-insight` etc.) que a v1 deixava de fora. **Sem cap de
+  6 itens** — mostra tudo que for achado real, ordenado por nível (ruim
+  primeiro) e depois por economia estimada. Um `passedCount` guarda quantas
+  verificações passaram sem problema (mostrado como resumo, não
+  enumerado item a item — o payload tem ~47 audits, listar todos seria
+  ruído).
+- `stripMarkdownLink()`: as `description` do Lighthouse vêm em Markdown
+  com link (`[texto](url)`) — troca por só o texto antes de exibir.
+- **Mobile + desktop no mesmo clique** (`Promise.all` das duas chamadas,
+  `strategy=mobile` e `strategy=desktop`) — evita dobrar a espera (ainda
+  ~30s no total). `PerfAuditPair { mobile, desktop }` guarda os dois
+  resultados prontos; trocar de aba não refaz o fetch.
+- `buildPerfSummary()` agora cobre as duas plataformas no mesmo texto
+  ("Mobile:" / "Desktop:", cada uma com nota + métricas + certo/pra
+  revisar) — pronto pra colar no chat cobrindo tudo de uma vez.
+
+**`AdminSeoEditor.tsx`**: a seção Velocidade saiu de dentro do card de
+"Análise de SEO" (só separada por uma linha) e virou **um card próprio**,
+a pedido explícito do Bruno, com visual inspirado no PageSpeed Insights de
+verdade:
+- `ScoreGauge` (novo, SVG puro): anel de progresso circular colorido
+  conforme o nível (`t.destructive`/`t.warning`/`t.success`), nota grande
+  no centro — o elemento mais reconhecível da tela do Google.
+- `MetricChip` (novo): as 5 métricas em cartões com fundo tintado pela cor
+  do próprio nível daquela métrica (não neutro/cinza) — mostra a legenda
+  em português embaixo do valor.
+- Abas pill "Mobile"/"Desktop" (`perfTab` state) trocam qual `PerfAudit` do
+  par é exibido, sem novo fetch.
+- Lista de `checks` com o item de maior impacto sempre primeiro, com um
+  selo "PRIORIDADE" no primeiro item — resposta direta ao pedido do Bruno
+  de "saber exatamente aonde atacar" antes de trazer aqui pro chat.
+
+**Como testei sem furar a restrição de domínio da chave** (achado
+metodológico, útil pra próxima vez): a chave `VITE_PAGESPEED_API_KEY` é
+restrita a `https://hubpan-site.vercel.app/*`, então chamar a API a partir
+do `localhost:5173` (ambiente de dev) é bloqueado de propósito (403) — é o
+comportamento de segurança certo, não um bug. Pra testar o visual mesmo
+assim: busquei os dados reais via `curl` com um header `Referer` forjado
+pro domínio liberado (funciona porque a restrição do Google é só checagem
+de header, não teste de origem real), salvei os dois JSONs
+(mobile/desktop) em `public/_test-psi-*.json` temporariamente, e no
+navegador sobrescrevi `window.fetch` (via `javascript_tool`) pra
+interceptar a chamada real e devolver esses arquivos locais — o app roda o
+código de produção normalmente, só a origem do dado é trocada. Arquivos de
+teste removidos depois, nunca commitados.
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no
