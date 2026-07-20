@@ -512,6 +512,30 @@ public/
         chega no limite) — não reproduzi o gesto exato via automação pra
         confirmar 100%, pedir confirmação do Bruno depois do deploy.
 
+      **Copy de SEO profissional pra todas as 10 páginas (título/descrição
+      em `App.tsx`, sincronizado em `admin/seoDefaults.ts`)** — o Bruno
+      pediu pra eu escrever com base no conteúdo real de cada página
+      (usei um agente Explore pra levantar propósito/dados concretos de
+      cada uma antes de escrever). Título 40–60 / descrição 120–160
+      caracteres em todas — várias estavam fora da faixa antes (Home 167
+      na descrição, O HUB PAN 164, Contato 29 no título, Imprensa 37,
+      Fórum 67, Casos de Uso só 83 na descrição). **Antes de escrever,
+      consultei a tabela `content_overrides` direto via REST do Supabase
+      com a chave anon/publishable (SELECT é público por RLS — só
+      leitura, não precisa login) pra não sobrescrever o que o Bruno já
+      tinha editado e PUBLICADO manualmente: descrição do PROINTER (tirou
+      "gratuito"), imagem de compartilhamento do PROINTER, e descrição do
+      GovIA (trocou "inteligência artificial" por "IA") — mantive esses
+      3 exatamente como estão (o código só documenta o mesmo texto, o
+      override no banco é quem realmente vale). Achado: `seo.govia.keyword`
+      já tinha um valor salvo, mas era o título inteiro colado ali (teste
+      do Bruno, não uma palavra-chave de verdade) — sinalizei pra ele
+      trocar. Como não consigo logar (não insiro senha em hipótese
+      nenhuma), só título/descrição (que têm fallback no código) eu
+      ajusto direto — palavra-chave não tem fallback, existe só como
+      override no banco, então as sugestões ficaram só na conversa pro
+      Bruno colar ele mesmo no painel.
+
 ---
 
 ## Editor visual de conteúdo (/editar)
