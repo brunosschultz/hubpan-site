@@ -292,11 +292,10 @@ public/
       (`FAQEntry.q`/`.a` eram `string`, agora `ReactNode`) — sem isso, eyebrow/
       stats do hero e perguntas/respostas de FAQ não podiam virar `ET`/`ERich`.
       `CTABanner.tsx`'s `sub` também virou `ReactNode` pelo mesmo motivo.
-      **Limitação que ficou de fora** (não corrigida, por ser mudança maior):
-      os 6 cards "Para Organizações" do PROINTER usam `GlassHoverCard`, cujo
-      `tag`/`titulo`/`desc` (string) e `Icon` (component reference, não JSX)
-      teriam que mudar de estrutura — não é só trocar o tipo — pra virar
-      editável; avaliar se vale a pena caso o Bruno peça.
+      `GlassHoverCard.tsx` (os 6 cards "Para Organizações" do PROINTER) também
+      foi ajustado: `Icon` (component reference) virou `icon: ReactNode` e
+      `tag`/`titulo`/`desc`/`itens` viraram `ReactNode`/`ReactNode[]` — agora
+      os 6 cards são 100% editáveis (ícone via `EIcon`, textos via `ET`/`ERich`).
       (regra permanente de página nova já editável documentada em "Editor
       visual de conteúdo" abaixo).
 - [x] **SSG/pré-renderização + SEO técnico — implementado.** `scripts/prerender.mjs`

@@ -46,13 +46,13 @@ const MISSAO = [
   { etapa: '04', cidade: 'De volta ao Brasil', titulo: 'Embaixadores e multiplicadores', desc: 'Cada bolsista retorna como Embaixador HUB PAN — com material documentado, certificação internacional e compromisso de multiplicar o impacto na sua comunidade. O professor que foi a Harvard impacta uma geração inteira.', duracao: 'Ciclo contínuo de impacto' },
 ];
 
-const ORGANIZACOES: { Icon: typeof FileCheck2; tag: string; titulo: string; desc: string; hoverColor: HoverColor }[] = [
-  { Icon: FileCheck2, tag: 'ESG', titulo: 'ESG com rastreabilidade total', desc: 'Cada bolsa financiada gera relatório de impacto documentado — dados, depoimentos, fotos e publicações. Insumo direto para relatórios ESG e de sustentabilidade com lastro real.', hoverColor: 'white' },
-  { Icon: Heart, tag: 'Fidelização', titulo: 'Fidelização de carteira educacional', desc: 'Os bolsistas são selecionados entre alunos dos programas do ecossistema HUB PAN. Apoiar o PROINTER aumenta retenção e engajamento da base educacional existente.', hoverColor: 'lime' },
-  { Icon: Award, tag: 'Marca', titulo: 'Embaixadores da sua marca', desc: 'Cada bolsista que volta do PROINTER se torna um defensor natural das marcas que tornaram sua jornada possível — um loyalty que leva décadas para se construir de outra forma.', hoverColor: 'blue' },
-  { Icon: Eye, tag: 'Visibilidade', titulo: 'Reconhecimento no ecossistema', desc: 'Apoiadores recebem reconhecimento no portal HUB PAN, nos eventos do ecossistema e em materiais institucionais — com nível proporcional ao apoio prestado.', hoverColor: 'blue' },
-  { Icon: Target, tag: 'ODS', titulo: 'Alinhamento com ODS da ONU', desc: 'O PROINTER está diretamente alinhado com ODS 4 (educação de qualidade), ODS 10 (redução das desigualdades) e ODS 17 (parcerias para os objetivos).', hoverColor: 'lime' },
-  { Icon: DollarSign, tag: 'Receita', titulo: 'Modelo de doação B2B e B2C', desc: 'Estrutura de doação transparente para pessoas físicas, empresas privadas, fundações e governos, com contrapartidas claras e públicas para cada categoria.', hoverColor: 'white' },
+const ORGANIZACOES: { id: string; Icon: typeof FileCheck2; tag: string; titulo: string; desc: string; hoverColor: HoverColor }[] = [
+  { id: 'esg', Icon: FileCheck2, tag: 'ESG', titulo: 'ESG com rastreabilidade total', desc: 'Cada bolsa financiada gera relatório de impacto documentado — dados, depoimentos, fotos e publicações. Insumo direto para relatórios ESG e de sustentabilidade com lastro real.', hoverColor: 'white' },
+  { id: 'fidelizacao', Icon: Heart, tag: 'Fidelização', titulo: 'Fidelização de carteira educacional', desc: 'Os bolsistas são selecionados entre alunos dos programas do ecossistema HUB PAN. Apoiar o PROINTER aumenta retenção e engajamento da base educacional existente.', hoverColor: 'lime' },
+  { id: 'marca', Icon: Award, tag: 'Marca', titulo: 'Embaixadores da sua marca', desc: 'Cada bolsista que volta do PROINTER se torna um defensor natural das marcas que tornaram sua jornada possível — um loyalty que leva décadas para se construir de outra forma.', hoverColor: 'blue' },
+  { id: 'visibilidade', Icon: Eye, tag: 'Visibilidade', titulo: 'Reconhecimento no ecossistema', desc: 'Apoiadores recebem reconhecimento no portal HUB PAN, nos eventos do ecossistema e em materiais institucionais — com nível proporcional ao apoio prestado.', hoverColor: 'blue' },
+  { id: 'ods', Icon: Target, tag: 'ODS', titulo: 'Alinhamento com ODS da ONU', desc: 'O PROINTER está diretamente alinhado com ODS 4 (educação de qualidade), ODS 10 (redução das desigualdades) e ODS 17 (parcerias para os objetivos).', hoverColor: 'lime' },
+  { id: 'receita', Icon: DollarSign, tag: 'Receita', titulo: 'Modelo de doação B2B e B2C', desc: 'Estrutura de doação transparente para pessoas físicas, empresas privadas, fundações e governos, com contrapartidas claras e públicas para cada categoria.', hoverColor: 'white' },
 ];
 
 const NIVEIS_APOIO = ['R$ 500 — Apoiador', 'R$ 1.000 — Parceiro', 'R$ 5.000 — Patrocinador de Bolsa', 'R$ 10.000 — Fundador do Programa', 'Outro valor — quero conversar'];
@@ -353,7 +353,18 @@ function SecOrganizacoes() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {ORGANIZACOES.map((o) => (
-            <GlassHoverCard key={o.tag} hoverColor={o.hoverColor} Icon={o.Icon} tag={o.tag} titulo={o.titulo} desc={o.desc} />
+            <GlassHoverCard
+              key={o.id}
+              hoverColor={o.hoverColor}
+              icon={
+                <EIcon k={`pro.organizacoes.${o.id}.icone`} l={`Para Organizações — ícone "${o.tag}"`} defaultSize={24}>
+                  <o.Icon size={24} strokeWidth={2} />
+                </EIcon>
+              }
+              tag={<ET k={`pro.organizacoes.${o.id}.tag`} v={o.tag} l={`Para Organizações — selo "${o.tag}"`} />}
+              titulo={<ET k={`pro.organizacoes.${o.id}.titulo`} v={o.titulo} l={`Para Organizações — título "${o.tag}"`} />}
+              desc={<ERich k={`pro.organizacoes.${o.id}.desc`} l={`Para Organizações — descrição "${o.tag}"`}>{o.desc}</ERich>}
+            />
           ))}
         </div>
       </div>

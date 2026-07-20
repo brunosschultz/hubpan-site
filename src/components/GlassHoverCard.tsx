@@ -1,4 +1,5 @@
 import { useLayoutEffect } from 'react';
+import type { ReactNode } from 'react';
 import gsap from 'gsap';
 import { useTilt } from './useTilt';
 
@@ -15,11 +16,11 @@ const BASE = { bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.12)', t
 interface GlassHoverCardProps {
   /** cor para a qual o card recolore no hover — alterne white/lime/blue entre os cards de uma grade pra variar o visual */
   hoverColor: HoverColor;
-  Icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
-  tag?: string;
-  titulo: string;
-  desc: string;
-  itens?: string[];
+  icon: ReactNode;
+  tag?: ReactNode;
+  titulo: ReactNode;
+  desc: ReactNode;
+  itens?: ReactNode[];
   className?: string;
 }
 
@@ -29,7 +30,7 @@ interface GlassHoverCardProps {
  * perspectiva. Mesmo padrão do GovCard da Governança Global (institucional).
  * Não usar número gigante de fundo como marca d'água — vira ruído visual.
  */
-export default function GlassHoverCard({ hoverColor, Icon, tag, titulo, desc, itens, className = '' }: GlassHoverCardProps) {
+export default function GlassHoverCard({ hoverColor, icon, tag, titulo, desc, itens, className = '' }: GlassHoverCardProps) {
   const tiltRef = useTilt<HTMLDivElement>(6, 8);
 
   useLayoutEffect(() => {
@@ -74,15 +75,15 @@ export default function GlassHoverCard({ hoverColor, Icon, tag, titulo, desc, it
       data-animate
     >
       <span className="ghc-circle flex items-center justify-center rounded-full mb-6" style={{ width: 52, height: 52, background: BASE.circleBg, color: BASE.iconColor }}>
-        <Icon size={24} strokeWidth={2} />
+        {icon}
       </span>
       {tag && <p className="ghc-tag mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10.5, letterSpacing: '1.8px', textTransform: 'uppercase', color: BASE.tag }}>{tag}</p>}
       <h3 className="ghc-title mb-3" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 21, lineHeight: 1.1, color: BASE.title }}>{titulo}</h3>
       <p className="ghc-desc" style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '23px', color: BASE.desc }}>{desc}</p>
       {itens && (
         <ul className="space-y-2 mt-5 pt-5 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
-          {itens.map((it) => (
-            <li key={it} className="flex items-start gap-2">
+          {itens.map((it, i) => (
+            <li key={i} className="flex items-start gap-2">
               <span className="ghc-dot mt-[8px] w-[5px] h-[5px] rounded-full shrink-0" style={{ background: '#d2e718' }} />
               <span className="ghc-item" style={{ fontFamily: 'Inter', fontSize: 13, lineHeight: '20px', color: BASE.desc }}>{it}</span>
             </li>
