@@ -1033,6 +1033,63 @@ fallback `createRoot`) e visitei as 10 rotas públicas uma por uma,
 checando console (zero avisos de hydration mismatch em todas) e
 conferindo visualmente. Só depois disso apliquei em produção.
 
+### Fundos "cor OU imagem" — malha quadriculada removida, tile institucional com cor editável
+
+O Bruno reportou 2 lacunas no editor. Pedi uma varredura geral do site
+(via agente Explore) antes de corrigir, pra achar TODOS os lugares onde
+isso acontece, não só onde ele notou — achado real: cada um só existia em
+1-2 lugares, não espalhado pelo site inteiro.
+
+**Malha quadriculada nos Heroes de página interna** — vinha hardcoded em
+`src/components/PageHero.tsx` (usado por Glossário/Imprensa/Casos de Uso)
+e duplicada em `src/pages/contato/index.tsx`, sem nenhum gancho de editor
+pra imagem (só a cor do Contato já era editável). O Bruno foi explícito:
+a malha não faz sentido existir, quer cor sólida OU imagem.
+
+**Padrão novo, sem precisar de UI nova**: `useEditImage(key, '', ...)` —
+fallback **vazio** em vez de uma URL real (diferente de todo uso anterior
+no site, que sempre tinha uma imagem padrão de verdade). Sem override,
+`get(key, '')` retorna `''`, nenhuma imagem é aplicada, só a cor sólida
+(`useEditColor`, já existente) aparece. O botão "Restaurar imagem
+original" (`src/editor/ui.tsx`, já existia) volta pro fallback vazio —
+cobre o "remover imagem, voltar pra cor sólida" de graça, sem precisar
+construir nenhum botão de remover. Único ajuste necessário em código
+compartilhado: `ImageBody` (`src/editor/ui.tsx:323`) mostrava
+`<img src="">` (ícone quebrado) quando não havia imagem — trocado por um
+placeholder "Nenhuma imagem — usando cor sólida", só dispara nesse caso
+novo (fallback vazio), zero risco pros outros ~15 usos de `EImg`/
+`useEditImage` no site (todos com imagem padrão real).
+
+**Cuidado real, achado testando**: `useEditColor` e `useEditImage`
+devolvem props com `onClick` cada um (abrem painéis diferentes) — se os
+dois forem espalhados (`{...bgProps} {...bgImageProps}`) no MESMO
+elemento, o segundo sobrescreve o primeiro (React/JS: chave de objeto
+repetida, o último spread ganha) e o clique direto no fundo só abriria
+UM dos dois painéis, nunca o outro. Resolvido: só `useEditColor` vai no
+`<section>` (clique direto edita cor); a imagem só abre pelo
+`<BgEditChip>` dedicado (sempre visível em modo edição, não só quando já
+tem imagem — é como o Bruno adiciona a primeira). Vale esse cuidado
+sempre que um mesmo elemento precisar de dois comportamentos de clique
+editável ao mesmo tempo.
+
+**Cor chapada → foto no hover, sem gancho de editor** — só existia em
+`TerritorioTile` (seção "Presença Global", `src/pages/institucional/index.tsx`),
+tile "tipográfico". A foto revelada no hover já era editável (`EImg`); a
+cor de fundo (`TILE_COLORS[t.color].bg`) era uma constante JS pura.
+Corrigido com `useEditColor` só no `bg` — **decisão deliberada de NÃO**
+tornar as outras 6 cores do tema do tile (texto, borda, ícone) editáveis
+juntas, pra não abrir brecha do Bruno escolher uma cor de fundo que
+quebre o contraste com o texto fixo. Ele pediu a cor de fundo
+especificamente, não o tema inteiro do card.
+
+Testado clicando em cada painel (Glossário, Contato, tile "Belo
+Horizonte" institucional) via `javascript_tool` — o `computer` (clique por
+coordenada) não estava acertando o elemento certo por causa de texto/
+overlay sobrepondo a área clicável em alguns pontos; disparar `.click()`
+direto no elemento via JS confirmou que o comportamento real está
+correto, só a ferramenta de automação por coordenada que não estava
+achando o alvo certo.
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no

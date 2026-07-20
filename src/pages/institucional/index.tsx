@@ -432,11 +432,16 @@ function TerritorioTile({ t, className = '' }: { t: Tile; className?: string }) 
   const Icon = t.Icon ?? MapPin;
   /* Cards claros (texto escuro no repouso) precisam virar branco no hover — a foto + camada preta escurecem o fundo */
   const isLight = t.color === 'lime' || t.color === 'white';
+  /* Só o fundo chapado é editável (não o tema inteiro — texto/ícone/borda
+   * ficam fixos combinando com `isLight`, senão o Bruno poderia escolher
+   * uma cor sem contraste com o texto fixo). */
+  const [tileBg, tileBgProps] = useEditColor(`inst.territorio.${t.id}.bg`, c.bg, `Presença Global — fundo "${t.nome}"`);
   return (
     <div
       className={`group relative rounded-[20px] overflow-hidden ${className}`}
-      style={{ background: c.bg, border: t.color === 'white' ? '1px solid #ecedf0' : undefined }}
+      style={{ background: tileBg, border: t.color === 'white' ? '1px solid #ecedf0' : undefined }}
       data-animate
+      {...tileBgProps}
     >
       {/* Foto revelada no hover */}
       <EImg

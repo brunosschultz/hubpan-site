@@ -1,7 +1,15 @@
 import type { ReactNode } from 'react';
 import { useReveal } from './useReveal';
+import { useEditColor, useEditImage, BgEditChip } from '../editor/fields';
+import type { ImageSpec } from '../editor/store';
+
+const HERO_BG_SPEC: ImageSpec = { w: 2560, h: 1200, shape: 'paisagem', note: 'Tela cheia, fundo do Hero.' };
 
 interface PageHeroProps {
+  /** Prefixo das chaves de fundo editável (cor + imagem), ex.: "gloss.hero" —
+   * cada página que usa esse componente precisa de um prefixo próprio,
+   * senão todas dividiriam a mesma cor/imagem de fundo. */
+  bgKey: string;
   eyebrow: ReactNode;
   /** Título — use <span> com cor lime (#d2e718) para os trechos de destaque */
   title: ReactNode;
@@ -13,24 +21,37 @@ interface PageHeroProps {
 }
 
 /**
- * Hero escuro padrão das páginas internas: fundo navy900 + grade sutil,
- * rótulo, título Luxenta 65px e CTAs. A NavBar global (absoluta)
- * fica por cima — por isso o padding-top alto.
+ * Hero escuro padrão das páginas internas: fundo navy900 (ou imagem, se o
+ * Bruno escolher uma) + rótulo, título Luxenta 65px e CTAs. A NavBar global
+ * (absoluta) fica por cima — por isso o padding-top alto.
+ *
+ * Fundo cor OU imagem: sem imagem escolhida (fallback vazio), mostra só a
+ * cor sólida editável; ao escolher uma imagem pelo chip, ela cobre a cor.
+ * "Restaurar imagem original" (no painel) volta pro fallback vazio — sem
+ * precisar de UI extra pra "remover imagem". A malha quadriculada que
+ * existia antes foi removida (pedido do Bruno — não fazia sentido existir).
  */
-export default function PageHero({ eyebrow, title, sub, actions, aside }: PageHeroProps) {
+export default function PageHero({ bgKey, eyebrow, title, sub, actions, aside }: PageHeroProps) {
   const ref = useReveal<HTMLElement>();
+  const [bg, bgProps] = useEditColor(`${bgKey}.bg`, '#060919', 'Hero — fundo');
+  const [bgImage] = useEditImage(`${bgKey}.bgImage`, '', 'Hero — imagem de fundo (opcional)', HERO_BG_SPEC);
 
   return (
-    <section ref={ref} className="relative w-full bg-navy900 overflow-hidden">
-      {/* Grade decorativa sutil */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px)',
-          backgroundSize: '48px 48px',
-        }}
-      />
+    <section
+      ref={ref}
+      className="relative w-full overflow-hidden"
+      {...bgProps}
+      style={{
+        background: bg,
+        ...(bgImage ? { backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}),
+      }}
+    >
+      {/* Chip dedicado pra imagem — clicar direto no fundo edita a COR
+       * (useEditColor acima); o chip é o único jeito de abrir o painel de
+       * imagem, evita os dois `onClick` (cor e imagem) disputando o mesmo
+       * elemento. Sempre visível em modo edição, não só quando já tem
+       * imagem — é como o Bruno adiciona a primeira imagem. */}
+      <BgEditChip k={`${bgKey}.bgImage`} v="" l="Hero — imagem de fundo (opcional)" spec={HERO_BG_SPEC} style={{ bottom: 24, right: 24 }} />
       <div className="relative gutter pt-[180px] lg:pt-[240px] pb-16 lg:pb-20">
         <div className="flex flex-col lg:flex-row lg:items-center gap-12">
           <div className="max-w-[820px]">

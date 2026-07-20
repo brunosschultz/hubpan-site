@@ -320,7 +320,13 @@ function ImageBody({ panel }: { panel: Extract<PanelState, { type: 'image' }> })
           ...(contain ? { background: 'repeating-conic-gradient(rgba(255,255,255,0.06) 0% 25%, transparent 0% 50%) 50% / 16px 16px' } : {}),
         }}
       >
-        <img src={current} alt="" className={`w-full h-full ${contain ? 'object-contain' : 'object-cover'}`} />
+        {current ? (
+          <img src={current} alt="" className={`w-full h-full ${contain ? 'object-contain' : 'object-cover'}`} />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-center px-4" style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <span style={{ fontFamily: 'Inter', fontSize: 12, color: '#8b90a3' }}>Nenhuma imagem — usando cor sólida</span>
+          </div>
+        )}
       </div>
 
       <div className="rounded-[12px] p-3.5 mb-4 flex gap-3" style={{ background: 'rgba(0,228,255,0.06)', border: '1px solid rgba(0,228,255,0.2)' }}>

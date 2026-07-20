@@ -157,6 +157,7 @@ export default function CasosDeUso() {
   return (
     <>
       <PageHero
+        bgKey="casos.hero"
         eyebrow={<ET k="casos.hero.eyebrow" v="CASOS DE USO · HISTÓRIAS DE IMPACTO · RESULTADOS REAIS" l="Casos de Uso — rótulo do hero" />}
         title={<ERich k="casos.hero.titulo" l="Casos de Uso — título do hero">O que o HUB PAN entrega na prática.</ERich>}
         sub={<ERich k="casos.hero.sub" l="Casos de Uso — subtítulo do hero">Não basta dizer que o ecossistema funciona. Aqui estão os dados, as histórias e os resultados documentados de quem já viveu o que o HUB PAN propõe.</ERich>}

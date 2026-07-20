@@ -4,7 +4,10 @@ import { Landmark, Sparkles, HeartHandshake, MapPin, Building2, Newspaper, Check
 import HubButton from '../../components/HubButton';
 import { useReveal } from '../../components/useReveal';
 import { useTilt } from '../../components/useTilt';
-import { EIcon, ERich, ET, useEditColor } from '../../editor/fields';
+import { EIcon, ERich, ET, useEditColor, useEditImage, BgEditChip } from '../../editor/fields';
+import type { ImageSpec } from '../../editor/store';
+
+const HERO_BG_SPEC: ImageSpec = { w: 2560, h: 1200, shape: 'paisagem', note: 'Tela cheia, fundo do Hero.' };
 import { supabase } from '../../editor/supabaseClient';
 
 const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
@@ -194,16 +197,25 @@ export default function Contato() {
   const heroRef = useReveal<HTMLElement>();
   const caminhosRef = useReveal<HTMLElement>();
   const [heroBg, heroBgProps] = useEditColor('contato.hero.bg', '#060919', 'Hero — fundo');
+  const [heroBgImage] = useEditImage('contato.hero.bgImage', '', 'Hero — imagem de fundo (opcional)', HERO_BG_SPEC);
   const [enderecosBg, enderecosBgProps] = useEditColor('contato.enderecos.bg', '#f5f5f5', 'Endereços — fundo da seção');
   const [caminhosBg, caminhosBgProps] = useEditColor('contato.caminhos.bg', '#ffffff', 'Caminhos — fundo da seção');
 
   return (
     <>
-      <section ref={heroRef} className="relative w-full overflow-hidden" {...heroBgProps} style={{ background: heroBg }}>
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px)', backgroundSize: '48px 48px' }}
-        />
+      <section
+        ref={heroRef}
+        className="relative w-full overflow-hidden"
+        {...heroBgProps}
+        style={{
+          background: heroBg,
+          ...(heroBgImage ? { backgroundImage: `url(${heroBgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}),
+        }}
+      >
+        {/* Chip dedicado — clicar no fundo edita a cor; o chip é o único
+         * jeito de abrir o painel de imagem (evita dois onClick disputando
+         * o mesmo elemento). Malha quadriculada removida (pedido do Bruno). */}
+        <BgEditChip k="contato.hero.bgImage" v="" l="Hero — imagem de fundo (opcional)" spec={HERO_BG_SPEC} style={{ bottom: 24, right: 24 }} />
         <div className="relative gutter pt-[170px] lg:pt-[220px] pb-[200px] lg:pb-[260px]">
           <p className="text-[13px] font-medium uppercase mb-6" style={{ fontFamily: 'Inter', letterSpacing: '5.85px', color: 'rgba(255,255,255,0.5)' }} data-animate>
             <ET k="contato.hero.eyebrow" v="CONTATO & CONEXÕES" l="Contato — selo do hero" />
