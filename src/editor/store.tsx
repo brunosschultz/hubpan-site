@@ -68,6 +68,9 @@ interface EditorCtx {
   connected: boolean;
   publishing: boolean;
   hasUnpublished: boolean;
+  /** Mensagem se a última tentativa de salvar no servidor falhou (ex.: permissão
+   * do banco faltando) — a edição fica só localmente até isso ser resolvido. */
+  syncError: string | null;
   get: (key: string, fallback: string) => string;
   setValue: (key: string, value: string | null, meta: { label: string; kind: FieldKind; restaurado?: boolean }) => void;
   /** Devolve null em caso de sucesso, ou a mensagem de erro (já traduzida) em caso de falha. */
@@ -133,6 +136,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   const [editMode, setEditModeState] = useState(false);
   const [panel, setPanel] = useState<PanelState | null>(null);
   const [publishing, setPublishing] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
 
   const rowsRef = useRef(rows);
   useEffect(() => { rowsRef.current = rows; }, [rows]);
@@ -212,12 +216,22 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     setHistory((h) => [entry, ...h].slice(0, HISTORY_CAP));
 
     if (connected && supabase) {
+      // Gravação assíncrona — precisa checar o erro explicitamente, senão uma
+      // falha (ex.: permissão do banco faltando) fica invisível: a edição some
+      // ao recarregar mesmo o editor tendo mostrado "Salvo" (já aconteceu em
+      // produção — ver nota de GRANT em supabase/schema.sql).
       void supabase.from('content_overrides')
-        .upsert({ key, draft_value: value, updated_at: new Date().toISOString(), updated_by: user?.email ?? null }, { onConflict: 'key' });
+        .upsert({ key, draft_value: value, updated_at: new Date().toISOString(), updated_by: user?.email ?? null }, { onConflict: 'key' })
+        .then(({ error }) => {
+          if (error) { console.error('[editor] falha ao salvar conteúdo:', error); setSyncError(error.message); }
+          else setSyncError(null);
+        });
       void supabase.from('edit_history').insert({
         id: entry.id, ts: new Date(entry.ts).toISOString(), user_name: entry.userName, user_email: entry.userEmail,
         key: entry.key, label: entry.label, kind: entry.kind, old_value: entry.oldValue, new_value: entry.newValue,
         restaurado: entry.restaurado ?? false, event: 'edit',
+      }).then(({ error }) => {
+        if (error) console.error('[editor] falha ao salvar histórico:', error);
       });
     } else {
       const ok = persistJSON(LS_CONTENT, (() => { const f: Record<string, string> = {}; for (const [k, v] of Object.entries(nextRows)) if (v.draft !== null) f[k] = v.draft; return f; })());
@@ -318,9 +332,9 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<EditorCtx>(() => ({
-    overrides: flatOverrides, history, user, editMode, panel, channel, connected, publishing, hasUnpublished,
+    overrides: flatOverrides, history, user, editMode, panel, channel, connected, publishing, hasUnpublished, syncError,
     get, setValue, login, logout, setEditMode, openPanel, closePanel, publish, uploadImage,
-  }), [flatOverrides, history, user, editMode, panel, channel, connected, publishing, hasUnpublished,
+  }), [flatOverrides, history, user, editMode, panel, channel, connected, publishing, hasUnpublished, syncError,
       get, setValue, login, logout, setEditMode, openPanel, closePanel, publish, uploadImage]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

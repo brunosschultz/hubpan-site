@@ -32,6 +32,16 @@ create table if not exists edit_history (
 alter table content_overrides enable row level security;
 alter table edit_history enable row level security;
 
+-- IMPORTANTE: tabelas criadas via SQL puro (fora do botão "New Table" do painel)
+-- NÃO recebem privilégio básico pra anon/authenticated automaticamente — RLS
+-- sozinho não basta, o GRANT de base precisa existir antes da política ser
+-- avaliada. Sem isso, todo select/insert/update falha com "permission denied"
+-- mesmo com as políticas certas (já aconteceu em produção — ver CLAUDE.md).
+grant usage on schema public to anon, authenticated;
+grant select on content_overrides to anon, authenticated;
+grant insert, update on content_overrides to authenticated;
+grant select, insert on edit_history to authenticated;
+
 -- Leitura pública: o site (/) lê published_value, a pré-visualização (/preview)
 -- lê draft_value — as duas rotas não pedem login, então SELECT é liberado a todos.
 create policy "conteudo_leitura_publica" on content_overrides

@@ -90,7 +90,7 @@ export function LoginScreen() {
 /* ═══════════ Toolbar + painéis (portal) ═══════════ */
 
 export function EditorChrome() {
-  const { user, logout, panel, openPanel, closePanel, history, connected, publish, publishing, hasUnpublished } = useEditorStore();
+  const { user, logout, panel, openPanel, closePanel, history, connected, publish, publishing, hasUnpublished, syncError } = useEditorStore();
   const [saved, setSaved] = useState(false);
   const prevLen = useRef(history.length);
 
@@ -120,9 +120,19 @@ export function EditorChrome() {
   return createPortal(
     <div data-editor-ui style={{ fontFamily: 'Inter' }}>
       <div className="fixed left-1/2 -translate-x-1/2 z-[1000] flex items-center gap-1 px-2.5 py-2 rounded-full" style={{ bottom: 22, ...glass }}>
-        <span className="flex items-center gap-2 px-3.5" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: '#fff' }} title={connected ? 'Conectado ao Supabase' : 'Modo local — sem Supabase'}>
-          {connected ? <span className="rounded-full" style={{ width: 8, height: 8, background: saved ? '#d2e718' : '#00e4ff', transition: 'background .3s' }} /> : <WifiOff size={13} color="#ff8a8a" />}
-          {saved ? <span className="flex items-center gap-1.5" style={{ color: '#d2e718' }}><Check size={14} strokeWidth={2.5} /> Salvo</span> : 'Modo edição'}
+        <span
+          className="flex items-center gap-2 px-3.5"
+          style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: syncError ? '#ff8a8a' : '#fff' }}
+          title={syncError ? `Não foi possível salvar no servidor: ${syncError}` : connected ? 'Conectado ao Supabase' : 'Modo local — sem Supabase'}
+        >
+          {syncError ? (
+            <WifiOff size={13} color="#ff8a8a" />
+          ) : connected ? (
+            <span className="rounded-full" style={{ width: 8, height: 8, background: saved ? '#d2e718' : '#00e4ff', transition: 'background .3s' }} />
+          ) : (
+            <WifiOff size={13} color="#ff8a8a" />
+          )}
+          {syncError ? 'Erro ao salvar — tente de novo' : saved ? <span className="flex items-center gap-1.5" style={{ color: '#d2e718' }}><Check size={14} strokeWidth={2.5} /> Salvo</span> : 'Modo edição'}
         </span>
 
         <span style={{ width: 1, height: 22, background: 'rgba(255,255,255,0.12)' }} />
