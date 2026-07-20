@@ -8,15 +8,6 @@ import PageMeta, { NoIndexMeta } from './components/PageMeta'
 import S11Newsletter from './sections/S11Newsletter'
 import Footer from './components/Footer'
 import Home from './pages/Home'
-import Institucional from './pages/institucional'
-import Prointer from './pages/prointer'
-import GovIA from './pages/govia'
-import ForumMundialIA from './pages/forum'
-import Insights from './pages/insights'
-import Contato from './pages/contato'
-import Glossario from './pages/utilitarias/Glossario'
-import Imprensa from './pages/utilitarias/Imprensa'
-import CasosDeUso from './pages/utilitarias/CasosDeUso'
 
 /* Carregados sob demanda (não entram no bundle público) — editor visual e
  * painel admin são código que só quem loga usa, nunca um visitante comum.
@@ -25,6 +16,23 @@ import CasosDeUso from './pages/utilitarias/CasosDeUso'
 const EditorPage = lazy(() => import('./editor/EditorPage'))
 const PreviewPage = lazy(() => import('./editor/PreviewPage'))
 const AdminApp = lazy(() => import('./admin/AdminApp'))
+
+/* As outras 9 páginas também viram pacote próprio, cada uma — mesmo
+ * achado real confirmado no detalhamento da auditoria (`unused-javascript`
+ * ainda mostrando ~600ms de economia possível mesmo depois de tirar
+ * admin/editor do pacote): visitar a Home baixava o código de PROINTER,
+ * GovIA e todas as outras páginas à toa. Home continua fora do lazy() —
+ * é a entrada mais comum do site, não faz sentido atrasar ela com um
+ * Suspense por um chunk que ela mesma precisa imediatamente. */
+const Institucional = lazy(() => import('./pages/institucional'))
+const Prointer = lazy(() => import('./pages/prointer'))
+const GovIA = lazy(() => import('./pages/govia'))
+const ForumMundialIA = lazy(() => import('./pages/forum'))
+const Insights = lazy(() => import('./pages/insights'))
+const Contato = lazy(() => import('./pages/contato'))
+const Glossario = lazy(() => import('./pages/utilitarias/Glossario'))
+const Imprensa = lazy(() => import('./pages/utilitarias/Imprensa'))
+const CasosDeUso = lazy(() => import('./pages/utilitarias/CasosDeUso'))
 
 /* Título/descrição por página — lidos também pela pré-renderização de build
  * (scripts/prerender.mjs) e pelo sitemap.xml gerado junto. Ao criar uma
@@ -51,6 +59,7 @@ function AppShell() {
   const isAdmin = location.pathname.startsWith('/admin');
 
   const routes = (
+    <Suspense fallback={null}>
     <Routes>
       <Route path="/" element={<>
         <PageMeta
@@ -61,9 +70,9 @@ function AppShell() {
         />
         <Home />
       </>} />
-      <Route path="/editar/*" element={<><NoIndexMeta /><Suspense fallback={null}><EditorPage /></Suspense></>} />
-      <Route path="/preview/*" element={<><NoIndexMeta /><Suspense fallback={null}><PreviewPage /></Suspense></>} />
-      <Route path="/admin/*" element={<><NoIndexMeta /><Suspense fallback={null}><AdminApp /></Suspense></>} />
+      <Route path="/editar/*" element={<><NoIndexMeta /><EditorPage /></>} />
+      <Route path="/preview/*" element={<><NoIndexMeta /><PreviewPage /></>} />
+      <Route path="/admin/*" element={<><NoIndexMeta /><AdminApp /></>} />
       <Route path="/o-hub-pan" element={<>
               <PageMeta
                 slug="o-hub-pan"
@@ -147,6 +156,7 @@ function AppShell() {
             </>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   );
 
   if (isAdmin) {

@@ -968,6 +968,33 @@ no JSON cru do PageSpeed) pra confirmar QUAL elemento está sendo medido
 antes de seguir supondo — economiza uma rodada inteira de mudança na
 causa errada.
 
+### Code splitting por rota — a correção que realmente ataca o volume de JS
+
+Depois da correção do `opacity` no Hero não mexer na nota (o Bruno
+cobrou, com razão, mais rigor antes de declarar causa raiz — essa foi a
+3ª tentativa), voltei no detalhamento da própria auditoria em vez de
+seguir supondo: `unused-javascript` ainda apontava ~600ms de economia
+possível mesmo depois de tirar admin/editor do bundle (fase anterior).
+Confirmado: as **outras 9 páginas do site** (`institucional`, `prointer`,
+`govia`, `forum`, `insights`, `contato`, `Glossario`, `Imprensa`,
+`CasosDeUso`) eram importadas direto em `App.tsx`, então visitar a Home
+baixava o código de todas elas à toa.
+
+**Fix**: todas as 9 viraram `lazy()`, com um único `<Suspense fallback={null}>`
+envolvendo o `<Routes>` inteiro (mais simples que um por rota, e Home não
+sofre esse Suspense porque continua importada direto — é a entrada mais
+comum, não faz sentido atrasar ela). Resultado real do build: bundle
+principal caiu de 917KB pra **698KB** (~24% a mais de redução, além do
+que já tinha saído na fase anterior), cada página secundária virou um
+chunk próprio de 10-45KB. Prerender (`scripts/prerender.mjs`, via
+Puppeteer) continua funcionando normal com rotas lazy — o `Suspense`
+resolve antes do `networkidle0` que o script espera.
+
+**Ainda não confirmado se isso resolve o LCP de verdade** — só vou
+declarar sucesso depois de rodar a auditoria de novo em produção e olhar
+o detalhamento, não só a nota geral (mesma lição de cima, valendo a
+sério dessa vez).
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no
