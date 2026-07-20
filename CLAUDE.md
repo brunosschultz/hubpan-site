@@ -281,8 +281,8 @@ public/
       recarregar). `schema.sql` já inclui os `grant select/insert/update`
       necessários; qualquer tabela nova criada por SQL precisa do mesmo.
 - [ ] Rotas de edição por página (`/editar/govia` etc.) + instrumentar as 8
-      páginas internas com ET/ERich/EImg/EIcon/useEditColor como na home.
-      **Regra: toda página nova já nasce instrumentada com os campos editáveis.**
+      páginas internas com ET/ERich/EImg/EIcon/useEditColor como na home
+      (regra permanente disso documentada em "Editor visual de conteúdo" abaixo).
 - [x] **SSG/pré-renderização + SEO técnico — implementado.** `scripts/prerender.mjs`
       roda depois de `vite build` (`npm run build` já encadeia): abre Puppeteer
       headless, visita as 10 rotas públicas do `ROUTES` (lista duplicada em
@@ -317,6 +317,22 @@ A home tem um painel de edição estilo Framer em `/editar` (login → clica no
 texto e edita inline, clica na imagem → painel com specs de tamanho + upload
 otimizado pra WebP, clica em fundo/card → paleta de cores; toolbar flutuante
 com histórico de auditoria: quem/quando/o quê + restaurar).
+
+**Regras permanentes (pedido explícito do Bruno, valem pra sempre, não só pra
+sessão em que foram combinadas):**
+1. **Toda página ou seção nova já nasce instrumentada com os campos editáveis**
+   (`ET`/`ERich`/`EImg`/`EIcon`/`useEditColor`, como a home) — desde que o
+   conteúdo aprovado vá pro ar, ela precisa ser editável pelo painel igual a
+   qualquer outra. Não é pra o Bruno pedir de novo a cada página; é o padrão
+   default de "página pronta pra publicar" neste projeto.
+2. **Antes de mudar o valor padrão (fallback) de um campo que JÁ EXISTE no
+   editor** — seja por pedido direto do Bruno aqui no Claude Code, seja numa
+   refatoração — **avisar que aquele campo pode ter uma edição salva no banco
+   (override) que vai continuar valendo e esconder a mudança**, e perguntar
+   se ele quer que eu também limpe esse override (`content_overrides` no
+   Supabase) pra a mudança de fato aparecer. Nunca mudar e seguir em silêncio
+   — o resultado "pedi pra mudar e não mudou" é exatamente o que essa regra
+   evita. (Campo NUNCA editado antes = sem risco, pode mudar o fallback livre.)
 
 **Regras ao mexer nas seções da home (S1–S11) e em NavBar/Footer:**
 - Campos editáveis: `<ET>` (texto inline) e `<ERich>` (bloco/caixa inteira,
