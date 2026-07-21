@@ -1281,6 +1281,48 @@ precisa recalcular nada; pular o `refresh()` nesse caso elimina de vez o
 risco de interromper o tween. Confirmado: `vite preview` local, âncora
 cruzada (`/govia#govia-planos`, rota muda) continua funcionando igual.
 
+### Bug real: painel de botão "grudava" no botão anterior + cor do círculo
+
+O Bruno reportou dois pontos na mesma mensagem:
+
+1. **Bug real, não visual** — clicar num botão pra editar o link, depois
+   clicar DIRETO no botão vizinho (sem fechar o painel antes): o painel
+   trocava de título/cor certinho (referenciando o botão certo), mas os
+   campos de LINK continuavam mostrando o valor do botão ANTERIOR. Causa
+   raiz: `ButtonStyleBody` (e também `ImageBody`/`IconBody`/`ColorsBody`)
+   guardam estado local (`useState`) inicializado só uma vez a partir do
+   `panel` recebido — quando o painel troca de `panel.key` SEM
+   desmontar (o componente `<Panel>` nunca vira `null` entre um clique e
+   outro, só troca de props), o React reaproveita a mesma instância e o
+   estado local antigo "gruda". **Fix**: `Panel` (`src/editor/ui.tsx`)
+   agora passa `key={panel.key}` (ou equivalente) pra cada corpo — isso
+   força o React a DESMONTAR e REMONTAR o corpo inteiro sempre que o
+   `key`/`fields` mudar, resetando o estado local do zero a partir do
+   painel novo. **Regra permanente**: qualquer painel novo com estado
+   local próprio precisa desse `key` no `<Panel>` — sem ele, o campo vai
+   "grudar" no valor do item anterior sempre que o usuário pular de um
+   elemento pro outro sem fechar o painel no meio.
+
+2. **Cor do círculo atrás do ícone, antes fixa** — `HubButton` já deixava
+   trocar a cor do botão, do texto e do ícone, mas o círculo de fundo do
+   ícone (`circleColor`, hoje usado em ~5 call sites como
+   `rgba(0,0,0,0.1)` ou uma cor lima/azul fixa) não tinha gancho nenhum.
+   Adicionado ao MESMO painel `ButtonStyleBody`, entre a cor do botão e o
+   link: swatches + picker customizado (mesmo padrão), **mais um slider
+   de opacidade** (0–100%) — o círculo quase sempre é uma cor semi-
+   transparente por design (`rgba(0,0,0,0.1)`), então cor sozinha não
+   bastava, precisava de opacidade separada. Armazenado como UM campo só
+   (`${key}.circleBg`, uma string `rgba(...)` completa — não dois campos
+   separados) pra não precisar mesclar hex+opacidade em runtime no
+   `HubButton`; o painel é quem lê o valor salvo, separa em
+   {hex, opacidade} só pra inicializar os controles
+   (`parseColorToHexOpacity`, novo utilitário em `store.tsx`, ao lado de
+   `hexOpacityToRgba` que faz o caminho inverso na hora de salvar).
+   `PanelState.buttonStyle` ganhou `circleFallback` (a cor efetiva atual
+   — o `circleColor` de cada call site, ou o padrão `rgba(0,0,0,0.1)`),
+   preenchido automaticamente pelo `HubButton` ao abrir o painel — nenhum
+   dos 52 call sites precisou ser tocado.
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no

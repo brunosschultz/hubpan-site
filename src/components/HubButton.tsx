@@ -103,7 +103,9 @@ export default function HubButton({
     </EIcon>
   ) : defaultArrow);
 
+  const circleFallback = circleColor ?? 'rgba(0,0,0,0.1)';
   const bg = styleKey ? get(`${styleKey}.bg`, v.bg) : v.bg;
+  const circleBg = styleKey ? get(`${styleKey}.circleBg`, circleFallback) : circleFallback;
   const linkHref = styleKey && !noLink ? get(`${styleKey}.href`, '') : '';
   const linkTarget = get(`${styleKey}.target`, '_self') === '_blank' ? '_blank' : '_self';
 
@@ -129,7 +131,7 @@ export default function HubButton({
     width: circleSize ?? s.circle,
     height: circleSize ?? s.circle,
     borderRadius: '50%',
-    background: circleColor ?? 'rgba(0,0,0,0.1)',
+    background: circleBg,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -161,7 +163,7 @@ export default function HubButton({
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          openPanel({ type: 'buttonStyle', key: styleKey, label: styleLabel ?? 'Botão', colorFallback: v.bg, linkEditable: !noLink });
+          openPanel({ type: 'buttonStyle', key: styleKey, label: styleLabel ?? 'Botão', colorFallback: v.bg, circleFallback, linkEditable: !noLink });
         }}
       >
         {content}

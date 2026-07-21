@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, CloudUpload, ExternalLink, History, Loader2, LogOut, RotateCcw, Ruler, Undo2, Upload, WifiOff, X } from 'lucide-react';
-import { formatWhen, processImage, useEditorStore, type HistoryEntry, type PanelState } from './store';
+import { formatWhen, hexOpacityToRgba, parseColorToHexOpacity, processImage, useEditorStore, type HistoryEntry, type PanelState } from './store';
 import { parseIconValue } from './fields';
 import { LUCIDE_CHOICES, LUCIDE_NAMES } from './editorIcons';
 import { glass, initials, label11, PALETTE, text13 } from './theme';
@@ -331,11 +331,19 @@ function Panel({ panel }: { panel: PanelState }) {
           <X size={16} />
         </button>
       </div>
+      {/* `key` força o React a REMONTAR o corpo do painel (não só re-renderizar
+       * com props novas) quando o usuário clica direto de um botão/campo pro
+       * próximo sem fechar o painel antes — cada um desses corpos guarda
+       * estado local (ex.: modo do link, hex/opacidade) inicializado só uma
+       * vez a partir do `panel` recebido; sem essa troca de `key`, esse
+       * estado ficava "grudado" no valor do elemento anterior (bug real
+       * reportado pelo Bruno: painel de um botão mostrando o link do botão
+       * anterior até algo mais mudar). */}
       <div className="overflow-y-auto p-5" style={{ scrollbarWidth: 'thin' }}>
-        {panel.type === 'colors' && <ColorsBody fields={panel.fields} />}
-        {panel.type === 'image' && <ImageBody panel={panel} />}
-        {panel.type === 'icon' && <IconBody panel={panel} />}
-        {panel.type === 'buttonStyle' && <ButtonStyleBody panel={panel} />}
+        {panel.type === 'colors' && <ColorsBody key={panel.fields.map((f) => f.key).join('|')} fields={panel.fields} />}
+        {panel.type === 'image' && <ImageBody key={panel.key} panel={panel} />}
+        {panel.type === 'icon' && <IconBody key={panel.key} panel={panel} />}
+        {panel.type === 'buttonStyle' && <ButtonStyleBody key={panel.key} panel={panel} />}
         {panel.type === 'history' && <HistoryBody />}
       </div>
     </div>
@@ -416,6 +424,24 @@ function ButtonStyleBody({ panel }: { panel: Extract<PanelState, { type: 'button
   const applyBg = (hex: string | null) =>
     setValue(bgKey, hex === panel.colorFallback ? null : hex, { label: `${panel.label} — cor do botão`, kind: 'color' });
 
+  const circleBgKey = `${panel.key}.circleBg`;
+  const circleOverridden = circleBgKey in overrides;
+  const initialCircle = parseColorToHexOpacity(get(circleBgKey, panel.circleFallback));
+  const [circleHex, setCircleHex] = useState(initialCircle.hex);
+  const [circleOpacity, setCircleOpacity] = useState(initialCircle.opacity);
+  const applyCircle = (hex: string, opacity: number) => {
+    setCircleHex(hex);
+    setCircleOpacity(opacity);
+    const rgba = hexOpacityToRgba(hex, opacity);
+    setValue(circleBgKey, rgba === panel.circleFallback ? null : rgba, { label: `${panel.label} — cor do círculo`, kind: 'color' });
+  };
+  const resetCircle = () => {
+    const f = parseColorToHexOpacity(panel.circleFallback);
+    setCircleHex(f.hex);
+    setCircleOpacity(f.opacity);
+    setValue(circleBgKey, null, { label: `${panel.label} — cor do círculo`, kind: 'color' });
+  };
+
   const savedHref = get(hrefKey, '');
   const savedIsExternal = /^https?:\/\//i.test(savedHref);
   const [mode, setMode] = useState<'none' | 'external' | 'internal'>(
@@ -492,6 +518,67 @@ function ButtonStyleBody({ panel }: { panel: Extract<PanelState, { type: 'button
           {bgOverridden && (
             <button
               onClick={() => applyBg(panel.colorFallback)}
+              className="ml-auto flex items-center gap-1.5 hover:text-white transition-colors"
+              style={{ fontFamily: 'Inter', fontSize: 12, color: '#8b90a3' }}
+            >
+              <RotateCcw size={12} /> Restaurar padrão
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 20 }}>
+        <p className="mb-3" style={label11}>Cor do círculo (atrás do ícone)</p>
+        <div className="grid grid-cols-5 gap-2 mb-3">
+          {PALETTE.map((c) => (
+            <button
+              key={c.hex}
+              title={c.name}
+              onClick={() => applyCircle(c.hex, circleOpacity)}
+              className="rounded-[10px] transition-transform hover:scale-110"
+              style={{
+                height: 40, background: c.hex,
+                border: c.hex.toLowerCase() === circleHex.toLowerCase() ? '2px solid #00e4ff' : '1px solid rgba(255,255,255,0.15)',
+              }}
+            />
+          ))}
+          <label
+            className="relative rounded-[10px] cursor-pointer overflow-hidden flex items-center justify-center transition-transform hover:scale-110"
+            title="Cor personalizada"
+            style={{ height: 40, border: '1px dashed rgba(255,255,255,0.3)', background: 'conic-gradient(#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)' }}
+          >
+            <input
+              type="color"
+              value={circleHex}
+              onChange={(e) => applyCircle(e.target.value, circleOpacity)}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
+          </label>
+        </div>
+        <div className="mb-3">
+          <div className="flex justify-between mb-1">
+            <span style={label11}>Opacidade</span>
+            <span style={{ fontFamily: 'Inter', fontSize: 12, color: '#fff' }}>{circleOpacity}%</span>
+          </div>
+          <input
+            type="range" min={0} max={100} value={circleOpacity}
+            onChange={(e) => applyCircle(circleHex, +e.target.value)}
+            style={{ width: '100%', accentColor: '#d2e718' }}
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <span
+            className="rounded-[8px] shrink-0"
+            style={{
+              width: 26, height: 26, borderRadius: '50%',
+              backgroundColor: hexOpacityToRgba(circleHex, circleOpacity),
+              backgroundImage: 'repeating-conic-gradient(rgba(255,255,255,0.15) 0% 25%, transparent 0% 50%) 50% / 8px 8px',
+              border: '1px solid rgba(255,255,255,0.2)',
+            }}
+          />
+          {circleOverridden && (
+            <button
+              onClick={resetCircle}
               className="ml-auto flex items-center gap-1.5 hover:text-white transition-colors"
               style={{ fontFamily: 'Inter', fontSize: 12, color: '#8b90a3' }}
             >

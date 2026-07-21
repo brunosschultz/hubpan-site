@@ -57,7 +57,7 @@ export type PanelState =
   | { type: 'image'; key: string; label: string; fallback: string; spec: ImageSpec }
   | { type: 'colors'; title: string; fields: { key: string; label: string; fallback: string }[] }
   | { type: 'icon'; key: string; label: string; defaultSize: number }
-  | { type: 'buttonStyle'; key: string; label: string; colorFallback: string; linkEditable?: boolean };
+  | { type: 'buttonStyle'; key: string; label: string; colorFallback: string; circleFallback: string; linkEditable?: boolean };
 
 interface EditorCtx {
   overrides: Record<string, string>;
@@ -372,6 +372,30 @@ export function useEditorStore(): EditorCtx {
 }
 
 /* ---------- Utilidades compartilhadas ---------- */
+
+/** Converte qualquer cor CSS (hex de 6 dígitos ou rgb/rgba) num par
+ * {hex, opacity 0-100} — usado pra inicializar o painel de cor+opacidade
+ * do círculo do botão a partir do valor atual (override salvo ou o padrão
+ * do design, que muitas vezes já vem como `rgba(0,0,0,0.1)`). */
+export function parseColorToHexOpacity(css: string): { hex: string; opacity: number } {
+  const m = css.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+))?\)/i);
+  if (m) {
+    const [, r, g, b, a] = m;
+    const hex = '#' + [r, g, b].map((n) => Math.max(0, Math.min(255, +n)).toString(16).padStart(2, '0')).join('');
+    return { hex, opacity: a !== undefined ? Math.round(+a * 100) : 100 };
+  }
+  if (/^#[0-9a-f]{6}$/i.test(css)) return { hex: css, opacity: 100 };
+  return { hex: '#000000', opacity: 100 };
+}
+
+/** hex (#rrggbb) + opacidade (0-100) → string `rgba()` pronta pro CSS. */
+export function hexOpacityToRgba(hex: string, opacity: number): string {
+  const m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
+  const r = m ? parseInt(m[1], 16) : 0;
+  const g = m ? parseInt(m[2], 16) : 0;
+  const b = m ? parseInt(m[3], 16) : 0;
+  return `rgba(${r}, ${g}, ${b}, ${Math.max(0, Math.min(100, opacity)) / 100})`;
+}
 
 /** "há 5 min" / "há 3 h" / data completa — pt-BR, curto e legível */
 export function formatWhen(ts: number): string {
