@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, Newspaper, Image as ImageIcon, ShieldAlert } from 'lucide-react';
 import PageHero from '../../components/PageHero';
-import HubButton from '../../components/HubButton';
+import HubButton, { WHATSAPP_URL } from '../../components/HubButton';
 import { useReveal } from '../../components/useReveal';
 import { EIcon, ERich, ET, useEditColor } from '../../editor/fields';
 
@@ -66,7 +66,7 @@ export default function Imprensa() {
         title={<ERich k="imprensa.hero.titulo" l="Imprensa — título do hero">Imprensa & Mídia</ERich>}
         sub={<ERich k="imprensa.hero.sub" l="Imprensa — subtítulo do hero">Material estruturado para jornalistas, editores e pesquisadores. Dados do Observatório de IA, releases institucionais, press kit e contato direto com a assessoria de comunicação do HUB PAN.</ERich>}
         actions={<>
-          <HubButton size="lg" variant="lime" iconKey="imprensa.hero.btn.presskit.icone" iconLabel="Imprensa — botão baixar press kit (hero), ícone" styleKey="imprensa.hero.btn.presskit" styleLabel="Imprensa — botão baixar press kit (hero)"><ET k="imprensa.hero.btn.presskit" v="Baixar press kit completo" l="Imprensa — botão baixar press kit (hero)" /></HubButton>
+          <HubButton size="lg" variant="lime" iconKey="imprensa.hero.btn.presskit.icone" iconLabel="Imprensa — botão baixar press kit (hero), ícone" styleKey="imprensa.hero.btn.presskit" styleLabel="Imprensa — botão baixar press kit (hero)" as="a" href={WHATSAPP_URL}><ET k="imprensa.hero.btn.presskit" v="Baixar press kit completo" l="Imprensa — botão baixar press kit (hero)" /></HubButton>
           <HubButton size="lg" variant="blue" iconKey="imprensa.hero.btn.contato.icone" iconLabel="Imprensa — botão contato (hero), ícone" to="/contato" styleKey="imprensa.hero.btn.contato" styleLabel="Imprensa — botão contato (hero)"><ET k="imprensa.hero.btn.contato" v="Contato de imprensa" l="Imprensa — botão contato (hero)" /></HubButton>
         </>}
       />
@@ -184,7 +184,7 @@ export default function Imprensa() {
                 <ERich k="imprensa.sidebar.presskit.desc" l="Imprensa — descrição do card Press Kit">Logos, fotos institucionais, descrição da organização, biographies das lideranças e dados do ecossistema.</ERich>
               </p>
               <p className="mb-3" style={{ fontFamily: 'Inter', fontSize: 13, color: '#2d4ebf' }}><ET k="imprensa.sidebar.presskit.nota" v="Logos HUB PAN · vetor" l="Imprensa — nota do card Press Kit" /></p>
-              <HubButton size="sm" variant="navy" iconKey="imprensa.sidebar.presskit.btn.icone" iconLabel="Imprensa — botão do card Press Kit, ícone" styleKey="imprensa.sidebar.presskit.btn" styleLabel="Imprensa — botão do card Press Kit"><ET k="imprensa.sidebar.presskit.btn" v="Baixar press kit completo" l="Imprensa — botão do card Press Kit" /></HubButton>
+              <HubButton size="sm" variant="navy" iconKey="imprensa.sidebar.presskit.btn.icone" iconLabel="Imprensa — botão do card Press Kit, ícone" styleKey="imprensa.sidebar.presskit.btn" styleLabel="Imprensa — botão do card Press Kit" as="a" href={WHATSAPP_URL}><ET k="imprensa.sidebar.presskit.btn" v="Baixar press kit completo" l="Imprensa — botão do card Press Kit" /></HubButton>
             </div>
 
             <div className="rounded-[20px] p-7" {...cardBgProps} style={{ background: cardBg }} data-animate>
@@ -201,7 +201,7 @@ export default function Imprensa() {
                   </span>
                 ))}
               </div>
-              <HubButton size="sm" variant="navy" iconKey="imprensa.sidebar.fotos.btn.icone" iconLabel="Imprensa — botão do card Fotos institucionais, ícone" styleKey="imprensa.sidebar.fotos.btn" styleLabel="Imprensa — botão do card Fotos institucionais"><ET k="imprensa.sidebar.fotos.btn" v="Baixar álbum completo" l="Imprensa — botão do card Fotos institucionais" /></HubButton>
+              <HubButton size="sm" variant="navy" iconKey="imprensa.sidebar.fotos.btn.icone" iconLabel="Imprensa — botão do card Fotos institucionais, ícone" styleKey="imprensa.sidebar.fotos.btn" styleLabel="Imprensa — botão do card Fotos institucionais" as="a" href={WHATSAPP_URL}><ET k="imprensa.sidebar.fotos.btn" v="Baixar álbum completo" l="Imprensa — botão do card Fotos institucionais" /></HubButton>
             </div>
 
             <div className="rounded-[20px] p-7" style={{ border: '1px dashed #dcdcdc' }} data-animate>

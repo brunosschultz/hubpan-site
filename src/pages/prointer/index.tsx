@@ -198,7 +198,7 @@ function PublicoCard({ p }: { p: (typeof PUBLICOS)[number] }) {
           ))}
         </ul>
         <div className="mt-auto">
-          <HubButton size="md" variant="blue" iconKey={`pro.publicos.${p.id}.btn.icone`} iconLabel={`Públicos — botão "${p.titulo}", ícone`} styleKey={`pro.publicos.${p.id}.btn`} styleLabel={`Públicos — botão "${p.titulo}"`}>
+          <HubButton size="md" variant="blue" iconKey={`pro.publicos.${p.id}.btn.icone`} iconLabel={`Públicos — botão "${p.titulo}", ícone`} styleKey={`pro.publicos.${p.id}.btn`} styleLabel={`Públicos — botão "${p.titulo}"`} onClick={() => ScrollSmoother.get()?.scrollTo('#prointer-apoie', true)}>
             <ET k={`pro.publicos.${p.id}.btn`} v="Quero me candidatar" l={`Públicos — botão "${p.titulo}"`} />
           </HubButton>
         </div>

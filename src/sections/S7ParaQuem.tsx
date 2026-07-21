@@ -17,6 +17,17 @@ const PERSONAS: Persona[] = [
   { id: 'comunidade', img: 's7-persona-5', label: 'Sou Comunidade', btn: 'Saiba mais' },
 ];
 
+/* Destino real por persona — governo/educador têm programa próprio (GovIA/
+ * PROINTER); empresa/investidor não têm página dedicada, então vão pra
+ * Contato; comunidade aponta pros Casos de Uso (resultados reais). */
+const PERSONA_TO: Record<string, string> = {
+  governo: '/govia',
+  empresa: '/contato',
+  educador: '/prointer',
+  investidor: '/contato',
+  comunidade: '/casos-de-uso',
+};
+
 export default function S7ParaQuem() {
   const ref = useReveal<HTMLElement>();
   const [bg, bgProps] = useEditColor('s7.bg', '#ffffff', 'Fundo da seção Para Quem');
@@ -67,7 +78,7 @@ export default function S7ParaQuem() {
 
             {/* Botão — só visível no hover */}
             <div className="absolute left-1/2 top-[83.68%] -translate-x-1/2 -translate-y-1/2 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none group-hover:pointer-events-auto">
-              <HubButton size="sm" variant="blue" iconKey={`s7.persona.${p.id}.btn.icone`} iconLabel={`Para Quem — botão "${p.label}", ícone`} styleKey={`s7.persona.${p.id}.btn`} styleLabel={`Para Quem — botão "${p.label}"`}>
+              <HubButton size="sm" variant="blue" iconKey={`s7.persona.${p.id}.btn.icone`} iconLabel={`Para Quem — botão "${p.label}", ícone`} styleKey={`s7.persona.${p.id}.btn`} styleLabel={`Para Quem — botão "${p.label}"`} to={PERSONA_TO[p.id]}>
                 <ET k={`s7.persona.${p.id}.btn`} v={p.btn} l={`Para Quem — botão "${p.label}"`} />
               </HubButton>
             </div>

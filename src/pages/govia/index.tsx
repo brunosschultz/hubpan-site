@@ -7,7 +7,7 @@ import {
   BrainCircuit, GraduationCap, Newspaper, Telescope, Check, Clock, CreditCard, ShieldOff, Puzzle,
 } from 'lucide-react';
 import Hero80, { STRIP_THEMES } from '../../components/Hero80';
-import HubButton from '../../components/HubButton';
+import HubButton, { WHATSAPP_URL } from '../../components/HubButton';
 import CreditCardMock from '../../components/CreditCardMock';
 import { useReveal } from '../../components/useReveal';
 import { useTilt } from '../../components/useTilt';
@@ -391,7 +391,7 @@ function SecObservatorio() {
           </div>
           <div className="flex flex-wrap gap-4">
             <HubButton size="md" variant="lime" iconKey="govia.obs.cta.dados.icone" iconLabel="Observatório — botão Acessar dados, ícone" to="/insights" styleKey="govia.obs.cta.dados" styleLabel="Observatório — botão Acessar dados"><ET k="govia.obs.cta.dados" v="Acessar dados" l="Observatório — botão Acessar dados" /></HubButton>
-            <HubButton size="md" variant="outline-light" iconKey="govia.obs.cta.relatorio.icone" iconLabel="Observatório — botão Baixar relatório, ícone" styleKey="govia.obs.cta.relatorio" styleLabel="Observatório — botão Baixar relatório"><ET k="govia.obs.cta.relatorio" v="Baixar relatório" l="Observatório — botão Baixar relatório" /></HubButton>
+            <HubButton size="md" variant="outline-light" iconKey="govia.obs.cta.relatorio.icone" iconLabel="Observatório — botão Baixar relatório, ícone" styleKey="govia.obs.cta.relatorio" styleLabel="Observatório — botão Baixar relatório" as="a" href={WHATSAPP_URL}><ET k="govia.obs.cta.relatorio" v="Baixar relatório" l="Observatório — botão Baixar relatório" /></HubButton>
           </div>
         </div>
         <div data-animate>
@@ -462,7 +462,7 @@ function PlanoCard({ p }: { p: (typeof PLANOS)[number] }) {
           </li>
         ))}
       </ul>
-      <HubButton size="md" variant={p.variant} className="w-full justify-center" iconKey={`govia.plano.${p.id}.cta.icone`} iconLabel={`Plano "${p.nome}" — botão, ícone`} styleKey={`govia.plano.${p.id}.cta`} styleLabel={`Plano "${p.nome}" — botão`}>
+      <HubButton size="md" variant={p.variant} className="w-full justify-center" iconKey={`govia.plano.${p.id}.cta.icone`} iconLabel={`Plano "${p.nome}" — botão, ícone`} styleKey={`govia.plano.${p.id}.cta`} styleLabel={`Plano "${p.nome}" — botão`} onClick={() => ScrollSmoother.get()?.scrollTo('#govia-form', true)}>
         <ET k={`govia.plano.${p.id}.cta`} v="Solicitar proposta" l={`Plano "${p.nome}" — botão`} />
       </HubButton>
     </div>

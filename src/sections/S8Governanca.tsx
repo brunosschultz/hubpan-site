@@ -92,7 +92,7 @@ export default function S8Governanca() {
           <div className="border-t border-white/30" />
         </div>
         <div className="gutter lg:pl-16" data-animate>
-          <HubButton size="lg" variant="lime" circleColor="rgba(0,0,0,0.1)" arrowColor="#2d4ebf" iconKey="s8.eco.btn.icone" iconLabel="Ecossistema Fundador — botão, ícone" styleKey="s8.eco.btn" styleLabel="Ecossistema Fundador — botão">
+          <HubButton size="lg" variant="lime" circleColor="rgba(0,0,0,0.1)" arrowColor="#2d4ebf" iconKey="s8.eco.btn.icone" iconLabel="Ecossistema Fundador — botão, ícone" styleKey="s8.eco.btn" styleLabel="Ecossistema Fundador — botão" to="/o-hub-pan#inst-governanca">
             <span style={{ color: '#2d4ebf' }}><ET k="s8.eco.btn" v="Ver governança completa" l="Ecossistema Fundador — botão" /></span>
           </HubButton>
         </div>

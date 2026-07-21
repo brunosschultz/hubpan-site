@@ -7,6 +7,11 @@ import { useEditorStore } from '../editor/store';
 type Size = 'lg' | 'md' | 'sm' | 'xs';
 type Variant = 'blue' | 'lime' | 'navy' | 'cyan' | 'outline-light' | 'outline-dark';
 
+/** Fallback padrão pra qualquer botão/CTA sem destino próprio de verdade
+ * (nenhuma página/seção real pra apontar) — pedido explícito do Bruno.
+ * Pode mudar mais pra frente; ele avisa quando isso acontecer. */
+export const WHATSAPP_URL = 'https://api.whatsapp.com/send/?phone=%2B5511914018533&text=Ol%C3%A1%21+Gostaria+de+receber+mais+informa%C3%A7%C3%B5es+sobre+o+HUB+PAN.&type=phone_number&app_absent=0';
+
 interface HubButtonProps {
   children: ReactNode;
   size?: Size;
@@ -183,7 +188,10 @@ export default function HubButton({
 
   /* Sem override: comportamento padrão de sempre — inalterado. */
   const commonProps = { style, className: sharedClassName, onClick };
-  if (as === 'a') return <a href={href} {...commonProps}>{content}</a>;
+  if (as === 'a') {
+    const isExternal = /^https?:\/\//i.test(href ?? '');
+    return <a href={href} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noreferrer' : undefined} {...commonProps}>{content}</a>;
+  }
   if (to) return <Link to={to} {...commonProps}>{content}</Link>;
   return <button {...commonProps}>{content}</button>;
 }

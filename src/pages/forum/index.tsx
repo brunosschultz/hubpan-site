@@ -324,7 +324,7 @@ function NivelCard({ n }: { n: (typeof NIVEIS)[number] }) {
           </li>
         ))}
       </ul>
-      <HubButton size="md" variant={n.destaque ? 'lime' : 'outline-dark'} className="w-full justify-center" iconKey={`forum.nivel.${n.id}.btn.icone`} iconLabel={`Nível "${n.nome}" — botão, ícone`} styleKey={`forum.nivel.${n.id}.btn`} styleLabel={`Nível "${n.nome}" — botão`}>
+      <HubButton size="md" variant={n.destaque ? 'lime' : 'outline-dark'} className="w-full justify-center" iconKey={`forum.nivel.${n.id}.btn.icone`} iconLabel={`Nível "${n.nome}" — botão, ícone`} styleKey={`forum.nivel.${n.id}.btn`} styleLabel={`Nível "${n.nome}" — botão`} onClick={() => ScrollSmoother.get()?.scrollTo('#forum-form', true)}>
         <ET k={`forum.nivel.${n.id}.btn`} v={`Solicitar proposta${n.destaque ? ' Ouro' : ''}`} l={`Nível "${n.nome}" — botão`} />
       </HubButton>
     </div>
@@ -505,7 +505,7 @@ export default function ForumMundialIA() {
             <HubButton size="lg" variant="lime" onClick={() => ScrollSmoother.get()?.scrollTo('#forum-form', true)} iconKey="forum.hero.btn.patrocinar.icone" iconLabel="Hero — botão Patrocinar o Fórum, ícone" styleKey="forum.hero.btn.patrocinar" styleLabel="Hero — botão Patrocinar o Fórum">
               <ET k="forum.hero.btn.patrocinar" v="Patrocinar o Fórum" l="Hero — botão Patrocinar o Fórum" />
             </HubButton>
-            <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#forum-form', true)} iconKey="forum.hero.btn.sobre.icone" iconLabel="Hero — botão Sobre a 1ª edição, ícone" styleKey="forum.hero.btn.sobre" styleLabel="Hero — botão Sobre a 1ª edição">
+            <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#forum-edicao', true)} iconKey="forum.hero.btn.sobre.icone" iconLabel="Hero — botão Sobre a 1ª edição, ícone" styleKey="forum.hero.btn.sobre" styleLabel="Hero — botão Sobre a 1ª edição">
               <ET k="forum.hero.btn.sobre" v="Sobre a 1ª edição" l="Hero — botão Sobre a 1ª edição" />
             </HubButton>
             <HubButton size="lg" variant="outline-light" onClick={() => ScrollSmoother.get()?.scrollTo('#forum-form', true)} iconKey="forum.hero.btn.manifestar.icone" iconLabel="Hero — botão Manifestar interesse, ícone" styleKey="forum.hero.btn.manifestar" styleLabel="Hero — botão Manifestar interesse">

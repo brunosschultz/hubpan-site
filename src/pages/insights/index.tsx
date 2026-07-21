@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import Hero80, { STRIP_THEMES } from '../../components/Hero80';
-import HubButton from '../../components/HubButton';
+import HubButton, { WHATSAPP_URL } from '../../components/HubButton';
 import { useReveal } from '../../components/useReveal';
 import { useTilt } from '../../components/useTilt';
 import { EImg, ERich, ET, useEditColor } from '../../editor/fields';
@@ -117,7 +117,7 @@ function SecDestaque() {
           <p className="mb-8" style={{ fontFamily: 'Inter', fontSize: 13, color: '#a7a4a4' }}>
             <ET k="insights.destaque.meta" v={DESTAQUE.meta} l="Insights — meta do destaque" />
           </p>
-          <div><HubButton size="md" variant="blue" iconKey="insights.destaque.btn.icone" iconLabel="Insights — botão do destaque, ícone" styleKey="insights.destaque.btn" styleLabel="Insights — botão do destaque"><ET k="insights.destaque.btn" v="Ler pesquisa completa" l="Insights — botão do destaque" /></HubButton></div>
+          <div><HubButton size="md" variant="blue" iconKey="insights.destaque.btn.icone" iconLabel="Insights — botão do destaque, ícone" styleKey="insights.destaque.btn" styleLabel="Insights — botão do destaque" as="a" href={WHATSAPP_URL}><ET k="insights.destaque.btn" v="Ler pesquisa completa" l="Insights — botão do destaque" /></HubButton></div>
         </div>
       </div>
     </section>
@@ -207,7 +207,7 @@ function ObservatorioCard({ o }: { o: (typeof OBSERVATORIOS)[number] }) {
           ))}
         </div>
       )}
-      {o.ativo && <div className="mt-auto"><HubButton size="sm" variant="lime" iconKey={`insights.observatorio.${o.id}.btn.icone`} iconLabel={`Insights — botão do observatório "${o.nome}", ícone`} styleKey={`insights.observatorio.${o.id}.btn`} styleLabel={`Insights — botão do observatório "${o.nome}"`}><ET k={`insights.observatorio.${o.id}.btn`} v="Acessar dados" l={`Insights — botão do observatório "${o.nome}"`} /></HubButton></div>}
+      {o.ativo && <div className="mt-auto"><HubButton size="sm" variant="lime" iconKey={`insights.observatorio.${o.id}.btn.icone`} iconLabel={`Insights — botão do observatório "${o.nome}", ícone`} styleKey={`insights.observatorio.${o.id}.btn`} styleLabel={`Insights — botão do observatório "${o.nome}"`} to="/govia#govia-obs"><ET k={`insights.observatorio.${o.id}.btn`} v="Acessar dados" l={`Insights — botão do observatório "${o.nome}"`} /></HubButton></div>}
     </div>
   );
 }

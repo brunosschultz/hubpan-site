@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
+import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import HubButton from '../components/HubButton';
 import { BgEditChip, EImg, ERich, ET, useEditImage } from '../editor/fields';
 
@@ -82,8 +83,8 @@ export default function S1Hero() {
           </ERich>
         </p>
         <div data-hero-text className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start pointer-events-auto self-start">
-          <HubButton size="lg" variant="blue" iconKey="s1.btn1.icone" iconLabel="Hero — botão azul, ícone" styleKey="s1.btn1" styleLabel="Hero — botão azul"><ET k="s1.btn1" v="Conheça o Ecossistema" l="Hero — botão azul" /></HubButton>
-          <HubButton size="lg" variant="lime" iconKey="s1.btn2.icone" iconLabel="Hero — botão lima, ícone" styleKey="s1.btn2" styleLabel="Hero — botão lima"><ET k="s1.btn2" v="Explorar Plataformas" l="Hero — botão lima" /></HubButton>
+          <HubButton size="lg" variant="blue" iconKey="s1.btn1.icone" iconLabel="Hero — botão azul, ícone" styleKey="s1.btn1" styleLabel="Hero — botão azul" to="/o-hub-pan"><ET k="s1.btn1" v="Conheça o Ecossistema" l="Hero — botão azul" /></HubButton>
+          <HubButton size="lg" variant="lime" iconKey="s1.btn2.icone" iconLabel="Hero — botão lima, ícone" styleKey="s1.btn2" styleLabel="Hero — botão lima" onClick={() => ScrollSmoother.get()?.scrollTo('#home-plataformas', true)}><ET k="s1.btn2" v="Explorar Plataformas" l="Hero — botão lima" /></HubButton>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useReveal } from '../components/useReveal';
-import HubButton from '../components/HubButton';
+import HubButton, { WHATSAPP_URL } from '../components/HubButton';
 import { EIcon, EImg, ERich, ET, useEditColor } from '../editor/fields';
 
 /* ---------- Accordion (linha 1) ---------- */
@@ -37,6 +37,7 @@ const ACC: AccItem[] = [
 ];
 
 const ACC_NOMES: Record<string, string> = { prointer: 'PROINTER', forum: 'Fórum Mundial de IA', govia: 'GovIA' };
+const ACC_TO: Record<string, string> = { prointer: '/prointer', forum: '/forum-mundial-ia', govia: '/govia' };
 
 /* Largura fixa do texto — não recalcula/reflow ao abrir. Só o card e a foto crescem. */
 function AccordionCard({ item, active, onHover }: { item: AccItem; active: boolean; onHover: () => void }) {
@@ -70,7 +71,7 @@ function AccordionCard({ item, active, onHover }: { item: AccItem; active: boole
           <>
             <div style={{ flex: 1 }} />
             <div className="mt-2">
-              <HubButton size="md" variant="blue" circleColor="#d2e718" arrowColor="#152852" iconKey={`s3.acc.${item.id}.btn.icone`} iconLabel={`Plataformas — ${nome}, botão, ícone`} styleKey={`s3.acc.${item.id}.btn`} styleLabel={`Plataformas — ${nome}, botão`}>
+              <HubButton size="md" variant="blue" circleColor="#d2e718" arrowColor="#152852" iconKey={`s3.acc.${item.id}.btn.icone`} iconLabel={`Plataformas — ${nome}, botão, ícone`} styleKey={`s3.acc.${item.id}.btn`} styleLabel={`Plataformas — ${nome}, botão`} to={ACC_TO[item.id]}>
                 <ET k={`s3.acc.${item.id}.btn`} v={item.buttonText} l={`Plataformas — ${nome}, botão`} />
               </HubButton>
             </div>
@@ -129,8 +130,13 @@ const PLAT: PlatCard[] = [
   },
 ];
 
+/* Só Insights tem página própria hoje — Academy/Alliance/Digital ainda não têm,
+ * então caem no fallback do WhatsApp (ver WHATSAPP_URL) até ganharem uma. */
+const PLAT_TO: Record<string, string | undefined> = { insights: '/insights' };
+
 function PlatformCard({ c }: { c: PlatCard }) {
   const [bg, bgProps] = useEditColor(`s3.plat.${c.id}.bg`, c.bg, `Card ${c.name} — cor de fundo`, `Card HUB PAN ${c.name}`);
+  const to = PLAT_TO[c.id];
   return (
     <div className="flex flex-col" {...bgProps} style={{ background: bg, borderRadius: 17, height: 372, padding: '36px 68px 48px 67px', border: bg === '#fff' ? '1px solid #ecedf0' : undefined }} data-animate>
       {/* gap ícone→rótulo varia por card p/ manter o rótulo sempre na mesma altura, como no Figma */}
@@ -167,6 +173,9 @@ function PlatformCard({ c }: { c: PlatCard }) {
           iconLabel={`Card ${c.name} — botão, ícone`}
           styleKey={`s3.plat.${c.id}.btn`}
           styleLabel={`Card ${c.name} — botão`}
+          to={to}
+          as={to ? undefined : 'a'}
+          href={to ? undefined : WHATSAPP_URL}
         >
           <ET k={`s3.plat.${c.id}.btn`} v="Explorar" l={`Card ${c.name} — botão`} />
         </HubButton>

@@ -29,7 +29,7 @@ export default function S10Parceiros() {
           </h2>
         </div>
         <div data-animate>
-          <HubButton size="lg" variant="navy" iconKey="s10.btn.icone" iconLabel="Parceiros — botão, ícone" styleKey="s10.btn" styleLabel="Parceiros — botão">
+          <HubButton size="lg" variant="navy" iconKey="s10.btn.icone" iconLabel="Parceiros — botão, ícone" styleKey="s10.btn" styleLabel="Parceiros — botão" to="/o-hub-pan#inst-fundador">
             <ET k="s10.btn" v="Conheça a nossa História" l="Parceiros — botão" />
           </HubButton>
         </div>

@@ -13,6 +13,14 @@ const CARDS: NumCard[] = [
   { id: 'projetos', num: '+100', img: 's6-numero-4', desc: 'Projetos de inovação abrigados', btn: 'Explorar' },
 ];
 
+/* Destino real por card — cada número remete a um conteúdo de verdade do site. */
+const NUM_TO: Record<string, string> = {
+  forum: '/forum-mundial-ia',
+  ny: '/forum-mundial-ia',
+  inicio: '/o-hub-pan#inst-jornada',
+  projetos: '/casos-de-uso',
+};
+
 export default function S6Numeros() {
   const ref = useReveal<HTMLElement>();
   const [bg, bgProps] = useEditColor('s6.bg', '#ecedf0', 'Fundo da seção Números');
@@ -64,7 +72,7 @@ export default function S6Numeros() {
                 </p>
                 <div style={{ flex: 1 }} />
                 <div className="self-start">
-                  <HubButton size="sm" variant="lime" iconKey={`s6.card.${c.id}.btn.icone`} iconLabel={`Números — botão do card "${c.desc}", ícone`} styleKey={`s6.card.${c.id}.btn`} styleLabel={`Números — botão do card "${c.desc}"`}>
+                  <HubButton size="sm" variant="lime" iconKey={`s6.card.${c.id}.btn.icone`} iconLabel={`Números — botão do card "${c.desc}", ícone`} styleKey={`s6.card.${c.id}.btn`} styleLabel={`Números — botão do card "${c.desc}"`} to={NUM_TO[c.id]}>
                     <ET k={`s6.card.${c.id}.btn`} v={c.btn} l={`Números — botão do card "${c.desc}"`} />
                   </HubButton>
                 </div>

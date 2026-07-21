@@ -1354,6 +1354,58 @@ novo no mesmo link" tem que depender de `location.key`, nunca só de
 `pathname`/`hash`/`search` — esses três só mudam quando o destino é
 literalmente diferente do atual.
 
+### Varredura geral — destino real (fallback padrão) em todo botão/CTA do site
+
+O Bruno pediu uma varredura completa: todo `<HubButton>` do site precisava
+ter um destino de verdade — âncora da própria página, outra página do
+site, ou (quando não existe conteúdo real pra apontar) um link direto
+pro WhatsApp — sem ele precisar configurar botão por botão no editor.
+**Importante: isso mexeu só no FALLBACK PADRÃO** (`to`/`onClick`/`href`
+direto no código de cada `HubButton`) — nunca em overrides que ele já
+tinha salvo manualmente no painel (esses continuam vencendo sempre, é
+assim que o sistema já funcionava desde a rodada anterior).
+
+**`WHATSAPP_URL`** — nova constante exportada de `src/components/HubButton.tsx`,
+usada como fallback em qualquer botão sem conteúdo real pra apontar (ex.:
+"Baixar press kit", "Baixar relatório", "Assistir Vídeo" — nada disso
+existe como arquivo/página de verdade ainda). O Bruno avisou que pode
+trocar esse número depois — é só editar essa constante num lugar só.
+`HubButton`'s branch `as === 'a'` ganhou detecção de link externo
+(`target="_blank" rel="noreferrer"` automático quando `href` começa com
+`http`) — antes só o link SOBRESCRITO pelo editor abria em nova aba,
+o fallback padrão via `as="a"` nunca tinha esse tratamento.
+
+**Lógica de cada destino** (documentado aqui pra não perder o raciocínio
+se precisar revisar depois): botões dentro de uma seção que menciona um
+programa/página específico foram linkados pra lá (ex.: cards do Fórum →
+`/forum-mundial-ia`, persona "Sou Governo" → `/govia`); botões cujo
+conteúdo relacionado mora na MESMA página viraram scroll de âncora (ex.:
+"Solicitar proposta" nos planos do GovIA → `#govia-form`, mesma âncora
+que o botão do hero já usa); botões sobre algo que não tem página nem
+arquivo hospedado (press kit, relatório, vídeo, portal de acesso, MIPAD,
+política de governança) foram pro WhatsApp. Um mismatch real também foi
+corrigido de passagem: o botão "Sobre a 1ª edição" do Fórum apontava pra
+`#forum-form` (errado, era cópia-e-cola do botão vizinho) — agora vai
+pra `#forum-edicao`, a seção que realmente fala da 1ª edição.
+
+**Achado ao testar**: alguns botões (ex. "Explorar Plataformas" da Home)
+já tinham um override REAL salvo pelo Bruno em produção, testado nos
+dias anteriores — confirmando que o sistema de prioridade (override
+sempre vence o fallback novo) está funcionando exatamente como
+desenhado. Não foi preciso descobrir todos manualmente: qualquer botão
+sem override cai automaticamente no fallback novo.
+
+**Nota sobre teste automatizado**: verificar visualmente um `scrollTo`
+animado via clique programático (`javascript_tool`) neste projeto é
+pouco confiável — o `ScrollSmoother` (com `normalizeScroll: true`) já
+deu falso-negativo antes em cliques disparados via automação, não por
+bug real (ver "causa raiz" de rodadas anteriores nesta mesma seção do
+arquivo). A confiança aqui veio de: (1) o código de cada botão novo é
+byte-a-byte igual ao padrão já usado e confirmado funcionando nos
+botões de hero de cada página (mesmo `onClick`/`scrollTo`); (2) `tsc -b`
+limpo; (3) o atributo renderizado (`href`/ausência de `href` num
+`<button>`) bate exatamente com o esperado pra cada botão testado.
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no

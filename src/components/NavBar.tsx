@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import HubButton from './HubButton';
+import HubButton, { WHATSAPP_URL } from './HubButton';
 import { EImg, ET } from '../editor/fields';
 
 /* Rótulos do menu são editáveis pelo editor visual (chaves nav.*) — como o
@@ -81,7 +81,7 @@ export default function NavBar() {
 
         {/* Botões desktop */}
         <div className="hidden lg:flex gap-3 ml-auto items-center">
-          <HubButton size="xs" variant="cyan" iconKey="nav.btn1.icone" iconLabel="Menu — botão Acessar Portal, ícone" styleKey="nav.btn1" styleLabel="Menu — botão Acessar Portal"><ET k="nav.btn1" v="ACESSAR PORTAL" l="Menu — botão Acessar Portal" /></HubButton>
+          <HubButton size="xs" variant="cyan" iconKey="nav.btn1.icone" iconLabel="Menu — botão Acessar Portal, ícone" styleKey="nav.btn1" styleLabel="Menu — botão Acessar Portal" as="a" href={WHATSAPP_URL}><ET k="nav.btn1" v="ACESSAR PORTAL" l="Menu — botão Acessar Portal" /></HubButton>
           <HubButton size="xs" variant="navy" withIcon={false} to="/contato" styleKey="nav.btn2" styleLabel="Menu — botão Conecte-se"><ET k="nav.btn2" v="CONECTE-SE" l="Menu — botão Conecte-se" /></HubButton>
         </div>
 
@@ -118,7 +118,7 @@ export default function NavBar() {
               ))}
             </div>
             <div className="flex flex-col gap-3 mt-auto">
-              <HubButton size="sm" variant="cyan" iconKey="nav.btn1.icone" iconLabel="Menu — botão Acessar Portal, ícone" styleKey="nav.btn1" styleLabel="Menu — botão Acessar Portal"><ET k="nav.btn1" v="ACESSAR PORTAL" l="Menu — botão Acessar Portal" /></HubButton>
+              <HubButton size="sm" variant="cyan" iconKey="nav.btn1.icone" iconLabel="Menu — botão Acessar Portal, ícone" styleKey="nav.btn1" styleLabel="Menu — botão Acessar Portal" as="a" href={WHATSAPP_URL}><ET k="nav.btn1" v="ACESSAR PORTAL" l="Menu — botão Acessar Portal" /></HubButton>
               <HubButton size="sm" variant="navy" withIcon={false} to="/contato" onClick={() => setOpen(false)} styleKey="nav.btn2" styleLabel="Menu — botão Conecte-se"><ET k="nav.btn2" v="CONECTE-SE" l="Menu — botão Conecte-se" /></HubButton>
             </div>
           </div>

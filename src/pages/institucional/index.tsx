@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import FAQAccordion from '../../components/FAQAccordion';
 import CTABanner from '../../components/CTABanner';
-import HubButton from '../../components/HubButton';
+import HubButton, { WHATSAPP_URL } from '../../components/HubButton';
 import { useReveal, useRevealBidirectional } from '../../components/useReveal';
 import { useTilt } from '../../components/useTilt';
 import { BgEditChip, EIcon, EImg, ERich, ET, useEditColor, useEditColors, useEditImage } from '../../editor/fields';
@@ -686,7 +686,7 @@ function SecMipad() {
             </span>
           </div>
           <div data-animate>
-            <HubButton size="md" variant="lime" iconKey="inst.mipad.btn.icone" iconLabel="MIPAD — botão, ícone" styleKey="inst.mipad.btn" styleLabel="MIPAD — botão"><ET k="inst.mipad.btn" v="Saiba mais sobre o MIPAD" l="MIPAD — botão" /></HubButton>
+            <HubButton size="md" variant="lime" iconKey="inst.mipad.btn.icone" iconLabel="MIPAD — botão, ícone" styleKey="inst.mipad.btn" styleLabel="MIPAD — botão" as="a" href={WHATSAPP_URL}><ET k="inst.mipad.btn" v="Saiba mais sobre o MIPAD" l="MIPAD — botão" /></HubButton>
           </div>
         </div>
 
@@ -836,7 +836,7 @@ function SecGovernanca() {
               Todo o conteúdo, metodologias, programas, marcas e ativos digitais do ecossistema HUB PAN são protegidos por registro de propriedade intelectual e por políticas internas de uso e licenciamento. Parceiros e patrocinadores recebem autorização formal e documentada de uso.
             </ERich>
           </p>
-          <HubButton size="sm" variant="lime" iconKey="inst.governanca.pi.btn.icone" iconLabel="Governança — botão Propriedade Intelectual, ícone" styleKey="inst.governanca.pi.btn" styleLabel="Governança — botão Propriedade Intelectual"><ET k="inst.governanca.pi.btn" v="Ver política de governança" l="Governança — botão Propriedade Intelectual" /></HubButton>
+          <HubButton size="sm" variant="lime" iconKey="inst.governanca.pi.btn.icone" iconLabel="Governança — botão Propriedade Intelectual, ícone" styleKey="inst.governanca.pi.btn" styleLabel="Governança — botão Propriedade Intelectual" as="a" href={WHATSAPP_URL}><ET k="inst.governanca.pi.btn" v="Ver política de governança" l="Governança — botão Propriedade Intelectual" /></HubButton>
         </div>
       </div>
     </section>
