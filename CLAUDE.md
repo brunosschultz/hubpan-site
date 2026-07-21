@@ -1669,6 +1669,74 @@ sessão em que foram combinadas):**
   deve devolver o valor pelo retorno da função, não depender de reler
   outro state do contexto logo após o `await`.
 
+### Rodada de acabamento — tilt do Hero (remove pulsação, logo real, equilíbrio) e Jornada Global (legenda + quebra de texto)
+
+Depois do refinamento de proximidade (seção acima), o Bruno testou em
+localhost (novo fluxo — ver "Fluxo de trabalho esperado") e pediu mais
+4 ajustes pontuais, todos já confirmados por ele antes de subir:
+
+**1. Pulsação removida.** "Não ficou legal" — tirado o `gsap.to(...
+{scale: PULSE_SCALE, repeat: -1, ...})` inteiro de `S1Hero.tsx`, junto
+das constantes `PULSE_SCALE`/`PULSE_DURATION` (não usadas mais em nenhum
+lugar). O tilt de proximidade (seção acima) continua normal.
+
+**2. Logo do card "Presença institucional" — tamanho errado por cálculo
+solto, corrigido via Figma real.** O Bruno pediu "+20%" e o resultado
+(66×66, quadrado) ficou **menor** visualmente que o original — motivo:
+o card no Figma (nó `2211:20` → `LOGO_ONU`) tem proporção retangular
+real de **57,6×54,3px**, bem diferente de um quadrado. Forçar 66×66
+distorcia a proporção pra mais estreita/vertical do que deveria,
+"encolhendo" a leitura visual da logo. **Lição gravada**: pedidos de
+"aumentar X%" em cima de um valor arbitrário são arriscados sem
+conferir a proporção real do elemento no Figma — sempre que o Bruno
+pedir ajuste de tamanho num elemento que tem referência no Figma, puxar
+`get_design_context`/`get_screenshot` no node certo ANTES de aplicar
+qualquer múltiplo solto, não confiar só na intuição da proporção atual
+do código.
+
+Além disso, o Bruno mandou a imagem real da logo (`~/Downloads/LOGO_ONU.png`,
+58×55px, PNG com alpha, JÁ recortada sem margem — bate quase exato com
+o Figma) — copiada pra `public/images/s1-hero-logo-onu.png` e trocada no
+lugar do placeholder genérico (`s4-logo-1.png`, que tinha bastante
+margem transparente ao redor, por isso "sumia" dentro da caixa mesmo
+aumentando o container). `EImg`/`style` ajustados pro tamanho natural do
+arquivo (58×55, `objectFit: contain`) — como a imagem já vem sem
+sobra, não precisa mais confiar só no `object-fit` pra cortar espaço
+vazio.
+
+**3. Equilíbrio entre giro do card e deslize do conteúdo interno.** O
+Bruno notou que o conteúdo (texto/número) deslizava mais do que o card
+girava — mesmo com valores "pequenos" em px (`TILT_MAX_SHIFT=7`) vs
+graus (`TILT_MAX_ROT=12`), o deslize em px "lê" mais forte visualmente
+que a mesma proporção em graus de rotação (rotação tem alguma
+foreshortening/perspectiva que suaviza a leitura, translate é um
+deslocamento direto). Fix: `TILT_MAX_SHIFT` de 7 → **4**, mantendo
+`TILT_MAX_ROT` em 12 — testado despachando `PointerEvent` sintético
+perto da borda do card: rotação ~9°/-7°, deslize ~3px, proporção que o
+Bruno confirmou como equilibrada.
+
+**4. Jornada Global — legenda grudando no SVG maior + "Marco inicial"
+quebrando em 2 linhas.**
+- A legenda (nome + selo + subtítulo, abaixo do círculo) descia só
+  22px no hover pra desviar do círculo SVG decorativo que cresce
+  50% (`scale(1.5)`) — não era suficiente, ainda ficava colado. Subido
+  pra **42px** (+20px, valor exato pedido pelo Bruno).
+- "Marco inicial" (subtítulo da cidade-origem, Belo Horizonte) quebrava
+  no meio da frase porque o `<span>` do subtítulo é inline e ficava
+  fluindo logo depois do selo pill ("ORIGEM · DESDE 2017", também
+  inline-flex) na mesma linha — quando não cabia mais nada ao lado do
+  selo, o texto quebrava no meio da palavra em vez de ir inteiro pra
+  linha de baixo. Fix: `<span className="block whitespace-nowrap">` no
+  subtítulo — força a começar sempre numa nova linha (abaixo do selo,
+  nunca ao lado) e nunca quebra as duas palavras entre si.
+
+Verificado: hover disparado via `MouseEvent('mouseover', {bubbles:true})`
+no card da cidade (React 17+ delega `mouseenter`/`mouseleave` via
+`mouseover`/`mouseout` no root — esse é o disparo sintético que
+funciona pra esse tipo de handler, diferente do `pointermove` usado nos
+testes do tilt). `tsc -b` e `npm run build` (10 rotas) limpos, sem
+erros de console em nenhum dos 2 arquivos.
+
 ---
 
 ## Fluxo de trabalho esperado
@@ -1690,5 +1758,10 @@ sessão em que foram combinadas):**
    - Teste nos 4 breakpoints (1280 / 1440 / 1920 / 2560) sempre que a mudança afetar
      largura, quebra de linha ou posicionamento.
 5. Rode `npm run build` para validar que não quebrou nada antes de considerar concluído.
-6. Ao finalizar, ofereça rodar `git add / commit / push` — sempre pedindo confirmação
-   antes de qualquer ação que envie algo para fora (GitHub).
+6. **Suba um preview em localhost (`preview_start`) e mande o link pro Bruno testar
+   primeiro** — não faça `git add / commit / push` nem dispare o deploy hook do
+   Vercel automaticamente. Só integrar e subir pra produção quando o Bruno der um
+   sinal explícito de aprovação (ex: "pode subir", "tá ótimo, sobe"). Regra pedida
+   pelo próprio Bruno em 2026-07-21, pra poder testar mudanças com agilidade em
+   localhost e pra nunca mandar nada de teste pro ar sem querer depois que o site
+   estiver em produção de verdade.

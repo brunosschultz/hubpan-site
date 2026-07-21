@@ -53,11 +53,12 @@ const HERO_BG_SPEC = { w: 2560, h: 1440, shape: 'paisagem' as const, note: 'Tela
 /* Ajustes do efeito dos glass cards — mexer só nesses números pra regular
  * a "força" (o Bruno já pediu isso 1x, deixa fácil de achar da próxima). */
 const TILT_MAX_ROT = 12;     // graus — o quanto o card gira quando o cursor está bem perto
-const TILT_MAX_SHIFT = 7;    // px — quanto o conteúdo interno desliza por cima do card
+const TILT_MAX_SHIFT = 4;    // px — quanto o conteúdo interno desliza por cima do card
+                              // (mantido bem menor que o giro do card — o deslize em px "lê"
+                              // mais forte visualmente que o mesmo tanto em graus de rotação,
+                              // por isso precisa de menos força pra sentir equilibrado)
 const TILT_FALLOFF = 420;    // px — distância (do centro do card) onde o efeito já chega a zero;
                               // menor = precisa do cursor bem mais perto pra sentir; maior = reage de mais longe
-const PULSE_SCALE = 1.025;   // "respiração" leve dos cards — 1 = sem pulsar, 1.05+ fica bem perceptível
-const PULSE_DURATION = 2.6;  // segundos por metade do ciclo — maior = mais lento/suave
 
 export default function S1Hero() {
   const ref = useRef<HTMLElement>(null);
@@ -77,23 +78,6 @@ export default function S1Hero() {
        * deslizar (y) pelo acabamento visual, sem esconder o conteúdo. */
       gsap.from('[data-hero-text]', { y: 20, duration: 0.6, stagger: 0.12, ease: 'power2.out', delay: 0.1 });
       gsap.from('[data-animate]', { opacity: 0, y: 15, scale: 0.95, duration: 0.5, stagger: 0.15, ease: 'power2.out', delay: 0.5 });
-
-      /* Pulsação leve, contínua, independente do tilt — GSAP soma
-       * `scale` (aqui) com `rotationX`/`rotationY` (no tilt abaixo) no
-       * mesmo elemento sem conflito, são propriedades de transform
-       * separadas internamente. `stagger` evita que os 4 pulsem em
-       * sincronia perfeita (fica mais orgânico). Dentro do gsap.context
-       * pra ser limpo automaticamente pelo ctx.revert() — é um tween
-       * infinito (`repeat: -1`), sem isso ficaria rodando pra sempre
-       * mesmo depois do componente desmontar. */
-      gsap.to('[data-tilt-card]', {
-        scale: PULSE_SCALE,
-        duration: PULSE_DURATION,
-        ease: 'sine.inOut',
-        yoyo: true,
-        repeat: -1,
-        stagger: { each: 0.4, from: 'start' },
-      });
     }, el);
 
     /* Cursor-driven perspective tilt — baseado no exemplo GSAP que o Bruno
@@ -211,10 +195,10 @@ export default function S1Hero() {
         </GlassCard>
         <GlassCard variant="pill" className="pointer-events-auto" style={{ right: '17%', top: '56%' }}>
           <EImg
-            k="s1.g2.logo" v="/images/s4-logo-1.png"
+            k="s1.g2.logo" v="/images/s1-hero-logo-onu.png"
             l="Hero — card flutuante 2, logo"
-            spec={{ w: 240, h: 240, shape: 'quadrada', fit: 'contain', note: 'Logo com fundo transparente (PNG ou SVG).' }}
-            style={{ width: 55, height: 55, objectFit: 'contain', flexShrink: 0 }}
+            spec={{ w: 58, h: 55, shape: 'quadrada', fit: 'contain', note: 'Logo com fundo transparente, já recortada sem margem (PNG ou SVG).' }}
+            style={{ width: 58, height: 55, objectFit: 'contain', flexShrink: 0 }}
             alt="Logo de parceiro institucional"
           />
           <ET k="s1.g2.lbl" v={'Presença\ninstitucional'} l="Hero — card flutuante 2, rótulo" multiline style={lbl} />

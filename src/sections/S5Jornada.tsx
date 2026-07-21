@@ -115,7 +115,7 @@ export default function S5Jornada() {
                   </div>
                   {/* Legenda desce suavemente no hover pra não ficar embaixo do
                    * globo decorativo, que cresce além da altura do holder acima. */}
-                  <div style={{ transform: isActive ? 'translateY(22px)' : 'translateY(0)', transition: 'transform 500ms ease-out' }}>
+                  <div style={{ transform: isActive ? 'translateY(42px)' : 'translateY(0)', transition: 'transform 500ms ease-out' }}>
                     <p style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: c.origin ? 28 : 24, lineHeight: '25px', color: c.origin ? '#2d4ebf' : '#152852', marginBottom: 6 }}>
                       <ET k={`s5.cidade.${c.id}.nome`} v={c.name} l={`Jornada — nome de ${c.name}`} />
                     </p>
@@ -124,7 +124,7 @@ export default function S5Jornada() {
                         <span className="inline-flex items-center justify-center px-3 py-1 mb-2" style={{ border: '1px solid #2d4ebf', borderRadius: 60, fontFamily: 'Inter', fontSize: 11, letterSpacing: '1.65px', textTransform: 'uppercase', color: '#2d4ebf' }}>
                           <ET k={`s5.cidade.${c.id}.label`} v={c.label} l={`Jornada — rótulo de ${c.name}`} />
                         </span>
-                        <span style={{ fontFamily: 'Inter', fontSize: 14, color: '#2d4ebf' }}>
+                        <span className="block whitespace-nowrap" style={{ fontFamily: 'Inter', fontSize: 14, color: '#2d4ebf' }}>
                           <ET k={`s5.cidade.${c.id}.sub`} v={c.sub} l={`Jornada — subtítulo de ${c.name}`} />
                         </span>
                       </>
