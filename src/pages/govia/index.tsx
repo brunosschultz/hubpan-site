@@ -198,7 +198,7 @@ function SecProblema() {
             </ERich>
           </p>
           <div className="flex flex-wrap gap-4" data-animate>
-            <HubButton size="lg" variant="navy" onClick={() => ScrollSmoother.get()?.scrollTo('#govia-planos', true)}>
+            <HubButton size="lg" variant="navy" onClick={() => ScrollSmoother.get()?.scrollTo('#govia-planos', true)} iconKey="govia.problema.cta.icone" iconLabel="Problema central — botão, ícone">
               <ET k="govia.problema.cta" v="Ver como contratar" l="Problema central — botão" />
             </HubButton>
           </div>
@@ -390,8 +390,8 @@ function SecObservatorio() {
             </span>
           </div>
           <div className="flex flex-wrap gap-4">
-            <Link to="/insights"><HubButton size="md" variant="lime"><ET k="govia.obs.cta.dados" v="Acessar dados" l="Observatório — botão Acessar dados" /></HubButton></Link>
-            <HubButton size="md" variant="outline-light"><ET k="govia.obs.cta.relatorio" v="Baixar relatório" l="Observatório — botão Baixar relatório" /></HubButton>
+            <Link to="/insights"><HubButton size="md" variant="lime" iconKey="govia.obs.cta.dados.icone" iconLabel="Observatório — botão Acessar dados, ícone"><ET k="govia.obs.cta.dados" v="Acessar dados" l="Observatório — botão Acessar dados" /></HubButton></Link>
+            <HubButton size="md" variant="outline-light" iconKey="govia.obs.cta.relatorio.icone" iconLabel="Observatório — botão Baixar relatório, ícone"><ET k="govia.obs.cta.relatorio" v="Baixar relatório" l="Observatório — botão Baixar relatório" /></HubButton>
           </div>
         </div>
         <div data-animate>
@@ -462,7 +462,7 @@ function PlanoCard({ p }: { p: (typeof PLANOS)[number] }) {
           </li>
         ))}
       </ul>
-      <HubButton size="md" variant={p.variant} className="w-full justify-center">
+      <HubButton size="md" variant={p.variant} className="w-full justify-center" iconKey={`govia.plano.${p.id}.cta.icone`} iconLabel={`Plano "${p.nome}" — botão, ícone`}>
         <ET k={`govia.plano.${p.id}.cta`} v="Solicitar proposta" l={`Plano "${p.nome}" — botão`} />
       </HubButton>
     </div>
@@ -559,7 +559,7 @@ function SecDemo() {
               {NECESSIDADES.map((n) => <option key={n}>{n}</option>)}
             </select>
             <input placeholder="Quantos servidores seriam beneficiados?" style={INPUT_STYLE} />
-            <HubButton size="md" variant="blue" className="w-full justify-center">
+            <HubButton size="md" variant="blue" className="w-full justify-center" iconKey="govia.demo.form.botao.icone" iconLabel="Demonstração — botão do formulário, ícone">
               <ET k="govia.demo.form.botao" v="Agendar demonstração gratuita" l="Demonstração — botão do formulário" />
             </HubButton>
             <p className="text-center" style={{ fontFamily: 'Inter', fontSize: 12.5, color: '#a7a4a4' }}>
@@ -688,9 +688,9 @@ function GovIAHero() {
         title={<ERich k="govia.hero.titulo" l="Hero — título">GovIA</ERich>}
         sub={<ERich k="govia.hero.sub" l="Hero — subtítulo">A primeira plataforma de inteligência artificial desenvolvida especificamente para municípios, estados e consórcios públicos brasileiros. Acesso a ferramentas, formação de servidores, conteúdo especializado e o Observatório de IA — tudo em uma assinatura institucional sem cartão de crédito.</ERich>}
         actions={<>
-          <HubButton size="lg" variant="lime" onClick={() => ScrollSmoother.get()?.scrollTo('#govia-form', true)}><ET k="govia.hero.cta.demo" v="Solicitar demonstração" l="Hero — botão Solicitar demonstração" /></HubButton>
-          <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#govia-planos', true)}><ET k="govia.hero.cta.planos" v="Ver planos" l="Hero — botão Ver planos" /></HubButton>
-          <HubButton size="lg" variant="outline-light" onClick={() => ScrollSmoother.get()?.scrollTo('#govia-obs', true)}><ET k="govia.hero.cta.observatorio" v="Observatório de IA" l="Hero — botão Observatório de IA" /></HubButton>
+          <HubButton size="lg" variant="lime" onClick={() => ScrollSmoother.get()?.scrollTo('#govia-form', true)} iconKey="govia.hero.cta.demo.icone" iconLabel="Hero — botão Solicitar demonstração, ícone"><ET k="govia.hero.cta.demo" v="Solicitar demonstração" l="Hero — botão Solicitar demonstração" /></HubButton>
+          <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#govia-planos', true)} iconKey="govia.hero.cta.planos.icone" iconLabel="Hero — botão Ver planos, ícone"><ET k="govia.hero.cta.planos" v="Ver planos" l="Hero — botão Ver planos" /></HubButton>
+          <HubButton size="lg" variant="outline-light" onClick={() => ScrollSmoother.get()?.scrollTo('#govia-obs', true)} iconKey="govia.hero.cta.observatorio.icone" iconLabel="Hero — botão Observatório de IA, ícone"><ET k="govia.hero.cta.observatorio" v="Observatório de IA" l="Hero — botão Observatório de IA" /></HubButton>
         </>}
         stats={STATS}
         strip={{ ...STRIP_THEMES.navy, bg: stripBg }}

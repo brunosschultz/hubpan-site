@@ -1090,6 +1090,61 @@ direto no elemento via JS confirmou que o comportamento real está
 correto, só a ferramenta de automação por coordenada que não estava
 achando o alvo certo.
 
+### Rodada 2 — cor+foto no hover de verdade, Ecossistema Fundador editável, ícone do botão
+
+O Bruno testou a rodada anterior e reportou 3 coisas: o fix da malha
+quadriculada funcionou, mas os cards com cor sólida que revelam foto no
+hover (Presença Global) continuaram não editáveis pelo clique real dele;
+achou mais uma seção sem nenhum gancho de editor (Ecossistema Fundador,
+"O HUB PAN"); e pediu, como regra permanente, que toda página nova e
+futuros projetos com editor nasçam 100% editáveis — incluindo o ícone
+(seta) dos botões, hoje fixo em todo `HubButton` do site.
+
+**Causa raiz real do bug de clique (não era falta de gancho)** — a foto
+de `TerritorioTile` (Presença Global) já era editável via `EImg`, mas a
+camada escura de hover (`bg-black/55`) e o bloco de texto/ícone do card
+são renderizados DEPOIS dela no DOM — ou seja, ficam por cima no
+empilhamento visual e interceptam o clique antes que ele alcance a foto.
+Mesmo clicando exatamente sobre a foto durante o hover, o alvo real do
+clique nunca era ela. **Regra permanente daqui pra frente**: todo fundo
+de card (sólido ou com imagem revelada só no hover) precisa de
+`useEditColor` no fundo E um `<BgEditChip>` dedicado e sempre visível
+para a imagem — nunca depender só de "clicar durante o hover" pra
+alcançar uma camada que pode estar coberta por outra. Aplicado em
+`TerritorioTile` (`src/pages/institucional/index.tsx`).
+
+**Ecossistema Fundador sem gancho nenhum** — confirmado por leitura
+direta: os 3 cards do topo (`FUNDADORAS`, constante JS pura) e o bloco
+lima do CTA final (`bg-lime` fixo) nunca tinham sido conectados ao
+editor. Corrigido extraindo dois componentes próprios,
+`FundadoraCard`/`FundadorCta` (hooks do editor não podem rodar dentro de
+um `.map()` inline — precisam de um componente de verdade), cada um com
+`useEditColor` só no fundo — mesma decisão de escopo do tile de Presença
+Global (só a cor de fundo, não o tema inteiro do card, pra não abrir
+brecha de quebrar contraste com o texto fixo).
+
+**Ícone do botão (seta) editável — capacidade nova em `HubButton`**
+(`src/components/HubButton.tsx`): props opcionais `iconKey`/`iconLabel`.
+Quando `iconKey` é passado, o ícone renderizado vira
+`<EIcon k={iconKey} l={iconLabel} defaultSize={...}>` envolvendo o
+`<ArrowIcon/>` de sempre como fallback — mesmo padrão já usado com
+sucesso em `GlassHoverCard`. A prop `icon` (override explícito e total,
+já existente) sempre ganha de `iconKey` se as duas forem passadas; sem
+nenhuma das duas, o botão renderiza exatamente como antes — **100%
+compatível com código antigo**, `iconKey` é aditivo.
+
+**Rollout mecânico nos 58 usos de `<HubButton>` do site** (19 arquivos)
+— cada botão ganhou `iconKey` com uma chave derivada da chave de texto
+já existente no mesmo botão (ex.: texto `k="s1.btn1"` → ícone
+`iconKey="s1.btn1.icone"`) e `iconLabel` seguindo o padrão "<rótulo do
+texto>, ícone". **3 exceções deliberadas, sem `iconKey`**: os 2 botões
+"CONECTE-SE" do NavBar (`withIcon={false}`, não renderizam ícone algum)
+e o botão "Assistir Vídeo" do Manifesto (`S2Manifesto.tsx`, usa
+`icon={<span>▶</span>}` — um ícone de play customizado, não a seta
+padrão, intencionalmente fora do sistema Lucide). Total confirmado por
+grep: 58 `<HubButton`, 55 `iconKey=`, 2 `withIcon={false}`, 1 `icon=`
+explícito — bate exatamente.
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no

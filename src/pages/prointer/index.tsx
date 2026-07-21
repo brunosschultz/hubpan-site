@@ -198,7 +198,7 @@ function PublicoCard({ p }: { p: (typeof PUBLICOS)[number] }) {
           ))}
         </ul>
         <div className="mt-auto">
-          <HubButton size="md" variant="blue">
+          <HubButton size="md" variant="blue" iconKey={`pro.publicos.${p.id}.btn.icone`} iconLabel={`Públicos — botão "${p.titulo}", ícone`}>
             <ET k={`pro.publicos.${p.id}.btn`} v="Quero me candidatar" l={`Públicos — botão "${p.titulo}"`} />
           </HubButton>
         </div>
@@ -413,7 +413,7 @@ function SecFormularios() {
               {NIVEIS_APOIO.map((n) => <option key={n}>{n}</option>)}
             </select>
             <textarea placeholder="Mensagem opcional" rows={3} style={{ ...INPUT_STYLE, height: 'auto', padding: '12px 16px', resize: 'vertical' }} />
-            <HubButton size="md" variant="blue" className="w-full justify-center">
+            <HubButton size="md" variant="blue" className="w-full justify-center" iconKey="pro.formularios.apoiar.btn.icone" iconLabel="Formulário Apoiar — botão, ícone">
               <ET k="pro.formularios.apoiar.btn" v="Apoiar o PROINTER" l="Formulário Apoiar — botão" />
             </HubButton>
           </div>
@@ -443,7 +443,7 @@ function SecFormularios() {
             <input placeholder="Cidade e estado" style={INPUT_STYLE} />
             <input placeholder="Escola ou negócio onde atua" style={INPUT_STYLE} />
             <textarea placeholder="Por que você deveria ser bolsista?" rows={3} style={{ ...INPUT_STYLE, height: 'auto', padding: '12px 16px', resize: 'vertical' }} />
-            <HubButton size="md" variant="lime" className="w-full justify-center">
+            <HubButton size="md" variant="lime" className="w-full justify-center" iconKey="pro.formularios.candidatar.btn.icone" iconLabel="Formulário Candidatar — botão, ícone">
               <ET k="pro.formularios.candidatar.btn" v="Enviar candidatura" l="Formulário Candidatar — botão" />
             </HubButton>
           </div>
@@ -535,13 +535,13 @@ export default function Prointer() {
             </div>
           }
           actions={<>
-            <HubButton size="lg" variant="lime" onClick={() => ScrollSmoother.get()?.scrollTo('#prointer-apoie', true)}>
+            <HubButton size="lg" variant="lime" onClick={() => ScrollSmoother.get()?.scrollTo('#prointer-apoie', true)} iconKey="pro.hero.btn.participar.icone" iconLabel="PROINTER — hero, botão Quero participar, ícone">
               <ET k="pro.hero.btn.participar" v="Quero participar" l="PROINTER — hero, botão Quero participar" />
             </HubButton>
-            <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#prointer-apoie', true)}>
+            <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#prointer-apoie', true)} iconKey="pro.hero.btn.apoiar.icone" iconLabel="PROINTER — hero, botão Apoiar o programa, ícone">
               <ET k="pro.hero.btn.apoiar" v="Apoiar o programa" l="PROINTER — hero, botão Apoiar o programa" />
             </HubButton>
-            <HubButton size="lg" variant="outline-light" onClick={() => ScrollSmoother.get()?.scrollTo('#prointer-organizacoes', true)}>
+            <HubButton size="lg" variant="outline-light" onClick={() => ScrollSmoother.get()?.scrollTo('#prointer-organizacoes', true)} iconKey="pro.hero.btn.empresa.icone" iconLabel="PROINTER — hero, botão Sou empresa ou governo, ícone">
               <ET k="pro.hero.btn.empresa" v="Sou empresa ou governo" l="PROINTER — hero, botão Sou empresa ou governo" />
             </HubButton>
           </>}

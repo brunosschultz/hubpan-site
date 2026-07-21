@@ -82,8 +82,8 @@ export default function S1Hero() {
           </ERich>
         </p>
         <div data-hero-text className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start pointer-events-auto self-start">
-          <HubButton size="lg" variant="blue"><ET k="s1.btn1" v="Conheça o Ecossistema" l="Hero — botão azul" /></HubButton>
-          <HubButton size="lg" variant="lime"><ET k="s1.btn2" v="Explorar Plataformas" l="Hero — botão lima" /></HubButton>
+          <HubButton size="lg" variant="blue" iconKey="s1.btn1.icone" iconLabel="Hero — botão azul, ícone"><ET k="s1.btn1" v="Conheça o Ecossistema" l="Hero — botão azul" /></HubButton>
+          <HubButton size="lg" variant="lime" iconKey="s1.btn2.icone" iconLabel="Hero — botão lima, ícone"><ET k="s1.btn2" v="Explorar Plataformas" l="Hero — botão lima" /></HubButton>
         </div>
       </div>
 

@@ -81,7 +81,7 @@ export default function NavBar() {
 
         {/* Botões desktop */}
         <div className="hidden lg:flex gap-3 ml-auto items-center">
-          <HubButton size="xs" variant="cyan"><ET k="nav.btn1" v="ACESSAR PORTAL" l="Menu — botão Acessar Portal" /></HubButton>
+          <HubButton size="xs" variant="cyan" iconKey="nav.btn1.icone" iconLabel="Menu — botão Acessar Portal, ícone"><ET k="nav.btn1" v="ACESSAR PORTAL" l="Menu — botão Acessar Portal" /></HubButton>
           <Link to="/contato">
             <HubButton size="xs" variant="navy" withIcon={false}><ET k="nav.btn2" v="CONECTE-SE" l="Menu — botão Conecte-se" /></HubButton>
           </Link>
@@ -120,7 +120,7 @@ export default function NavBar() {
               ))}
             </div>
             <div className="flex flex-col gap-3 mt-auto">
-              <HubButton size="sm" variant="cyan"><ET k="nav.btn1" v="ACESSAR PORTAL" l="Menu — botão Acessar Portal" /></HubButton>
+              <HubButton size="sm" variant="cyan" iconKey="nav.btn1.icone" iconLabel="Menu — botão Acessar Portal, ícone"><ET k="nav.btn1" v="ACESSAR PORTAL" l="Menu — botão Acessar Portal" /></HubButton>
               <Link to="/contato" onClick={() => setOpen(false)}>
                 <HubButton size="sm" variant="navy" withIcon={false}><ET k="nav.btn2" v="CONECTE-SE" l="Menu — botão Conecte-se" /></HubButton>
               </Link>

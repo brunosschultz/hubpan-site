@@ -182,8 +182,8 @@ function HeroInst() {
             </ERich>
           </p>
           <div className="flex flex-wrap gap-4" data-animate>
-            <Link to="/contato"><HubButton size="lg" variant="lime"><ET k="inst.hero.btn.principal" v="Fale com nossa equipe" l="Hero institucional — botão principal" /></HubButton></Link>
-            <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#inst-manifesto', true)}>
+            <Link to="/contato"><HubButton size="lg" variant="lime" iconKey="inst.hero.btn.principal.icone" iconLabel="Hero institucional — botão principal, ícone"><ET k="inst.hero.btn.principal" v="Fale com nossa equipe" l="Hero institucional — botão principal" /></HubButton></Link>
+            <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#inst-manifesto', true)} iconKey="inst.hero.btn.secundario.icone" iconLabel="Hero institucional — botão secundário, ícone">
               <ET k="inst.hero.btn.secundario" v="Leia o manifesto" l="Hero institucional — botão secundário" />
             </HubButton>
           </div>
@@ -275,7 +275,7 @@ function SecManifesto() {
               </p>
             </div>
             <div data-animate>
-              <Link to="/contato"><HubButton size="lg" variant="navy"><ET k="inst.manifesto.btn" v="Fale com nossa equipe" l="Manifesto — botão" /></HubButton></Link>
+              <Link to="/contato"><HubButton size="lg" variant="navy" iconKey="inst.manifesto.btn.icone" iconLabel="Manifesto — botão, ícone"><ET k="inst.manifesto.btn" v="Fale com nossa equipe" l="Manifesto — botão" /></HubButton></Link>
             </div>
           </div>
         </div>
@@ -323,46 +323,58 @@ function SecFundador() {
       </div>
 
       <div className="grid md:grid-cols-3 gap-5 mb-5">
-        {FUNDADORAS.map((f) => (
-          <div key={f.id} className="rounded-[20px] p-8 flex flex-col" style={{ background: f.bg, border: f.bg === '#fff' ? '1px solid #ecedf0' : 'none' }} data-animate>
-            <div className="flex items-center justify-center mb-6" style={{ width: 56, height: 56, borderRadius: 14, background: f.iconBg }}>
-              <EIcon k={`inst.fundador.${f.id}.icone`} l={`Ecossistema Fundador — ícone "${f.nome}"`} defaultSize={28}>
-                <f.Icon size={28} strokeWidth={2} color={f.iconColor} />
-              </EIcon>
-            </div>
-            <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10.5, letterSpacing: '2px', textTransform: 'uppercase', color: f.tagColor }}>
-              <ET k={`inst.fundador.${f.id}.tag`} v={f.tag} l={`Ecossistema Fundador — selo "${f.nome}"`} />
-            </p>
-            <h3 className="mb-3" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 24, color: f.text }}>
-              <ET k={`inst.fundador.${f.id}.nome`} v={f.nome} l={`Ecossistema Fundador — nome "${f.nome}"`} />
-            </h3>
-            <p className="mb-6" style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '23px', color: f.sub }}>
-              <ERich k={`inst.fundador.${f.id}.desc`} l={`Ecossistema Fundador — descrição "${f.nome}"`}>{f.desc}</ERich>
-            </p>
-            <ul className="space-y-2 mt-auto">
-              {f.bullets.map((b, i) => (
-                <li key={b} className="flex items-start gap-3" style={{ fontFamily: 'Inter', fontSize: 13, lineHeight: '20px', color: f.sub }}>
-                  <span className="mt-[7px] shrink-0 w-[6px] h-[6px] rounded-full bg-lime" />
-                  <ET k={`inst.fundador.${f.id}.bullet.${i}`} v={b} l={`Ecossistema Fundador — item ${i + 1} "${f.nome}"`} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        {FUNDADORAS.map((f) => <FundadoraCard key={f.id} f={f} />)}
       </div>
 
-      <div className="rounded-[20px] bg-lime p-8 lg:p-10 flex flex-col lg:flex-row lg:items-center gap-6" data-animate>
-        <p className="shrink-0" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 'clamp(32px,3vw,44px)', color: '#152852', whiteSpace: 'nowrap', lineHeight: 1 }}>
-          <ET k="inst.fundador.cta.marca" v="HUB PAN" l="Ecossistema Fundador — bloco final, wordmark" />
-        </p>
-        <div className="hidden lg:block w-px self-stretch" style={{ background: 'rgba(21,40,82,0.25)' }} />
-        <p style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: '#152852' }}>
-          <ERich k="inst.fundador.cta.desc" l="Ecossistema Fundador — bloco final, texto">
-            <strong>O guarda-chuva global</strong> que organiza, reposiciona e escala tudo que já foi construído. Narrativa global, capilaridade, expansão, negócios, comunidade e futuro compartilhado entre Américas e África.
-          </ERich>
-        </p>
-      </div>
+      <FundadorCta />
     </section>
+  );
+}
+
+function FundadoraCard({ f }: { f: (typeof FUNDADORAS)[number] }) {
+  const [bg, bgProps] = useEditColor(`inst.fundador.${f.id}.bg`, f.bg, `Ecossistema Fundador — fundo "${f.nome}"`);
+  return (
+    <div className="rounded-[20px] p-8 flex flex-col" style={{ background: bg, border: bg === '#fff' ? '1px solid #ecedf0' : 'none' }} data-animate {...bgProps}>
+      <div className="flex items-center justify-center mb-6" style={{ width: 56, height: 56, borderRadius: 14, background: f.iconBg }}>
+        <EIcon k={`inst.fundador.${f.id}.icone`} l={`Ecossistema Fundador — ícone "${f.nome}"`} defaultSize={28}>
+          <f.Icon size={28} strokeWidth={2} color={f.iconColor} />
+        </EIcon>
+      </div>
+      <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10.5, letterSpacing: '2px', textTransform: 'uppercase', color: f.tagColor }}>
+        <ET k={`inst.fundador.${f.id}.tag`} v={f.tag} l={`Ecossistema Fundador — selo "${f.nome}"`} />
+      </p>
+      <h3 className="mb-3" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 24, color: f.text }}>
+        <ET k={`inst.fundador.${f.id}.nome`} v={f.nome} l={`Ecossistema Fundador — nome "${f.nome}"`} />
+      </h3>
+      <p className="mb-6" style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '23px', color: f.sub }}>
+        <ERich k={`inst.fundador.${f.id}.desc`} l={`Ecossistema Fundador — descrição "${f.nome}"`}>{f.desc}</ERich>
+      </p>
+      <ul className="space-y-2 mt-auto">
+        {f.bullets.map((b, i) => (
+          <li key={b} className="flex items-start gap-3" style={{ fontFamily: 'Inter', fontSize: 13, lineHeight: '20px', color: f.sub }}>
+            <span className="mt-[7px] shrink-0 w-[6px] h-[6px] rounded-full bg-lime" />
+            <ET k={`inst.fundador.${f.id}.bullet.${i}`} v={b} l={`Ecossistema Fundador — item ${i + 1} "${f.nome}"`} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function FundadorCta() {
+  const [bg, bgProps] = useEditColor('inst.fundador.cta.bg', '#d2e718', 'Ecossistema Fundador — bloco final, fundo');
+  return (
+    <div className="rounded-[20px] p-8 lg:p-10 flex flex-col lg:flex-row lg:items-center gap-6" style={{ background: bg }} data-animate {...bgProps}>
+      <p className="shrink-0" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 'clamp(32px,3vw,44px)', color: '#152852', whiteSpace: 'nowrap', lineHeight: 1 }}>
+        <ET k="inst.fundador.cta.marca" v="HUB PAN" l="Ecossistema Fundador — bloco final, wordmark" />
+      </p>
+      <div className="hidden lg:block w-px self-stretch" style={{ background: 'rgba(21,40,82,0.25)' }} />
+      <p style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: '#152852' }}>
+        <ERich k="inst.fundador.cta.desc" l="Ecossistema Fundador — bloco final, texto">
+          <strong>O guarda-chuva global</strong> que organiza, reposiciona e escala tudo que já foi construído. Narrativa global, capilaridade, expansão, negócios, comunidade e futuro compartilhado entre Américas e África.
+        </ERich>
+      </p>
+    </div>
   );
 }
 
@@ -452,6 +464,15 @@ function TerritorioTile({ t, className = '' }: { t: Tile; className?: string }) 
         className="absolute inset-0 w-full h-full object-cover opacity-0 scale-110 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:scale-100"
       />
       <div className="absolute inset-0 bg-black/55 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      {/* A camada escura acima fica por cima da foto no clique (mesmo com o
+       * mouse em cima) — sem esse chip, não existe caminho de clique
+       * confiável até o painel de imagem, só até o de cor. */}
+      <BgEditChip
+        k={`inst.territorio.${t.id}.img`} v={`/images/${t.img}.webp`}
+        l={`Presença Global — foto "${t.nome}" (revelada no hover)`}
+        spec={{ w: 900, h: 900, shape: 'quadrada', note: 'Só aparece quando o mouse passa por cima do card.' }}
+        style={{ bottom: 12, right: 12, height: 30, fontSize: 11 }}
+      />
 
       <div className="relative h-full flex flex-col p-6">
         {/* Ícone — some quando a foto aparece */}
@@ -665,7 +686,7 @@ function SecMipad() {
             </span>
           </div>
           <div data-animate>
-            <HubButton size="md" variant="lime"><ET k="inst.mipad.btn" v="Saiba mais sobre o MIPAD" l="MIPAD — botão" /></HubButton>
+            <HubButton size="md" variant="lime" iconKey="inst.mipad.btn.icone" iconLabel="MIPAD — botão, ícone"><ET k="inst.mipad.btn" v="Saiba mais sobre o MIPAD" l="MIPAD — botão" /></HubButton>
           </div>
         </div>
 
@@ -815,7 +836,7 @@ function SecGovernanca() {
               Todo o conteúdo, metodologias, programas, marcas e ativos digitais do ecossistema HUB PAN são protegidos por registro de propriedade intelectual e por políticas internas de uso e licenciamento. Parceiros e patrocinadores recebem autorização formal e documentada de uso.
             </ERich>
           </p>
-          <HubButton size="sm" variant="lime"><ET k="inst.governanca.pi.btn" v="Ver política de governança" l="Governança — botão Propriedade Intelectual" /></HubButton>
+          <HubButton size="sm" variant="lime" iconKey="inst.governanca.pi.btn.icone" iconLabel="Governança — botão Propriedade Intelectual, ícone"><ET k="inst.governanca.pi.btn" v="Ver política de governança" l="Governança — botão Propriedade Intelectual" /></HubButton>
         </div>
       </div>
     </section>
@@ -870,8 +891,8 @@ export default function Institucional() {
         sub={<ET k="inst.cta.sub" v="Seja como governo, empresa, educador, investidor ou comunidade — há um caminho para você no HUB PAN." l="CTA final — subtítulo" />}
         actions={
           <>
-            <Link to="/contato"><HubButton size="lg" variant="lime"><ET k="inst.cta.btn.principal" v="Fale com nossa equipe" l="CTA final — botão principal" /></HubButton></Link>
-            <Link to="/prointer"><HubButton size="lg" variant="navy"><ET k="inst.cta.btn.secundario" v="Conhecer o PROINTER" l="CTA final — botão secundário" /></HubButton></Link>
+            <Link to="/contato"><HubButton size="lg" variant="lime" iconKey="inst.cta.btn.principal.icone" iconLabel="CTA final — botão principal, ícone"><ET k="inst.cta.btn.principal" v="Fale com nossa equipe" l="CTA final — botão principal" /></HubButton></Link>
+            <Link to="/prointer"><HubButton size="lg" variant="navy" iconKey="inst.cta.btn.secundario.icone" iconLabel="CTA final — botão secundário, ícone"><ET k="inst.cta.btn.secundario" v="Conhecer o PROINTER" l="CTA final — botão secundário" /></HubButton></Link>
           </>
         }
       />

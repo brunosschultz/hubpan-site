@@ -126,7 +126,7 @@ export default function Glossario() {
           <p style={{ fontFamily: 'Inter', fontSize: 16, color: '#797979' }}>
             <ERich k="gloss.cta.texto" l="Glossário — texto de sugestão de termo">Não encontrou o termo que buscava? Sugira uma entrada para o glossário.</ERich>
           </p>
-          <Link to="/contato"><HubButton size="md" variant="navy"><ET k="gloss.cta.btn" v="Sugerir um termo" l="Glossário — botão de sugestão" /></HubButton></Link>
+          <Link to="/contato"><HubButton size="md" variant="navy" iconKey="gloss.cta.btn.icone" iconLabel="Glossário — botão de sugestão, ícone"><ET k="gloss.cta.btn" v="Sugerir um termo" l="Glossário — botão de sugestão" /></HubButton></Link>
         </div>
       </section>
     </>

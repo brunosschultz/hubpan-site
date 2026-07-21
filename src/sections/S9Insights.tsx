@@ -25,7 +25,7 @@ export default function S9Insights() {
           </h2>
         </div>
         <div data-animate>
-          <HubButton size="md" variant="blue">
+          <HubButton size="md" variant="blue" iconKey="s9.btn.icone" iconLabel="Insights — botão, ícone">
             <ET k="s9.btn" v="Ver todos" l="Insights — botão" />
           </HubButton>
         </div>

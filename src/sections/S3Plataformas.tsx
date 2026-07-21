@@ -70,7 +70,7 @@ function AccordionCard({ item, active, onHover }: { item: AccItem; active: boole
           <>
             <div style={{ flex: 1 }} />
             <div className="mt-2">
-              <HubButton size="md" variant="blue" circleColor="#d2e718" arrowColor="#152852">
+              <HubButton size="md" variant="blue" circleColor="#d2e718" arrowColor="#152852" iconKey={`s3.acc.${item.id}.btn.icone`} iconLabel={`Plataformas — ${nome}, botão, ícone`}>
                 <ET k={`s3.acc.${item.id}.btn`} v={item.buttonText} l={`Plataformas — ${nome}, botão`} />
               </HubButton>
             </div>
@@ -163,6 +163,8 @@ function PlatformCard({ c }: { c: PlatCard }) {
           arrowColor={c.btnArrow}
           circleSize={36}
           arrowSize={13}
+          iconKey={`s3.plat.${c.id}.btn.icone`}
+          iconLabel={`Card ${c.name} — botão, ícone`}
         >
           <ET k={`s3.plat.${c.id}.btn`} v="Explorar" l={`Card ${c.name} — botão`} />
         </HubButton>

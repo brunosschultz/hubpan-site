@@ -52,7 +52,7 @@ export default function S4Autoridade() {
           </div>
 
           <div data-animate>
-            <HubButton size="lg" variant="lime">
+            <HubButton size="lg" variant="lime" iconKey="s4.btn.icone" iconLabel="Autoridade — botão, ícone">
               <ET k="s4.btn" v="Conheça a nossa História" l="Autoridade — botão" />
             </HubButton>
           </div>

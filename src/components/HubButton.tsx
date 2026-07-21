@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import ArrowIcon from './ArrowIcon';
+import { EIcon } from '../editor/fields';
 
 type Size = 'lg' | 'md' | 'sm' | 'xs';
 type Variant = 'blue' | 'lime' | 'navy' | 'cyan' | 'outline-light' | 'outline-dark';
@@ -19,8 +20,14 @@ interface HubButtonProps {
   circleSize?: number;
   /** Sobrescreve o tamanho da seta (px) */
   arrowSize?: number;
-  /** Ícone customizado no lugar da seta (ex: Play) */
+  /** Ícone customizado no lugar da seta (ex: Play) — sobrescreve `iconKey` se os dois forem passados */
   icon?: ReactNode;
+  /** Chave editável do ícone (abre o seletor de ícones Lucide no editor) —
+   * cada botão do site precisa de uma chave única. Sem essa prop, o botão
+   * continua com a seta fixa de sempre (compatível com uso já existente). */
+  iconKey?: string;
+  /** Rótulo mostrado no painel do editor pra esse ícone — obrigatório junto com `iconKey` */
+  iconLabel?: string;
   className?: string;
   onClick?: () => void;
   as?: 'button' | 'a';
@@ -59,6 +66,8 @@ export default function HubButton({
   circleSize,
   arrowSize,
   icon,
+  iconKey,
+  iconLabel,
   className = '',
   onClick,
   as = 'button',
@@ -66,6 +75,12 @@ export default function HubButton({
 }: HubButtonProps) {
   const s = SCALES[size];
   const v = VARIANTS[variant];
+  const defaultArrow = <ArrowIcon color={arrowColor ?? v.arrow} size={arrowSize ?? s.arrow} />;
+  const resolvedIcon = icon ?? (iconKey ? (
+    <EIcon k={iconKey} l={iconLabel ?? 'Ícone do botão'} defaultSize={arrowSize ?? s.arrow}>
+      {defaultArrow}
+    </EIcon>
+  ) : defaultArrow);
 
   const style: React.CSSProperties = {
     height: s.height,
@@ -101,7 +116,7 @@ export default function HubButton({
       <span>{children}</span>
       {withIcon && (
         <span style={circle}>
-          {icon ?? <ArrowIcon color={arrowColor ?? v.arrow} size={arrowSize ?? s.arrow} />}
+          {resolvedIcon}
         </span>
       )}
     </>
