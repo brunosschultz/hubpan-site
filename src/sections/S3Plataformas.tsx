@@ -141,10 +141,18 @@ const PLAT_TO: Record<string, string | undefined> = { insights: '/insights' };
 function PlatformCard({ c }: { c: PlatCard }) {
   const [bg, bgProps] = useEditColor(`s3.plat.${c.id}.bg`, c.bg, `Card ${c.name} — cor de fundo`, `Card HUB PAN ${c.name}`);
   const to = PLAT_TO[c.id];
+  /* Cor do texto é inline (varia por card) — Tailwind `group-hover:` não
+   * consegue sobrescrever inline style (especificidade), então o contraste
+   * no hover precisa de estado real (mesmo padrão já usado em S5Jornada
+   * pra casos parecidos), não CSS puro. */
+  const [hovered, setHovered] = useState(false);
+  const txt = (fallback: string) => (hovered ? '#fff' : fallback);
   return (
     <div
       className="group relative overflow-hidden flex flex-col"
       {...bgProps}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{ background: bg, borderRadius: 17, height: 372, padding: '36px 68px 48px 67px', border: bg === '#fff' ? '1px solid #ecedf0' : undefined }}
       data-animate
     >
@@ -168,26 +176,26 @@ function PlatformCard({ c }: { c: PlatCard }) {
         style={{ bottom: 12, right: 12, height: 30, fontSize: 11 }}
       />
 
-      {/* Conteúdo original — some no hover pra foto tomar conta (cores de
-       * texto são inline por card, não dá pra virar branco via Tailwind) */}
-      <div className="relative z-10 flex flex-col flex-1 transition-opacity duration-300 group-hover:opacity-0">
+      {/* Conteúdo continua visível no hover (pedido explícito do Bruno —
+       * só o contraste da cor muda, pra continuar legível sobre a foto) */}
+      <div className="relative z-10 flex flex-col flex-1">
         {/* gap ícone→rótulo varia por card p/ manter o rótulo sempre na mesma altura, como no Figma */}
         <EIcon k={`s3.plat.${c.id}.icone`} l={`Card ${c.name} — ícone`} defaultSize={c.iconSize} className="self-start" style={{ marginBottom: 75 - c.iconSize }}>
           <img src={c.icon} alt="" style={{ width: c.iconSize, height: c.iconSize }} />
         </EIcon>
-        <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11.9, letterSpacing: '3.58px', textTransform: 'uppercase', color: c.labelColor, marginBottom: 18 }}>
+        <p className="transition-colors duration-300" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11.9, letterSpacing: '3.58px', textTransform: 'uppercase', color: txt(c.labelColor), marginBottom: 18 }}>
           <ET k={`s3.plat.${c.id}.label`} v={c.label} l={`Card ${c.name} — selo`} />
         </p>
         <p style={{ marginBottom: 13 }}>
-          <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 30, color: c.hubColor }}>
+          <span className="transition-colors duration-300" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 30, color: txt(c.hubColor) }}>
             <ET k="s3.plat.marca" v="HUB PAN" l="Cards de plataforma — marca" />
           </span>{' '}
-          <span style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: 20, color: c.nameColor }}>
+          <span className="transition-colors duration-300" style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: 20, color: txt(c.nameColor) }}>
             <ET k={`s3.plat.${c.id}.nome`} v={c.name} l={`Card ${c.name} — nome`} />
           </span>
         </p>
         {/* margin-bottom:auto empurra o resto pro fim do bloco, independente do nº de linhas da descrição */}
-        <p style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '21px', color: c.descColor, marginBottom: 'auto' }}>
+        <p className="transition-colors duration-300" style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '21px', color: txt(c.descColor), marginBottom: 'auto' }}>
           <ERich k={`s3.plat.${c.id}.desc`} l={`Card ${c.name} — descrição`}>
             {c.desc}
           </ERich>

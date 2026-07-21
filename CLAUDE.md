@@ -1482,6 +1482,71 @@ efeito pela ESTRUTURA renderizada em vez de tentar disparar o hover:
 como filhos do card certo, `transform: scale(1)` (repouso) no SVG da
 Jornada. `tsc -b` e `npm run build` (10 rotas) limpos.
 
+### Correção — tilt do Hero (não acontecia) e conteúdo some no hover das Plataformas
+
+O Bruno testou e reportou dois problemas reais nos ajustes acima:
+
+**1. Tilt do Hero não funcionava, e devia ser individual por card.** A
+1ª tentativa usava `useTilt()` (hook já existente) COM seu comportamento
+original: só reage dentro de um `mouseenter/mousemove/mouseleave` restrito
+à área do próprio card — um alvo pequeno (233×115px) difícil de acertar,
+e ainda por cima competia com um parallax de CAMADA ÚNICA (um wrapper só,
+movendo os 4 cards juntos) que eu tinha adicionado por cima — daí o
+"em conjunto" que o Bruno rejeitou. O Bruno passou um exemplo real do
+GSAP (CodePen) que usa um modelo diferente: UM listener de `pointermove`
+no container PAI inteiro, não por elemento — e cada elemento calcula sua
+própria transformação a partir da posição do cursor NA TELA.
+
+**Fix, em `S1Hero.tsx`** — reescrito do zero seguindo esse modelo, mas
+adaptado pra 4 elementos reagirem de forma INDEPENDENTE (o exemplo do
+Bruno só tinha 1 elemento):
+- `gsap.set(el, { perspective: 800 })` no `<section>` inteiro (perspectiva
+  do PAI, como no exemplo — diferente do `useTilt.ts` original, que seta
+  `transformPerspective` em cada elemento individualmente).
+- Cada `GlassCard` ganha `data-tilt-card` (o card, gira) e
+  `data-tilt-inner` (um wrapper novo por dentro, desliza em x/y) — 2
+  camadas de profundidade, igual ao outer/inner do exemplo do Bruno
+  (lá: `.logo-outer` gira, `.logo` desliza por cima).
+- UM ÚNICO listener de `pointermove` no `<section>` inteiro (não mais
+  por card) — o efeito reage em QUALQUER lugar do Hero, não só quando o
+  cursor acerta o card pequeno. Isso sozinho já resolve o "não
+  aconteceu".
+- Cada card mantém seu PRÓPRIO par de `gsap.quickTo` (`rotationX`/
+  `rotationY` no card, `x`/`y` no `data-tilt-inner`) — a cada
+  `pointermove`, o código itera os 4 cards e calcula a rotação de CADA
+  UM a partir da posição do cursor relativa ao RETÂNGULO DAQUELE card
+  específico (não uma fórmula global única aplicada a todos) — por isso
+  cada card tilta diferente ao mesmo tempo (confirmado testando:
+  despachando um `PointerEvent` sintético direto no `<section>`, os 4
+  cards mostraram `rotateY` DIFERENTES entre si na mesma leitura). O
+  retângulo de cada card é cacheado uma vez (só recalculado no
+  `resize`), não a cada `pointermove` — mesmo cuidado de reflow do
+  `useTilt.ts` original.
+- **Achado real de teste**: a ferramenta de automação de clique/hover
+  (`computer` tool) não dispara `pointermove` de verdade nem em
+  coordenada exata — confirmado despachando um `PointerEvent` sintético
+  direto via `dispatchEvent()` no elemento, que SIM ativou o efeito
+  corretamente (`transform: rotateY(...) rotateX(...)` aplicado,
+  valores diferentes por card). Ou seja, o código está certo — é mais
+  uma limitação da ferramenta de automação (já documentada nesta mesma
+  seção, mesma causa da limitação de `:hover`), não um bug real do
+  site. Testar com o mouse de verdade é a única forma confiável aqui.
+
+**2. Cards de Plataformas: conteúdo NÃO deve sumir no hover, só o
+contraste da cor.** Minha primeira versão fazia o bloco de texto inteiro
+sumir (`group-hover:opacity-0`) achando que resolvia o problema de
+contraste (cores são inline por card, `group-hover:text-white` do
+Tailwind não vence `style` inline). O Bruno foi claro: quer o texto
+sempre visível, só a COR ajustada quando precisar de contraste. **Fix**:
+trocado pra um estado local (`const [hovered, setHovered] = useState(false)`,
+`onMouseEnter`/`onMouseLeave` no card — mesmo padrão já usado em
+`S5Jornada.tsx` pra casos parecidos, já que só JS consegue sobrescrever
+um `style` inline dinamicamente) — cada texto usa
+`color: hovered ? '#fff' : c.corOriginal` com `transition-colors
+duration-300`. Removido o `group-hover:opacity-0` do bloco de conteúdo.
+Testado: a estrutura confirma que o wrapper de conteúdo não tem mais
+classe de opacidade nenhuma.
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no

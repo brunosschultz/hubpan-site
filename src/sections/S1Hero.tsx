@@ -2,11 +2,14 @@ import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import HubButton from '../components/HubButton';
-import { useTilt } from '../components/useTilt';
 import { BgEditChip, EImg, ERich, ET, useEditImage } from '../editor/fields';
 
-/* Glass card — pill ou accent. Perspectiva 3D no cursor via useTilt (mesmo
- * hook já usado em ~10 outros lugares do site). */
+/* Glass card — pill ou accent. `data-tilt-card`/`data-tilt-inner` marcam os
+ * dois níveis do efeito de profundidade (ver useLayoutEffect do S1Hero,
+ * abaixo): o card inteiro gira (rotationX/Y) e o conteúdo dentro dele
+ * desliza um pouco por cima (x/y) — mesma dupla camada do exemplo GSAP que
+ * o Bruno passou (outer = rotação, inner = translate), só adaptada pra 4
+ * cards reagindo cada um à SUA própria posição na tela, não em conjunto. */
 function GlassCard({
   variant, accent, children, className = '', style,
 }: {
@@ -16,11 +19,10 @@ function GlassCard({
   className?: string;
   style?: React.CSSProperties;
 }) {
-  const tiltRef = useTilt<HTMLDivElement>(5, 7);
   return (
     <div
-      ref={tiltRef}
-      className={`absolute flex items-center justify-center gap-[14px] px-5 ${className}`}
+      data-tilt-card
+      className={`absolute ${className}`}
       style={{
         width: 233, height: 115,
         backdropFilter: 'blur(17.6px)', WebkitBackdropFilter: 'blur(17.6px)',
@@ -36,7 +38,9 @@ function GlassCard({
       }}
       data-animate
     >
-      {children}
+      <div data-tilt-inner className="w-full h-full flex items-center justify-center gap-[14px] px-5">
+        {children}
+      </div>
     </div>
   );
 }
@@ -48,7 +52,6 @@ const HERO_BG_SPEC = { w: 2560, h: 1440, shape: 'paisagem' as const, note: 'Tela
 
 export default function S1Hero() {
   const ref = useRef<HTMLElement>(null);
-  const cardsWrapRef = useRef<HTMLDivElement>(null);
   const [bgSrc, bgProps] = useEditImage('s1.bg', '/images/s1-hero-bg.webp', 'Hero — imagem de fundo', HERO_BG_SPEC);
 
   useLayoutEffect(() => {
@@ -67,38 +70,65 @@ export default function S1Hero() {
       gsap.from('[data-animate]', { opacity: 0, y: 15, scale: 0.95, duration: 0.5, stagger: 0.15, ease: 'power2.out', delay: 0.5 });
     }, el);
 
-    /* Parallax leve na camada inteira dos 4 glass cards — segue o cursor
-     * conforme ele se move em QUALQUER lugar do Hero (não só sobre um card,
-     * isso é o tilt do useTilt em cada card). Mesma técnica do useTilt.ts:
-     * gsap.quickTo + retângulo cacheado só no mouseenter, pra não forçar
-     * reflow a cada mousemove. Fica FORA do gsap.context porque seu cleanup
-     * é de listeners DOM, não de tweens/timelines — ctx.revert() não sabe
-     * removê-los. */
-    const wrap = cardsWrapRef.current;
-    let cleanupParallax: (() => void) | undefined;
-    if (wrap) {
-      const AMPLITUDE = 10;
-      const px = gsap.quickTo(wrap, 'x', { duration: 0.6, ease: 'power2.out' });
-      const py = gsap.quickTo(wrap, 'y', { duration: 0.6, ease: 'power2.out' });
-      let rect: DOMRect | null = null;
-      const onEnter = () => { rect = el.getBoundingClientRect(); };
-      const onMove = (e: MouseEvent) => {
-        if (!rect) rect = el.getBoundingClientRect();
-        px(((e.clientX - rect.left) / rect.width - 0.5) * AMPLITUDE);
-        py(((e.clientY - rect.top) / rect.height - 0.5) * AMPLITUDE);
+    /* Cursor-driven perspective tilt — baseado no exemplo GSAP que o Bruno
+     * passou (perspective no container pai + rotationX/Y no card + x/y no
+     * conteúdo interno = sensação real de profundidade em 2 camadas).
+     * Diferenças importantes em relação à 1ª tentativa (não funcionou —
+     * ficava restrita a um `mouseenter/mousemove/mouseleave` só dentro do
+     * card pequeno, um alvo difícil de acertar): (1) o listener é único,
+     * em TODA a seção (`pointermove`), não por card — não precisa acertar
+     * o card pequeno pra o efeito reagir; (2) CADA card calcula sua PRÓPRIA
+     * rotação a partir da posição do cursor relativa à SUA própria posição
+     * na tela — cards diferentes tiltam diferente ao mesmo tempo
+     * (individual, não em conjunto como o parallax de camada única da
+     * tentativa anterior). O retângulo de cada card é cacheado uma vez
+     * (recalculado só no resize) — não são elementos que mudam de posição
+     * sozinhos, então não precisa reconsultar a cada movimento do mouse. */
+    let cleanupTilt: (() => void) | undefined;
+    const cardEls = Array.from(el.querySelectorAll<HTMLElement>('[data-tilt-card]'));
+    if (cardEls.length) {
+      gsap.set(el, { perspective: 800 });
+      const MAX_ROT = 12;   // graus — rotação do card inteiro
+      const MAX_SHIFT = 7;  // px — deslocamento do conteúdo interno (camada de cima)
+      const clamp = gsap.utils.clamp(-1, 1);
+      const trackers = cardEls.map((card) => {
+        const inner = card.querySelector<HTMLElement>('[data-tilt-inner]');
+        return {
+          card,
+          rect: card.getBoundingClientRect(),
+          rx: gsap.quickTo(card, 'rotationX', { duration: 0.6, ease: 'power3' }),
+          ry: gsap.quickTo(card, 'rotationY', { duration: 0.6, ease: 'power3' }),
+          ix: inner ? gsap.quickTo(inner, 'x', { duration: 0.6, ease: 'power3' }) : null,
+          iy: inner ? gsap.quickTo(inner, 'y', { duration: 0.6, ease: 'power3' }) : null,
+        };
+      });
+      const onMove = (e: PointerEvent) => {
+        for (const t of trackers) {
+          const nx = clamp(((e.clientX - t.rect.left) / t.rect.width - 0.5) * 2);
+          const ny = clamp(((e.clientY - t.rect.top) / t.rect.height - 0.5) * 2);
+          t.rx(-ny * MAX_ROT);
+          t.ry(nx * MAX_ROT);
+          t.ix?.(nx * MAX_SHIFT);
+          t.iy?.(ny * MAX_SHIFT);
+        }
       };
-      const onLeave = () => { px(0); py(0); rect = null; };
-      el.addEventListener('mouseenter', onEnter);
-      el.addEventListener('mousemove', onMove);
-      el.addEventListener('mouseleave', onLeave);
-      cleanupParallax = () => {
-        el.removeEventListener('mouseenter', onEnter);
-        el.removeEventListener('mousemove', onMove);
-        el.removeEventListener('mouseleave', onLeave);
+      const onLeave = () => {
+        for (const t of trackers) { t.rx(0); t.ry(0); t.ix?.(0); t.iy?.(0); }
+      };
+      const onResize = () => {
+        for (const t of trackers) t.rect = t.card.getBoundingClientRect();
+      };
+      el.addEventListener('pointermove', onMove);
+      el.addEventListener('pointerleave', onLeave);
+      window.addEventListener('resize', onResize);
+      cleanupTilt = () => {
+        el.removeEventListener('pointermove', onMove);
+        el.removeEventListener('pointerleave', onLeave);
+        window.removeEventListener('resize', onResize);
       };
     }
 
-    return () => { ctx.revert(); cleanupParallax?.(); };
+    return () => { ctx.revert(); cleanupTilt?.(); };
   }, []);
 
   return (
@@ -130,7 +160,7 @@ export default function S1Hero() {
       </div>
 
       {/* 4 Glass cards — posições % do Figma (só ≥lg) */}
-      <div ref={cardsWrapRef} className="hidden lg:block absolute inset-0 z-[6] pointer-events-none">
+      <div className="hidden lg:block absolute inset-0 z-[6] pointer-events-none">
         <GlassCard variant="accent" accent="#00e4ff" className="pointer-events-auto" style={{ right: '37.4%', top: '47.4%' }}>
           <span style={num}><ET k="s1.g1.num" v="10" l="Hero — card flutuante 1, número" /></span>
           <ET k="s1.g1.lbl" v={'Anos de\ntrajetória'} l="Hero — card flutuante 1, rótulo" multiline style={lbl} />
