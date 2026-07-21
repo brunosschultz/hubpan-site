@@ -258,10 +258,18 @@ public/
 - [x] Páginas internas criadas: PROINTER, GovIA, Fórum Mundial IA, Insights,
       Contato, Glossário, Imprensa e Casos de Uso — todas seguindo o padrão
       DESIGN-SYSTEM.md §5.5 (Hero80 compartilhado com faixa de cor por página).
-- [ ] Páginas futuras se aprovadas: Academy, Alliance, Manifesto/Legado próprios.
-- [ ] Conteúdo das páginas internas é proposta de copy — validar com o cliente
-      (números da faixa de stats, releases de imprensa e casos de uso são
-      ilustrativos e podem precisar de ajuste factual).
+- [ ] Páginas futuras se aprovadas: Academy, Alliance, Manifesto/Legado próprios
+      — hoje esses três só existem como card/seção dentro de outra página
+      (Academy e Alliance são 2 dos 4 cards de `S3Plataformas` na Home;
+      Manifesto é a seção `S2Manifesto` da Home) — nenhum dos três tem uma
+      URL/página dedicada própria, ao contrário de PROINTER/GovIA/WAIF/
+      Insights, que já são páginas completas. Só vira tarefa de verdade se o
+      Bruno decidir que quer uma página própria pra algum desses.
+- [x] Conteúdo das páginas internas — já corrigido bem antes desta sessão
+      (ver "Regra de ouro #2" no topo deste arquivo): o conteúdo inventado
+      inicialmente foi substituído pelo conteúdo real, extraído do wireframe
+      que o Bruno compartilhou. Item desatualizado na lista, não precisa de
+      ação — confirmado com o Bruno.
 - [ ] Ajustes finos de alinhamento em várias seções (em andamento, seção por seção).
 - [ ] Conectar o domínio do cliente na Vercel quando o site for aprovado.
 - [ ] Revogar/rotacionar qualquer token do GitHub que tenha sido exposto durante setup.
@@ -726,22 +734,23 @@ Testei sem chave e a cota diária anônima está zerada
 direto do navegador (`access-control-allow-origin` reflete a origem da
 chamada), então não precisou de proxy/Edge Function.
 
-**Passos que só o Bruno pode fazer** (pendente, feature já implantada mas
-inativa até isso ser feito — o botão fica desabilitado com uma mensagem
-explicando o motivo, nunca falha silenciosamente):
-1. Google Cloud Console → criar projeto (grátis, sem cartão) → ativar API
-   "PageSpeed Insights" → Credenciais → criar chave de API.
-2. Restringir a chave por domínio (`hubpan-site.vercel.app/*`) — ela fica
-   visível no JS público do site (é uma `VITE_*`, sempre bundled no
+**Passos que só o Bruno pode fazer** (os 3 primeiros, únicos que exigem
+conta/decisão pessoal dele — já feitos):
+1. [x] Google Cloud Console → criar projeto (grátis, sem cartão) → ativar
+   API "PageSpeed Insights" → Credenciais → criar chave de API.
+2. [x] Restringir a chave por domínio (`hubpan-site.vercel.app/*`) — ela
+   fica visível no JS público do site (é uma `VITE_*`, sempre bundled no
    cliente, mesmo padrão da chave anon do Supabase), então a restrição por
    domínio evita uso indevido por terceiros mesmo com a chave exposta
    (prática padrão pra chaves Google client-side, ex: Google Maps).
-3. Colar em `.env.local` como `VITE_PAGESPEED_API_KEY=...`.
-4. Adicionar a MESMA chave nas variáveis de ambiente do projeto na Vercel
-   (Dashboard → Settings → Environment Variables) — sem token equivalente
-   ao da Supabase configurado ainda pra essa parte, então esse passo
-   específico segue manual mesmo depois de tudo que automatizamos pra
-   Leads.
+3. [x] Colar em `.env.local` como `VITE_PAGESPEED_API_KEY=...`.
+4. [x] Adicionar a MESMA chave nas variáveis de ambiente do projeto na
+   Vercel (`vercel env add` via `VERCEL_TOKEN`, mesmo padrão de automação
+   já usado pra tudo mais nesse projeto — apesar do comentário antigo aqui
+   dizer que esse passo seguiria manual, o token da Vercel já dava conta
+   disso desde que foi criado; confirmado via `vercel env ls` que já
+   estava configurado em produção). Auditoria de Velocidade já está
+   ativa/funcional em produção.
 
 **Achado à parte, fora do escopo desta fase**: o build já mostra bundle de
 ~987 KB (acima do limite recomendado de 500 KB do Vite) — vai aparecer
