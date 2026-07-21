@@ -63,6 +63,8 @@ export const STRIP_THEMES: Record<'navy900' | 'blue' | 'navy' | 'lime' | 'light'
 };
 
 interface Hero80Props {
+  /** id estável pra âncora de scroll (seletor de link do editor) */
+  id?: string;
   img: string;
   imgAlt?: string;
   eyebrow: ReactNode;
@@ -88,10 +90,10 @@ function statsGridClass(n: number): string {
   return 'grid-cols-3 lg:grid-cols-6';
 }
 
-export default function Hero80({ img, imgAlt = '', eyebrow, title, sub, badge, actions, stats, strip, imgPosition, stripProps }: Hero80Props) {
+export default function Hero80({ id, img, imgAlt = '', eyebrow, title, sub, badge, actions, stats, strip, imgPosition, stripProps }: Hero80Props) {
   const ref = useReveal<HTMLElement>();
   return (
-    <section ref={ref} className="relative w-full">
+    <section ref={ref} id={id} className="relative w-full">
       <div className="relative w-full h-[80vh] min-h-[560px] flex items-center overflow-hidden">
         <img src={img} alt={imgAlt} className="absolute inset-0 w-full h-full object-cover" style={imgPosition ? { objectPosition: imgPosition } : undefined} />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(6,9,25,0.93) 0%, rgba(6,9,25,0.72) 45%, rgba(6,9,25,0.35) 100%)' }} />

@@ -157,13 +157,14 @@ export default function CasosDeUso() {
   return (
     <>
       <PageHero
+        id="casos-hero"
         bgKey="casos.hero"
         eyebrow={<ET k="casos.hero.eyebrow" v="CASOS DE USO · HISTÓRIAS DE IMPACTO · RESULTADOS REAIS" l="Casos de Uso — rótulo do hero" />}
         title={<ERich k="casos.hero.titulo" l="Casos de Uso — título do hero">O que o HUB PAN entrega na prática.</ERich>}
         sub={<ERich k="casos.hero.sub" l="Casos de Uso — subtítulo do hero">Não basta dizer que o ecossistema funciona. Aqui estão os dados, as histórias e os resultados documentados de quem já viveu o que o HUB PAN propõe.</ERich>}
       />
 
-      <section ref={ref} className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
+      <section ref={ref} id="casos-area" className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
         <div className="mb-10">
           <p className="eyebrow text-muted mb-6" data-animate><ET k="casos.secao.eyebrow" v="POR PLATAFORMA" l="Casos de Uso — selo da seção de filtros" /></p>
           <h2 className="mb-8" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(28px,3vw,38px)', letterSpacing: '-0.5px', lineHeight: 1.1, color: '#152852' }} data-animate>
@@ -188,7 +189,7 @@ export default function CasosDeUso() {
         </div>
       </section>
 
-      <section ref={perfilRef} className="py-20 gutter" {...perfisBgProps} style={{ background: perfisBg }}>
+      <section ref={perfilRef} id="casos-perfis" className="py-20 gutter" {...perfisBgProps} style={{ background: perfisBg }}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {PERFIS.map((p) => <PerfilCard key={p.id} p={p} />)}
         </div>

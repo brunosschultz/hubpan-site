@@ -60,6 +60,7 @@ export default function Imprensa() {
   return (
     <>
       <PageHero
+        id="imprensa-hero"
         bgKey="imprensa.hero"
         eyebrow={<ET k="imprensa.hero.eyebrow" v="SALA DE IMPRENSA · PRESS KIT · RELEASES · DADOS" l="Imprensa — rótulo do hero" />}
         title={<ERich k="imprensa.hero.titulo" l="Imprensa — título do hero">Imprensa & Mídia</ERich>}
@@ -70,7 +71,7 @@ export default function Imprensa() {
         </>}
       />
 
-      <section ref={ref} className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
+      <section ref={ref} id="imprensa-corpo" className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
         <div className="grid lg:grid-cols-[1.7fr_1fr] gap-14">
           {/* Coluna principal */}
           <div>

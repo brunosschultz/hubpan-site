@@ -18,7 +18,7 @@ export default function S6Numeros() {
   const [bg, bgProps] = useEditColor('s6.bg', '#ecedf0', 'Fundo da seção Números');
 
   return (
-    <section ref={ref} className="relative w-full pt-20 pb-[200px] gutter" {...bgProps} style={{ background: bg }}>
+    <section ref={ref} id="home-numeros" className="relative w-full pt-20 pb-[200px] gutter" {...bgProps} style={{ background: bg }}>
       <p className="eyebrow text-muted mb-6" data-animate>
         <ET k="s6.eyebrow" v="NÚMEROS VALIDADOS" l="Números — selo da seção" />
       </p>

@@ -60,7 +60,7 @@ export default function S1Hero() {
   }, []);
 
   return (
-    <section ref={ref} className="relative w-full h-screen min-h-[700px] overflow-hidden">
+    <section ref={ref} id="home-hero" className="relative w-full h-screen min-h-[700px] overflow-hidden">
       {/* BG */}
       <div className="absolute inset-0 bg-navy900" {...bgProps} style={{ backgroundImage: `url(${bgSrc})`, backgroundSize: 'cover', backgroundPosition: 'center right' }} />
       <BgEditChip k="s1.bg" v="/images/s1-hero-bg.webp" l="Hero — imagem de fundo" spec={HERO_BG_SPEC} style={{ bottom: 24, right: 24 }} />

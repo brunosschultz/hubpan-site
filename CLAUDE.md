@@ -1220,6 +1220,42 @@ removidos (`Glossario.tsx`, `insights/index.tsx`, `institucional/index.tsx`).
 reaproveitável): link editável em cards, imagens, ícones soltos ou
 texto — fica pra próxima rodada.
 
+### Seções nomeadas — âncora por dropdown em vez de texto livre
+
+O Bruno testou e reportou: o campo de âncora do link interno era um texto
+livre — sem saber os ids internos do código, ele não conseguia apontar
+pra uma seção específica da página (só pro topo). **Regra permanente daqui
+pra frente**: toda seção nova de qualquer página precisa de um `id="..."`
+estável E uma entrada correspondente em `PAGE_SECTIONS`
+(`src/editor/ui.tsx`) — senão ela simplesmente não aparece como opção no
+seletor, mesmo que role até lá funcionando via link direto.
+
+**O que mudou**: todo `<section>` (~55, nas 10 páginas + `S11Newsletter`,
+que é global — aparece em toda página via `AppShell`) ganhou um `id`
+estável (ex.: `home-manifesto`, `govia-planos`, `prointer-missao`) — os 8
+que já existiam (usados pelos botões com scroll-anchor) foram mantidos
+exatamente como estavam, só os novos foram adicionados. `Hero80.tsx`,
+`PageHero.tsx` e `CTABanner.tsx` (componentes compartilhados de
+hero/CTA) ganharam uma prop `id?: string` opcional, repassada direto pro
+`<section>` — sem isso não dava pra endereçar os heroes de PROINTER/
+GovIA/Fórum/Insights (todos via `Hero80`) nem os de Glossário/Imprensa/
+Casos de Uso (via `PageHero`).
+
+`PAGE_SECTIONS` (novo, `src/editor/ui.tsx`, ao lado de `INTERNAL_PAGES`)
+mapeia cada `path` das 10 páginas pra uma lista `{id, label}[]` com o
+rótulo em português de cada seção — `NEWSLETTER_SECTION` é adicionado no
+fim de todas as 10 listas (mesmo motivo do global). O painel
+`ButtonStyleBody` trocou o `<input>` de texto livre da âncora por um
+segundo `<select>`, populado a partir de `PAGE_SECTIONS[intPath]` — a
+lista de seções muda de acordo com a página escolhida no primeiro
+dropdown (troca de página reseta a âncora pra "Nenhuma", evita ficar com
+um id de outra página selecionado sem querer). Opção padrão "Nenhuma
+(topo da página)" = `''` = sem âncora, mesmo comportamento de antes.
+
+**Testado**: `http://localhost:5173/prointer#prointer-missao` carrega já
+na seção "A Missão", confirmando que os ids novos funcionam igual aos
+que já existiam.
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no

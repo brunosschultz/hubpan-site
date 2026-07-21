@@ -60,7 +60,7 @@ function SecFiltros() {
   const [ativo, setAtivo] = useState('Todos');
   const [bg, bgProps] = useEditColor('insights.filtros.bg', '#ffffff', 'Filtros — fundo da seção');
   return (
-    <section className="pt-14 pb-4 gutter" {...bgProps} style={{ background: bg }}>
+    <section id="insights-filtros" className="pt-14 pb-4 gutter" {...bgProps} style={{ background: bg }}>
       <p className="mb-4" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12, letterSpacing: '1.6px', textTransform: 'uppercase', color: '#a7a4a4' }}>
         <ET k="insights.filtros.label" v="Filtrar por" l="Insights — rótulo dos filtros" />
       </p>
@@ -90,7 +90,7 @@ function SecDestaque() {
   const [bg, bgProps] = useEditColor('insights.destaque.bg', '#ffffff', 'Destaque — fundo da seção');
   const [cardBg, cardBgProps] = useEditColor('insights.destaque.cardBg', '#ebebeb', 'Destaque — fundo do card', 'Card de destaque');
   return (
-    <section ref={ref} className="pt-14 pb-24 lg:pb-32 gutter" {...bgProps} style={{ background: bg }}>
+    <section ref={ref} id="insights-destaque" className="pt-14 pb-24 lg:pb-32 gutter" {...bgProps} style={{ background: bg }}>
       <p className="eyebrow text-muted mb-6" data-animate>
         <ET k="insights.destaque.eyebrow" v="DESTAQUE" l="Insights — selo da seção Destaque" />
       </p>
@@ -216,7 +216,7 @@ function SecObservatorios() {
   const ref = useReveal<HTMLElement>();
   const [bg, bgProps] = useEditColor('insights.observatorios.bg', '#ffffff', 'Observatórios — fundo da seção');
   return (
-    <section ref={ref} className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
+    <section ref={ref} id="insights-observatorios" className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
       <div className="mb-14 max-w-[700px]">
         <p className="eyebrow text-muted mb-6" data-animate>
           <ET k="insights.observatorios.eyebrow" v="OBSERVATÓRIOS TEMÁTICOS" l="Insights — selo da seção Observatórios" />
@@ -242,6 +242,7 @@ export default function Insights() {
   return (
     <>
       <Hero80
+        id="insights-hero"
         img="/images/insights-hero-globo.webp"
         imgAlt="Globo dourado na sede das Nações Unidas"
         eyebrow={<ET k="insights.hero.eyebrow" v="BLOG · OBSERVATÓRIOS · PESQUISAS · WHITE PAPERS" l="Insights — eyebrow do hero" />}

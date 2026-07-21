@@ -22,6 +22,7 @@ export default function S2Manifesto() {
   return (
     <section
       ref={ref}
+      id="home-manifesto"
       className="relative w-full overflow-hidden py-20 lg:py-0"
       {...bgProps}
       style={{ background: `linear-gradient(213deg, ${bgC1} 62.6%, ${bgC2} 100%)` }}

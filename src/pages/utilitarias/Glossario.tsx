@@ -83,12 +83,13 @@ export default function Glossario() {
   return (
     <>
       <PageHero
+        id="gloss-hero"
         bgKey="gloss.hero"
         eyebrow={<ET k="gloss.hero.eyebrow" v="REFERÊNCIA CONCEITUAL · INOVAÇÃO · IA · IMPACTO · COOPERAÇÃO" l="Glossário — rótulo do hero" />}
         title={<ERich k="gloss.hero.titulo" l="Glossário — título do hero">Glossário HUB PAN</ERich>}
         sub={<ERich k="gloss.hero.sub" l="Glossário — subtítulo do hero">Definições claras dos conceitos centrais do ecossistema — para que qualquer pessoa, independente do nível técnico, entenda o que o HUB PAN faz e por que faz.</ERich>}
       />
-      <section ref={ref} className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
+      <section ref={ref} id="gloss-lista" className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
         <div className="flex flex-wrap gap-3 mb-12" data-animate>
           {CATEGORIAS.map((c) => (
             <button

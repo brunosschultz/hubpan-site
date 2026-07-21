@@ -98,7 +98,7 @@ function SecProposito() {
     { key: 'pro.proposito.bg.2', label: 'Proposito — cor 2 (fim do gradiente)', fallback: '#d2e718' },
   ]);
   return (
-    <section ref={ref} className="relative w-full overflow-hidden" {...bgProps} style={{ background: `linear-gradient(39.8deg, ${bg[0]} 65.3%, ${bg[1]} 99%)` }}>
+    <section ref={ref} id="prointer-sobre" className="relative w-full overflow-hidden" {...bgProps} style={{ background: `linear-gradient(39.8deg, ${bg[0]} 65.3%, ${bg[1]} 99%)` }}>
       <div className="gutter grid lg:grid-cols-2 gap-12 lg:gap-16 py-20 lg:py-0 lg:h-screen items-center">
         <div className="lg:h-screen flex flex-col justify-center">
           <p className="eyebrow text-muted mb-6" data-animate><ET k="pro.proposito.eyebrow" v="O QUE É O PROINTER" l="Proposito — selo da seção" /></p>
@@ -229,7 +229,7 @@ function CitacaoCard() {
 function SecPublicos() {
   const ref = useReveal<HTMLElement>();
   return (
-    <section ref={ref} className="py-24 lg:py-32 gutter" style={{ background: '#f5f5f5' }}>
+    <section ref={ref} id="prointer-publicos" className="py-24 lg:py-32 gutter" style={{ background: '#f5f5f5' }}>
       <div className="mb-14 max-w-[700px]">
         <p className="eyebrow text-muted mb-6" data-animate><ET k="pro.publicos.eyebrow" v="PARA QUEM É O PROINTER" l="Públicos — selo da seção" /></p>
         <h2 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#152852' }} data-animate>
@@ -310,7 +310,7 @@ function SecMissao() {
   }, []);
 
   return (
-    <section className="pt-24 lg:pt-32 gutter bg-white overflow-hidden">
+    <section id="prointer-missao" className="pt-24 lg:pt-32 gutter bg-white overflow-hidden">
       <div ref={headRef} className="mb-16 max-w-[680px]">
         <p className="eyebrow text-muted mb-6" data-animate><ET k="pro.missao.eyebrow" v="A MISSÃO" l="Missão — selo da seção" /></p>
         <h2 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#152852' }} data-animate>
@@ -457,7 +457,7 @@ function SecFormularios() {
 
 function SecEcossistema() {
   return (
-    <section className="py-16 gutter bg-white">
+    <section id="prointer-ecossistema" className="py-16 gutter bg-white">
       <p className="mb-6" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12, letterSpacing: '1.6px', textTransform: 'uppercase', color: '#a7a4a4' }}>
         <ET k="pro.ecossistema.titulo" v="TAMBÉM NO ECOSSISTEMA HUB PAN" l="Ecossistema — título da faixa" />
       </p>
@@ -484,7 +484,7 @@ function SecEcossistema() {
 function SecFAQ() {
   const ref = useReveal<HTMLElement>();
   return (
-    <section ref={ref} className="py-24 lg:py-32 gutter bg-white">
+    <section ref={ref} id="prointer-faq" className="py-24 lg:py-32 gutter bg-white">
       <div className="grid lg:grid-cols-[1fr_1.4fr] gap-12">
         <div>
           <p className="eyebrow text-muted mb-6" data-animate><ET k="pro.faq.eyebrow" v="PERGUNTAS FREQUENTES" l="FAQ — selo da seção" /></p>
@@ -515,6 +515,7 @@ export default function Prointer() {
     <>
       <div style={{ position: 'relative' }}>
         <Hero80
+          id="prointer-hero"
           img={heroImg}
           imgAlt="Panorama de Cambridge, Massachusetts"
           eyebrow={<ET k="pro.hero.eyebrow" v="PROGRAMA DE INTERCÂMBIO E IMPACTO · ESG · ODS 4 · ODS 10 · ODS 17" l="Hero — eyebrow" />}

@@ -22,6 +22,105 @@ const INTERNAL_PAGES: { label: string; path: string }[] = [
   { label: 'Casos de Uso', path: '/casos-de-uso' },
 ];
 
+/** Seções reais de cada página (id do `<section>` + rótulo em português),
+ * pra escolher a âncora certa por dropdown em vez de digitar um id de
+ * cabeça — o Bruno não tem como saber os ids internos do código. Todo
+ * `id="..."` aqui precisa existir de verdade na página (ver `CLAUDE.md`,
+ * "Seções nomeadas"). `newsletter` aparece em TODAS as páginas porque a
+ * seção é renderizada globalmente (`AppShell`, fora do conteúdo da rota). */
+const NEWSLETTER_SECTION = { id: 'newsletter', label: 'Newsletter' };
+const PAGE_SECTIONS: Record<string, { id: string; label: string }[]> = {
+  '/': [
+    { id: 'home-hero', label: 'Hero' },
+    { id: 'home-manifesto', label: 'Manifesto Fundacional' },
+    { id: 'home-plataformas', label: 'Plataformas Estratégicas' },
+    { id: 'home-autoridade', label: 'Autoridade & Presença' },
+    { id: 'home-jornada', label: 'Jornada Global' },
+    { id: 'home-numeros', label: 'Números Validados' },
+    { id: 'home-para-quem', label: 'Para Quem é o HUB PAN' },
+    { id: 'home-governanca', label: 'Governança Global' },
+    { id: 'home-eco-fundador', label: 'Ecossistema Fundador' },
+    { id: 'home-insights', label: 'HUB PAN Insights' },
+    { id: 'home-parceiros', label: 'Parceiros Estratégicos' },
+    NEWSLETTER_SECTION,
+  ],
+  '/o-hub-pan': [
+    { id: 'inst-hero', label: 'Hero' },
+    { id: 'inst-manifesto', label: 'Manifesto Fundacional' },
+    { id: 'inst-fundador', label: 'Ecossistema Fundador' },
+    { id: 'inst-presenca', label: 'Presença Global' },
+    { id: 'inst-jornada', label: '10 Anos de Trajetória' },
+    { id: 'inst-mipad', label: 'MIPAD' },
+    { id: 'inst-governanca', label: 'Governança Global' },
+    { id: 'inst-faq', label: 'Perguntas Frequentes' },
+    { id: 'inst-cta', label: 'CTA Final' },
+    NEWSLETTER_SECTION,
+  ],
+  '/prointer': [
+    { id: 'prointer-hero', label: 'Hero' },
+    { id: 'prointer-sobre', label: 'O que é o PROINTER' },
+    { id: 'prointer-publicos', label: 'Para Quem é o PROINTER' },
+    { id: 'prointer-missao', label: 'A Missão' },
+    { id: 'prointer-organizacoes', label: 'Para Organizações' },
+    { id: 'prointer-apoie', label: 'Formulários (Participe ou Apoie)' },
+    { id: 'prointer-ecossistema', label: 'Também no Ecossistema HUB PAN' },
+    { id: 'prointer-faq', label: 'Perguntas Frequentes' },
+    NEWSLETTER_SECTION,
+  ],
+  '/govia': [
+    { id: 'govia-hero', label: 'Hero' },
+    { id: 'govia-problema', label: 'O Problema Central' },
+    { id: 'govia-incluso', label: 'O Que Está Incluso' },
+    { id: 'govia-obs', label: 'Observatório de IA' },
+    { id: 'govia-planos', label: 'Planos e Preços' },
+    { id: 'govia-form', label: 'Demonstração Gratuita' },
+    { id: 'govia-ecossistema', label: 'Também no Ecossistema HUB PAN' },
+    { id: 'govia-faq', label: 'Perguntas Frequentes' },
+    NEWSLETTER_SECTION,
+  ],
+  '/forum-mundial-ia': [
+    { id: 'forum-hero', label: 'Hero' },
+    { id: 'forum-diferencial', label: 'Diferencial do WAIF' },
+    { id: 'forum-pilares', label: 'Os Pilares do WAIF' },
+    { id: 'forum-edicao', label: 'Edição 2027' },
+    { id: 'forum-patrocinio', label: 'Oportunidades de Patrocínio' },
+    { id: 'forum-form', label: 'Formulários' },
+    { id: 'forum-ecossistema', label: 'Também no Ecossistema HUB PAN' },
+    { id: 'forum-faq', label: 'Perguntas Frequentes' },
+    NEWSLETTER_SECTION,
+  ],
+  '/insights': [
+    { id: 'insights-hero', label: 'Hero' },
+    { id: 'insights-filtros', label: 'Filtros' },
+    { id: 'insights-destaque', label: 'Destaque' },
+    { id: 'insights-artigos', label: 'Publicações Recentes' },
+    { id: 'insights-observatorios', label: 'Observatórios Temáticos' },
+    NEWSLETTER_SECTION,
+  ],
+  '/contato': [
+    { id: 'contato-hero', label: 'Hero' },
+    { id: 'contato-formulario', label: 'Formulário e Onde Estamos' },
+    { id: 'contato-caminhos', label: 'Qual é o seu caminho?' },
+    NEWSLETTER_SECTION,
+  ],
+  '/glossario': [
+    { id: 'gloss-hero', label: 'Hero' },
+    { id: 'gloss-lista', label: 'Lista de Termos' },
+    NEWSLETTER_SECTION,
+  ],
+  '/imprensa': [
+    { id: 'imprensa-hero', label: 'Hero' },
+    { id: 'imprensa-corpo', label: 'Releases, Dados e Contato de Imprensa' },
+    NEWSLETTER_SECTION,
+  ],
+  '/casos-de-uso': [
+    { id: 'casos-hero', label: 'Hero' },
+    { id: 'casos-area', label: 'Casos de Uso por Área' },
+    { id: 'casos-perfis', label: 'Perfis' },
+    NEWSLETTER_SECTION,
+  ],
+};
+
 /* ═══════════════════════════════════════════════════════════════════
    UI do editor — login, toolbar flutuante, painéis (cor / imagem /
    ícone / histórico) e o chip de cor que aparece no hover dos textos.
@@ -433,20 +532,21 @@ function ButtonStyleBody({ panel }: { panel: Extract<PanelState, { type: 'button
             <div className="space-y-2.5">
               <select
                 value={intPath}
-                onChange={(e) => { setIntPath(e.target.value); commitInternal(e.target.value, intAnchor); }}
+                onChange={(e) => { setIntPath(e.target.value); setIntAnchor(''); commitInternal(e.target.value, ''); }}
                 className="w-full outline-none"
                 style={inputStyle}
               >
                 {INTERNAL_PAGES.map((p) => <option key={p.path} value={p.path}>{p.label}</option>)}
               </select>
-              <input
-                placeholder="Âncora da seção (opcional, ex.: govia-planos)"
+              <select
                 value={intAnchor}
-                onChange={(e) => setIntAnchor(e.target.value)}
-                onBlur={() => commitInternal(intPath, intAnchor)}
+                onChange={(e) => { setIntAnchor(e.target.value); commitInternal(intPath, e.target.value); }}
                 className="w-full outline-none"
                 style={inputStyle}
-              />
+              >
+                <option value="">Nenhuma (topo da página)</option>
+                {(PAGE_SECTIONS[intPath] ?? []).map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+              </select>
             </div>
           )}
 

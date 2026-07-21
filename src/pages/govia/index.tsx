@@ -176,7 +176,7 @@ function SecProblema() {
     { key: 'govia.problema.bg.2', label: 'Problema central — fundo, cor 2', fallback: '#d2e718' },
   ]);
   return (
-    <section ref={ref} className="relative w-full overflow-hidden" {...degProps} style={{ background: `linear-gradient(39.8deg, ${degA} 65.3%, ${degB} 99%)` }}>
+    <section ref={ref} id="govia-problema" className="relative w-full overflow-hidden" {...degProps} style={{ background: `linear-gradient(39.8deg, ${degA} 65.3%, ${degB} 99%)` }}>
       <div className="gutter grid lg:grid-cols-[1fr_1fr] gap-12 lg:gap-10 py-20 lg:py-0 lg:min-h-screen items-center">
         <div className="lg:py-24">
           <p className="eyebrow text-muted mb-8" data-animate>
@@ -272,7 +272,7 @@ function SecEixos() {
   }, []);
 
   return (
-    <section ref={wrapRef} className="relative w-full h-screen overflow-hidden flex flex-col bg-navy900">
+    <section ref={wrapRef} id="govia-incluso" className="relative w-full h-screen overflow-hidden flex flex-col bg-navy900">
       <div className="relative gutter pt-16 lg:pt-20 pb-4 shrink-0">
         <div className="max-w-[680px]">
           <p className="eyebrow mb-4" style={{ color: 'rgba(255,255,255,0.69)' }}>
@@ -575,7 +575,7 @@ function SecDemo() {
 function SecEcossistema() {
   const [bg, bgProps] = useEditColor('govia.eco.bg', '#ffffff', 'Ecossistema — fundo da seção');
   return (
-    <section className="py-16 gutter" {...bgProps} style={{ background: bg }}>
+    <section id="govia-ecossistema" className="py-16 gutter" {...bgProps} style={{ background: bg }}>
       <p className="mb-6" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12, letterSpacing: '1.6px', textTransform: 'uppercase', color: '#a7a4a4' }}>
         <ET k="govia.eco.eyebrow" v="TAMBÉM NO ECOSSISTEMA HUB PAN" l="Ecossistema — selo" />
       </p>
@@ -652,7 +652,7 @@ function SecFAQ() {
   const ref = useReveal<HTMLElement>();
   const [bg, bgProps] = useEditColor('govia.faq.bg', '#ffffff', 'FAQ — fundo da seção');
   return (
-    <section ref={ref} className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
+    <section ref={ref} id="govia-faq" className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
       <div className="grid lg:grid-cols-[1fr_1.4fr] gap-12">
         <div>
           <p className="eyebrow text-muted mb-6" data-animate>
@@ -682,6 +682,7 @@ function GovIAHero() {
   return (
     <div style={{ position: 'relative' }}>
       <Hero80
+        id="govia-hero"
         img={heroImg}
         imgAlt="Prédio institucional"
         eyebrow={<ET k="govia.hero.eyebrow" v="PLATAFORMA DE IA PARA O SETOR PÚBLICO · ASSINATURA INSTITUCIONAL · OBSERVATÓRIO" l="Hero — eyebrow" />}

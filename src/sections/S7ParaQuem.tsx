@@ -22,7 +22,7 @@ export default function S7ParaQuem() {
   const [bg, bgProps] = useEditColor('s7.bg', '#ffffff', 'Fundo da seção Para Quem');
 
   return (
-    <section ref={ref} className="relative w-full py-20 gutter" {...bgProps} style={{ background: bg }}>
+    <section ref={ref} id="home-para-quem" className="relative w-full py-20 gutter" {...bgProps} style={{ background: bg }}>
       <p className="eyebrow text-muted mb-6" data-animate>
         <ET k="s7.eyebrow" v="PARA QUEM É O HUB PAN" l="Para Quem — selo da seção" />
       </p>

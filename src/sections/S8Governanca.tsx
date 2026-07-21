@@ -28,7 +28,7 @@ export default function S8Governanca() {
   return (
     <section ref={ref} className="relative w-full lg:min-h-screen grid lg:grid-cols-[3fr_2fr]">
       {/* Esquerda: imagem + overlay + cards glass */}
-      <div className="relative overflow-hidden py-20 gutter">
+      <div id="home-governanca" className="relative overflow-hidden py-20 gutter">
         <img src={bgSrc} alt="" className="absolute inset-0 w-full h-full object-cover" {...bgImgProps} />
         <div className="relative z-10 pointer-events-none">
           <div className="pointer-events-auto">
@@ -65,7 +65,7 @@ export default function S8Governanca() {
       </div>
 
       {/* Direita: fundo blue + lista numerada */}
-      <div className="relative py-20 flex flex-col" {...rightBgProps} style={{ background: rightBg }}>
+      <div id="home-eco-fundador" className="relative py-20 flex flex-col" {...rightBgProps} style={{ background: rightBg }}>
         <div className="gutter lg:pl-16">
           {/* Espaçador invisível — mesma altura do eyebrow da esquerda, pra alinhar a base dos 2 títulos */}
           <div aria-hidden style={{ height: 48 }} />

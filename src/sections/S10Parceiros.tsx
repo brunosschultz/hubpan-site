@@ -16,7 +16,7 @@ export default function S10Parceiros() {
   const [bg, bgProps] = useEditColor('s10.bg', '#f5f5f5', 'Fundo da seção Parceiros');
 
   return (
-    <section ref={ref} className="relative w-full py-20 overflow-hidden" {...bgProps} style={{ background: bg }}>
+    <section ref={ref} id="home-parceiros" className="relative w-full py-20 overflow-hidden" {...bgProps} style={{ background: bg }}>
       <div className="gutter flex flex-wrap items-end justify-between gap-6 mb-16">
         <div>
           <p className="eyebrow text-muted mb-6" data-animate>

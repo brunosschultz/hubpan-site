@@ -28,6 +28,7 @@ export default function S5Jornada() {
   return (
     <section
       ref={ref}
+      id="home-jornada"
       className="relative w-full min-h-screen overflow-hidden py-20"
       {...bgProps}
       style={{ background: `linear-gradient(39.8deg, ${bgC1} 65.3%, ${bgC2} 99%)` }}

@@ -23,7 +23,7 @@ export default function S4Autoridade() {
   const [bg, bgProps] = useEditColor('s4.bg', '#2d4ebf', 'Fundo da seção Autoridade');
 
   return (
-    <section ref={ref} className="relative w-full min-h-screen overflow-hidden" {...bgProps} style={{ background: bg }}>
+    <section ref={ref} id="home-autoridade" className="relative w-full min-h-screen overflow-hidden" {...bgProps} style={{ background: bg }}>
       <div className="relative flex flex-col lg:flex-row min-h-screen">
         {/* Esquerda: conteúdo — largura fixa, acomoda título e badges sem quebrar errado */}
         <div className="flex flex-col justify-center gutter lg:pr-10 py-20 lg:py-0 lg:flex-shrink-0" style={{ maxWidth: 950 }}>

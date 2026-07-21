@@ -115,7 +115,7 @@ function SecDiferencial() {
     { w: 1400, h: 1050, shape: 'paisagem', note: 'Foto com overlay escuro na base — prefira imagens com boa área de contraste embaixo.' }
   );
   return (
-    <section ref={ref} className="relative w-full overflow-hidden" {...bgProps} style={{ background: bg }}>
+    <section ref={ref} id="forum-diferencial" className="relative w-full overflow-hidden" {...bgProps} style={{ background: bg }}>
       <div className="gutter grid lg:grid-cols-2 gap-12 lg:gap-16 py-20 lg:py-0 lg:min-h-screen items-center">
         <div>
           <p className="eyebrow text-muted mb-6" data-animate>
@@ -189,7 +189,7 @@ function SecPilares() {
   const ref = useReveal<HTMLElement>();
   const [bg, bgProps] = useEditColor('forum.pilares.bg', '#f5f5f5', 'Fundo da seção Pilares');
   return (
-    <section ref={ref} className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
+    <section ref={ref} id="forum-pilares" className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
       <div className="mb-14 max-w-[700px]">
         <p className="eyebrow text-muted mb-6" data-animate>
           <ET k="forum.pilares.eyebrow" v="OS PILARES DO WAIF" l="Pilares — selo da seção" />
@@ -214,7 +214,7 @@ function SecEdicao() {
     { w: 1400, h: 1050, shape: 'paisagem', note: 'Foto com overlay escuro na base.' }
   );
   return (
-    <section className="relative w-full overflow-hidden" {...bgProps} style={{ background: bg }}>
+    <section id="forum-edicao" className="relative w-full overflow-hidden" {...bgProps} style={{ background: bg }}>
       <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
       <div ref={ref} className="relative gutter py-24 lg:py-32">
         <div className="mb-14 max-w-[720px]">
@@ -335,7 +335,7 @@ function SecPatrocinio() {
   const ref = useReveal<HTMLElement>();
   const [bg, bgProps] = useEditColor('forum.patrocinio.bg', '#ffffff', 'Fundo da seção Patrocínio');
   return (
-    <section ref={ref} className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
+    <section ref={ref} id="forum-patrocinio" className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
       <div className="mb-14 max-w-[720px]">
         <p className="eyebrow text-muted mb-6" data-animate>
           <ET k="forum.patrocinio.eyebrow" v="OPORTUNIDADES DE PATROCÍNIO" l="Patrocínio — selo da seção" />
@@ -426,7 +426,7 @@ function SecFormularios() {
 function SecEcossistema() {
   const [bg, bgProps] = useEditColor('forum.ecossistema.bg', '#ffffff', 'Fundo da seção Também no Ecossistema');
   return (
-    <section className="py-16 gutter" {...bgProps} style={{ background: bg }}>
+    <section id="forum-ecossistema" className="py-16 gutter" {...bgProps} style={{ background: bg }}>
       <p className="mb-6" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12, letterSpacing: '1.6px', textTransform: 'uppercase', color: '#a7a4a4' }}>
         <ET k="forum.ecossistema.eyebrow" v="TAMBÉM NO ECOSSISTEMA HUB PAN" l="Também no Ecossistema — selo" />
       </p>
@@ -458,7 +458,7 @@ function SecFAQ() {
   const ref = useReveal<HTMLElement>();
   const [bg, bgProps] = useEditColor('forum.faq.bg', '#ffffff', 'Fundo da seção FAQ');
   return (
-    <section ref={ref} className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
+    <section ref={ref} id="forum-faq" className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
       <div className="grid lg:grid-cols-[1fr_1.4fr] gap-12">
         <div>
           <p className="eyebrow text-muted mb-6" data-animate>
@@ -491,6 +491,7 @@ export default function ForumMundialIA() {
     <>
       <div style={{ position: 'relative' }}>
         <Hero80
+          id="forum-hero"
           img={heroImg}
           imgAlt="MIT Museum — Cambridge, MA"
           eyebrow={<ET k="forum.hero.eyebrow" v="ATIVO PROPRIETÁRIO HUB PAN · AUTORIDADE GLOBAL · CAMBRIDGE 2027" l="Hero — eyebrow" />}

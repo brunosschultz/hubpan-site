@@ -14,7 +14,7 @@ export default function S9Insights() {
   const [cardBg, cardBgProps] = useEditColor('s9.cardBg', '#ebebeb', 'Fundo dos cards de insight', 'Cards de insight');
 
   return (
-    <section ref={ref} className="relative w-full py-20 gutter" {...bgProps} style={{ background: bg }}>
+    <section ref={ref} id="home-insights" className="relative w-full py-20 gutter" {...bgProps} style={{ background: bg }}>
       <div className="flex flex-wrap items-end justify-between gap-6 mb-12">
         <div>
           <p className="eyebrow text-muted mb-6" data-animate>

@@ -189,7 +189,7 @@ export default function S3Plataformas() {
   }, []);
 
   return (
-    <section ref={ref} className="relative w-full py-20 gutter" {...bgProps} style={{ background: bg }} onMouseEnter={() => (pausedRef.current = true)} onMouseLeave={() => (pausedRef.current = false)}>
+    <section ref={ref} id="home-plataformas" className="relative w-full py-20 gutter" {...bgProps} style={{ background: bg }} onMouseEnter={() => (pausedRef.current = true)} onMouseLeave={() => (pausedRef.current = false)}>
       <p className="eyebrow text-muted mb-6" data-animate>
         <ET k="s3.eyebrow" v="PLATAFORMAS ESTRATÉGICAS" l="Plataformas — selo da seção" />
       </p>

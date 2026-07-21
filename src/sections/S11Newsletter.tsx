@@ -28,7 +28,7 @@ export default function S11Newsletter() {
   }
 
   return (
-    <section ref={ref} className="relative w-full py-24 gutter" {...bgProps} style={{ background: bg }}>
+    <section ref={ref} id="newsletter" className="relative w-full py-24 gutter" {...bgProps} style={{ background: bg }}>
       <div className="grid lg:grid-cols-2 gap-10 items-center">
         <div>
           <p className="eyebrow text-muted mb-6" data-animate>

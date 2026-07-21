@@ -6,6 +6,8 @@ import type { ImageSpec } from '../editor/store';
 const HERO_BG_SPEC: ImageSpec = { w: 2560, h: 1200, shape: 'paisagem', note: 'Tela cheia, fundo do Hero.' };
 
 interface PageHeroProps {
+  /** id estável pra âncora de scroll (seletor de link do editor) */
+  id?: string;
   /** Prefixo das chaves de fundo editável (cor + imagem), ex.: "gloss.hero" —
    * cada página que usa esse componente precisa de um prefixo próprio,
    * senão todas dividiriam a mesma cor/imagem de fundo. */
@@ -31,7 +33,7 @@ interface PageHeroProps {
  * precisar de UI extra pra "remover imagem". A malha quadriculada que
  * existia antes foi removida (pedido do Bruno — não fazia sentido existir).
  */
-export default function PageHero({ bgKey, eyebrow, title, sub, actions, aside }: PageHeroProps) {
+export default function PageHero({ id, bgKey, eyebrow, title, sub, actions, aside }: PageHeroProps) {
   const ref = useReveal<HTMLElement>();
   const [bg, bgProps] = useEditColor(`${bgKey}.bg`, '#060919', 'Hero — fundo');
   const [bgImage] = useEditImage(`${bgKey}.bgImage`, '', 'Hero — imagem de fundo (opcional)', HERO_BG_SPEC);
@@ -39,6 +41,7 @@ export default function PageHero({ bgKey, eyebrow, title, sub, actions, aside }:
   return (
     <section
       ref={ref}
+      id={id}
       className="relative w-full overflow-hidden"
       {...bgProps}
       style={{

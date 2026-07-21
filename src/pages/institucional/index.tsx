@@ -151,7 +151,7 @@ function HeroInst() {
   );
   const [stripBg, stripBgProps] = useEditColor('inst.stats.bg', '#060919', 'Faixa de números — fundo');
   return (
-    <section ref={ref} className="relative w-full">
+    <section ref={ref} id="inst-hero" className="relative w-full">
       <div className="relative w-full h-[80vh] min-h-[560px] flex items-center overflow-hidden">
         <img src={bgSrc} alt="Delegação do HUB PAN na sede da ONU em Nova York" className="absolute inset-0 w-full h-full object-cover" {...bgImgProps} />
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(90deg, rgba(6,9,25,0.93) 0%, rgba(6,9,25,0.72) 45%, rgba(6,9,25,0.35) 100%)' }} />
@@ -308,7 +308,7 @@ function SecManifesto() {
 function SecFundador() {
   const ref = useReveal<HTMLElement>();
   return (
-    <section ref={ref} className="lg:min-h-screen flex flex-col justify-center py-24 lg:py-32 gutter bg-white">
+    <section ref={ref} id="inst-fundador" className="lg:min-h-screen flex flex-col justify-center py-24 lg:py-32 gutter bg-white">
       <div className="mb-14 max-w-[640px]">
         <p className="eyebrow text-muted mb-6" data-animate><ET k="inst.fundador.eyebrow" v="ECOSSISTEMA FUNDADOR" l="Ecossistema Fundador — selo da seção" /></p>
         <h2 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#152852' }} data-animate>
@@ -515,7 +515,7 @@ function SecPresenca() {
   const [cambridge, africa, bh, sp, boston, ny] = TERRITORIOS;
   const [bg, bgProps] = useEditColor('inst.presenca.bg', '#f5f5f5', 'Fundo da seção Presença Global');
   return (
-    <section ref={ref} className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
+    <section ref={ref} id="inst-presenca" className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
       <div className="mb-14 max-w-[700px]">
         <p className="eyebrow text-muted mb-6" data-animate><ET k="inst.presenca.eyebrow" v="PRESENÇA GLOBAL" l="Presença Global — selo da seção" /></p>
         <h2 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#152852' }} data-animate>
@@ -610,6 +610,7 @@ function SecTimeline() {
   ]);
   return (
     <section
+      id="inst-jornada"
       className="pt-24 lg:pt-32 gutter overflow-hidden"
       {...tGradProps}
       style={{ background: `linear-gradient(39.8deg, ${tc1} 65.3%, ${tc2} 99%)` }}
@@ -644,7 +645,7 @@ function SecTimeline() {
 function SecMipad() {
   const ref = useReveal<HTMLElement>();
   return (
-    <section ref={ref} className="relative w-full bg-navy900 overflow-hidden">
+    <section ref={ref} id="inst-mipad" className="relative w-full bg-navy900 overflow-hidden">
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -780,7 +781,7 @@ function GovCard({ g }: { g: (typeof GOVERNANCA)[number] }) {
 function SecGovernanca() {
   const ref = useReveal<HTMLElement>();
   return (
-    <section ref={ref} className="w-full bg-hubblue py-24 lg:py-32 gutter">
+    <section ref={ref} id="inst-governanca" className="w-full bg-hubblue py-24 lg:py-32 gutter">
       <div className="text-center max-w-[640px] mx-auto mb-14">
         <p className="eyebrow mb-6" style={{ color: 'rgba(255,255,255,0.69)' }} data-animate><ET k="inst.governanca.eyebrow" v="GOVERNANÇA GLOBAL" l="Governança — selo da seção" /></p>
         <h2 className="mb-4 text-white" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1 }} data-animate>
@@ -847,7 +848,7 @@ function SecGovernanca() {
 function SecFAQ() {
   const ref = useReveal<HTMLElement>();
   return (
-    <section ref={ref} className="bg-white py-24 lg:py-32 gutter">
+    <section ref={ref} id="inst-faq" className="bg-white py-24 lg:py-32 gutter">
       <div className="grid lg:grid-cols-[1fr_2fr] gap-10 lg:gap-[72px] items-start">
         <div data-animate>
           <p className="eyebrow text-muted mb-6"><ET k="inst.faq.eyebrow" v="PERGUNTAS FREQUENTES" l="FAQ — selo da seção" /></p>
@@ -882,6 +883,7 @@ export default function Institucional() {
       <SecGovernanca />
       <SecFAQ />
       <CTABanner
+        id="inst-cta"
         title={
           <ERich k="inst.cta.titulo" l="CTA final — título">
             Conecte-se ao futuro das <span style={{ color: '#d2e718' }}>Américas e da África.</span>

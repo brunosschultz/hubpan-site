@@ -205,6 +205,7 @@ export default function Contato() {
     <>
       <section
         ref={heroRef}
+        id="contato-hero"
         className="relative w-full overflow-hidden"
         {...heroBgProps}
         style={{
@@ -230,7 +231,7 @@ export default function Contato() {
       </section>
 
       {/* Form + endereços — sobreposto entre o hero e o resto do conteúdo */}
-      <section className="gutter pb-24 lg:pb-32" {...enderecosBgProps} style={{ background: enderecosBg }}>
+      <section id="contato-formulario" className="gutter pb-24 lg:pb-32" {...enderecosBgProps} style={{ background: enderecosBg }}>
         <div className="grid lg:grid-cols-[1fr_1.3fr] gap-10 items-stretch -mt-[150px] lg:-mt-[190px] relative z-10">
           <div className="h-full flex flex-col">
             <h3 className="mb-6 shrink-0 text-white" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 22, lineHeight: 1.1 }}>
@@ -250,7 +251,7 @@ export default function Contato() {
       </section>
 
       {/* 3 caminhos rápidos */}
-      <section ref={caminhosRef} className="py-24 lg:py-32 gutter" {...caminhosBgProps} style={{ background: caminhosBg }}>
+      <section ref={caminhosRef} id="contato-caminhos" className="py-24 lg:py-32 gutter" {...caminhosBgProps} style={{ background: caminhosBg }}>
         <div className="mb-14 max-w-[700px]">
           <p className="eyebrow text-muted mb-6" data-animate>
             <ET k="contato.caminhos.eyebrow" v="COMECE POR AQUI" l="Contato — selo da seção Caminhos" />
