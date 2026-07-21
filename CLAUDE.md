@@ -1256,6 +1256,31 @@ um id de outra página selecionado sem querer). Opção padrão "Nenhuma
 na seção "A Missão", confirmando que os ids novos funcionam igual aos
 que já existiam.
 
+### Bug real: âncora na MESMA página mudava a URL mas não rolava
+
+O Bruno testou de verdade (botão "Leia o manifesto" com link pra uma
+seção poucas seções abaixo, NA MESMA página) e reportou: a URL mudava
+(`#âncora` aparecia lá em cima), mas a página não rolava — só rolava se
+ele desse um toque manual no scroll, e aí "pulava" direto pro lugar
+certo. Causa raiz real, achada relendo `ScrollToTop.tsx`: `smoother.scrollTo(id, true)`
+é um TWEEN ANIMADO (o `true` no final = ~1s de animação suave) — o
+código chamava `ScrollTrigger.refresh()` logo em seguida (num
+`requestAnimationFrame`), e isso **interrompe um tween em andamento**
+(comportamento conhecido do GSAP/ScrollTrigger, não documentado de forma
+óbvia). O valor final da posição já estava certo internamente — só a
+animação até lá tinha sido cancelada quase no início; um scroll manual
+do usuário forçava o GSAP a "recalcular" e saltar pro estado já
+correto, dando a falsa impressão de que só funcionava com esse toque.
+
+**Fix** (`src/components/ScrollToTop.tsx`): inverteu a ordem — `refresh()`
+sempre ANTES do `scrollTo`, nunca depois (padrão recomendado pelo
+próprio GSAP). E, indo além: `refresh()` só é chamado quando a ROTA de
+fato mudou (`pathname` diferente do anterior, guardado num `useRef`) —
+numa âncora dentro da MESMA página nada no layout mudou, então nem
+precisa recalcular nada; pular o `refresh()` nesse caso elimina de vez o
+risco de interromper o tween. Confirmado: `vite preview` local, âncora
+cruzada (`/govia#govia-planos`, rota muda) continua funcionando igual.
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no

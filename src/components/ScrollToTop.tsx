@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
@@ -15,8 +15,12 @@ import { ScrollSmoother } from 'gsap/ScrollSmoother';
  */
 export default function ScrollToTop() {
   const { pathname, hash } = useLocation();
+  const prevPathname = useRef(pathname);
 
   useLayoutEffect(() => {
+    const pageChanged = prevPathname.current !== pathname;
+    prevPathname.current = pathname;
+
     if (hash) {
       const id = hash.slice(1);
       let attempts = 0;
@@ -25,10 +29,21 @@ export default function ScrollToTop() {
         if (cancelled) return;
         const el = document.getElementById(id);
         if (el) {
+          /* refresh só quando a rota realmente mudou (conteúdo novo montado,
+           * posições dos triggers podem ter mudado) — e sempre ANTES do
+           * scrollTo, nunca depois. scrollTo(id, true) é um tween animado
+           * (~1s); um refresh() logo em seguida interrompe esse tween em
+           * andamento (achado real, reportado pelo Bruno: clicar num botão
+           * com âncora na MESMA página mudava a URL mas não rolava — só um
+           * scroll manual do usuário fazia a página "pular" pro lugar certo,
+           * ou seja, o valor final já estava certo internamente, só a
+           * animação até lá tinha sido cancelada pelo refresh). Numa âncora
+           * da mesma página nada no layout mudou, então nem precisa de
+           * refresh — pular ele evita o risco por completo nesse caso. */
+          if (pageChanged) ScrollTrigger.refresh();
           const smoother = ScrollSmoother.get();
           if (smoother) smoother.scrollTo(`#${id}`, true);
           else el.scrollIntoView();
-          requestAnimationFrame(() => ScrollTrigger.refresh());
           return;
         }
         if (attempts++ < 40) requestAnimationFrame(tryScroll);
