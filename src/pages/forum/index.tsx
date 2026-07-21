@@ -324,7 +324,7 @@ function NivelCard({ n }: { n: (typeof NIVEIS)[number] }) {
           </li>
         ))}
       </ul>
-      <HubButton size="md" variant={n.destaque ? 'lime' : 'outline-dark'} className="w-full justify-center" iconKey={`forum.nivel.${n.id}.btn.icone`} iconLabel={`Nível "${n.nome}" — botão, ícone`}>
+      <HubButton size="md" variant={n.destaque ? 'lime' : 'outline-dark'} className="w-full justify-center" iconKey={`forum.nivel.${n.id}.btn.icone`} iconLabel={`Nível "${n.nome}" — botão, ícone`} styleKey={`forum.nivel.${n.id}.btn`} styleLabel={`Nível "${n.nome}" — botão`}>
         <ET k={`forum.nivel.${n.id}.btn`} v={`Solicitar proposta${n.destaque ? ' Ouro' : ''}`} l={`Nível "${n.nome}" — botão`} />
       </HubButton>
     </div>
@@ -384,7 +384,7 @@ function SecFormularios() {
               {OBJETIVOS.map((o) => <option key={o}>{o}</option>)}
             </select>
             <textarea placeholder="Mensagem" rows={3} style={{ ...INPUT_STYLE, height: 'auto', padding: '12px 16px', resize: 'vertical' }} />
-            <HubButton size="md" variant="blue" className="w-full justify-center" iconKey="forum.form.empresas.btn.icone" iconLabel="Formulário Empresas — botão, ícone">
+            <HubButton size="md" variant="blue" className="w-full justify-center" iconKey="forum.form.empresas.btn.icone" iconLabel="Formulário Empresas — botão, ícone" styleKey="forum.form.empresas.btn" styleLabel="Formulário Empresas — botão" noLink>
               <ET k="forum.form.empresas.btn" v="Solicitar proposta de patrocínio" l="Formulário Empresas — botão" />
             </HubButton>
           </div>
@@ -413,7 +413,7 @@ function SecFormularios() {
               {EXPERTISE.map((e) => <option key={e}>{e}</option>)}
             </select>
             <textarea placeholder="Por que você deve estar no WAIF 2027?" rows={3} style={{ ...INPUT_STYLE, height: 'auto', padding: '12px 16px', resize: 'vertical' }} />
-            <HubButton size="md" variant="lime" className="w-full justify-center" iconKey="forum.form.palestrantes.btn.icone" iconLabel="Formulário Palestrantes — botão, ícone">
+            <HubButton size="md" variant="lime" className="w-full justify-center" iconKey="forum.form.palestrantes.btn.icone" iconLabel="Formulário Palestrantes — botão, ícone" styleKey="forum.form.palestrantes.btn" styleLabel="Formulário Palestrantes — botão" noLink>
               <ET k="forum.form.palestrantes.btn" v="Manifestar interesse" l="Formulário Palestrantes — botão" />
             </HubButton>
           </div>
@@ -501,13 +501,13 @@ export default function ForumMundialIA() {
             </ERich>
           }
           actions={<>
-            <HubButton size="lg" variant="lime" onClick={() => ScrollSmoother.get()?.scrollTo('#forum-form', true)} iconKey="forum.hero.btn.patrocinar.icone" iconLabel="Hero — botão Patrocinar o Fórum, ícone">
+            <HubButton size="lg" variant="lime" onClick={() => ScrollSmoother.get()?.scrollTo('#forum-form', true)} iconKey="forum.hero.btn.patrocinar.icone" iconLabel="Hero — botão Patrocinar o Fórum, ícone" styleKey="forum.hero.btn.patrocinar" styleLabel="Hero — botão Patrocinar o Fórum">
               <ET k="forum.hero.btn.patrocinar" v="Patrocinar o Fórum" l="Hero — botão Patrocinar o Fórum" />
             </HubButton>
-            <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#forum-form', true)} iconKey="forum.hero.btn.sobre.icone" iconLabel="Hero — botão Sobre a 1ª edição, ícone">
+            <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#forum-form', true)} iconKey="forum.hero.btn.sobre.icone" iconLabel="Hero — botão Sobre a 1ª edição, ícone" styleKey="forum.hero.btn.sobre" styleLabel="Hero — botão Sobre a 1ª edição">
               <ET k="forum.hero.btn.sobre" v="Sobre a 1ª edição" l="Hero — botão Sobre a 1ª edição" />
             </HubButton>
-            <HubButton size="lg" variant="outline-light" onClick={() => ScrollSmoother.get()?.scrollTo('#forum-form', true)} iconKey="forum.hero.btn.manifestar.icone" iconLabel="Hero — botão Manifestar interesse, ícone">
+            <HubButton size="lg" variant="outline-light" onClick={() => ScrollSmoother.get()?.scrollTo('#forum-form', true)} iconKey="forum.hero.btn.manifestar.icone" iconLabel="Hero — botão Manifestar interesse, ícone" styleKey="forum.hero.btn.manifestar" styleLabel="Hero — botão Manifestar interesse">
               <ET k="forum.hero.btn.manifestar" v="Manifestar interesse" l="Hero — botão Manifestar interesse" />
             </HubButton>
           </>}

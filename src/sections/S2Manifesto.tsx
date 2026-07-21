@@ -102,10 +102,10 @@ export default function S2Manifesto() {
             </p>
           </div>
           <div className="flex flex-wrap gap-4" data-animate>
-            <HubButton size="lg" variant="blue" circleColor="#d2e718" icon={<span style={{ color: '#152852', fontSize: 12 }}>▶</span>}>
+            <HubButton size="lg" variant="blue" circleColor="#d2e718" icon={<span style={{ color: '#152852', fontSize: 12 }}>▶</span>} styleKey="s2.btn1" styleLabel="Manifesto — botão vídeo">
               <ET k="s2.btn1" v="Assistir Vídeo" l="Manifesto — botão vídeo" />
             </HubButton>
-            <HubButton size="lg" variant="navy" circleColor="rgba(0,0,0,0.1)" arrowColor="#d2e718" iconKey="s2.btn2.icone" iconLabel="Manifesto — botão manifesto, ícone">
+            <HubButton size="lg" variant="navy" circleColor="rgba(0,0,0,0.1)" arrowColor="#d2e718" iconKey="s2.btn2.icone" iconLabel="Manifesto — botão manifesto, ícone" styleKey="s2.btn2" styleLabel="Manifesto — botão manifesto">
               <ET k="s2.btn2" v="Leia nosso manifesto completo" l="Manifesto — botão manifesto" />
             </HubButton>
           </div>

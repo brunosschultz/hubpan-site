@@ -65,8 +65,8 @@ export default function Imprensa() {
         title={<ERich k="imprensa.hero.titulo" l="Imprensa — título do hero">Imprensa & Mídia</ERich>}
         sub={<ERich k="imprensa.hero.sub" l="Imprensa — subtítulo do hero">Material estruturado para jornalistas, editores e pesquisadores. Dados do Observatório de IA, releases institucionais, press kit e contato direto com a assessoria de comunicação do HUB PAN.</ERich>}
         actions={<>
-          <HubButton size="lg" variant="lime" iconKey="imprensa.hero.btn.presskit.icone" iconLabel="Imprensa — botão baixar press kit (hero), ícone"><ET k="imprensa.hero.btn.presskit" v="Baixar press kit completo" l="Imprensa — botão baixar press kit (hero)" /></HubButton>
-          <Link to="/contato"><HubButton size="lg" variant="blue" iconKey="imprensa.hero.btn.contato.icone" iconLabel="Imprensa — botão contato (hero), ícone"><ET k="imprensa.hero.btn.contato" v="Contato de imprensa" l="Imprensa — botão contato (hero)" /></HubButton></Link>
+          <HubButton size="lg" variant="lime" iconKey="imprensa.hero.btn.presskit.icone" iconLabel="Imprensa — botão baixar press kit (hero), ícone" styleKey="imprensa.hero.btn.presskit" styleLabel="Imprensa — botão baixar press kit (hero)"><ET k="imprensa.hero.btn.presskit" v="Baixar press kit completo" l="Imprensa — botão baixar press kit (hero)" /></HubButton>
+          <HubButton size="lg" variant="blue" iconKey="imprensa.hero.btn.contato.icone" iconLabel="Imprensa — botão contato (hero), ícone" to="/contato" styleKey="imprensa.hero.btn.contato" styleLabel="Imprensa — botão contato (hero)"><ET k="imprensa.hero.btn.contato" v="Contato de imprensa" l="Imprensa — botão contato (hero)" /></HubButton>
         </>}
       />
 
@@ -133,8 +133,8 @@ export default function Imprensa() {
                 </ERich>
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link to="/insights"><HubButton size="sm" variant="blue" iconKey="imprensa.dados.btn.acesso.icone" iconLabel="Imprensa — botão solicitar acesso aos dados, ícone"><ET k="imprensa.dados.btn.acesso" v="Solicitar acesso aos dados" l="Imprensa — botão solicitar acesso aos dados" /></HubButton></Link>
-                <Link to="/contato"><HubButton size="sm" variant="outline-dark" iconKey="imprensa.dados.btn.credenciar.icone" iconLabel="Imprensa — botão credenciar-se como imprensa, ícone"><ET k="imprensa.dados.btn.credenciar" v="Credenciar-se como imprensa" l="Imprensa — botão credenciar-se como imprensa" /></HubButton></Link>
+                <HubButton size="sm" variant="blue" iconKey="imprensa.dados.btn.acesso.icone" iconLabel="Imprensa — botão solicitar acesso aos dados, ícone" to="/insights" styleKey="imprensa.dados.btn.acesso" styleLabel="Imprensa — botão solicitar acesso aos dados"><ET k="imprensa.dados.btn.acesso" v="Solicitar acesso aos dados" l="Imprensa — botão solicitar acesso aos dados" /></HubButton>
+                <HubButton size="sm" variant="outline-dark" iconKey="imprensa.dados.btn.credenciar.icone" iconLabel="Imprensa — botão credenciar-se como imprensa, ícone" to="/contato" styleKey="imprensa.dados.btn.credenciar" styleLabel="Imprensa — botão credenciar-se como imprensa"><ET k="imprensa.dados.btn.credenciar" v="Credenciar-se como imprensa" l="Imprensa — botão credenciar-se como imprensa" /></HubButton>
               </div>
             </div>
 
@@ -174,7 +174,7 @@ export default function Imprensa() {
               <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 13.5, lineHeight: '22px', color: 'rgba(255,255,255,0.75)' }}>
                 <ERich k="imprensa.sidebar.contato.desc" l="Imprensa — descrição do card Contato de Imprensa">Para entrevistas, dados exclusivos, cobertura de eventos ou informações adicionais.</ERich>
               </p>
-              <Link to="/contato"><HubButton size="sm" variant="lime" iconKey="imprensa.sidebar.contato.btn.icone" iconLabel="Imprensa — botão do card Contato de Imprensa, ícone"><ET k="imprensa.sidebar.contato.btn" v="Falar com assessoria" l="Imprensa — botão do card Contato de Imprensa" /></HubButton></Link>
+              <HubButton size="sm" variant="lime" iconKey="imprensa.sidebar.contato.btn.icone" iconLabel="Imprensa — botão do card Contato de Imprensa, ícone" to="/contato" styleKey="imprensa.sidebar.contato.btn" styleLabel="Imprensa — botão do card Contato de Imprensa"><ET k="imprensa.sidebar.contato.btn" v="Falar com assessoria" l="Imprensa — botão do card Contato de Imprensa" /></HubButton>
             </div>
 
             <div className="rounded-[20px] p-7" {...cardBgProps} style={{ background: cardBg }} data-animate>
@@ -183,7 +183,7 @@ export default function Imprensa() {
                 <ERich k="imprensa.sidebar.presskit.desc" l="Imprensa — descrição do card Press Kit">Logos, fotos institucionais, descrição da organização, biographies das lideranças e dados do ecossistema.</ERich>
               </p>
               <p className="mb-3" style={{ fontFamily: 'Inter', fontSize: 13, color: '#2d4ebf' }}><ET k="imprensa.sidebar.presskit.nota" v="Logos HUB PAN · vetor" l="Imprensa — nota do card Press Kit" /></p>
-              <HubButton size="sm" variant="navy" iconKey="imprensa.sidebar.presskit.btn.icone" iconLabel="Imprensa — botão do card Press Kit, ícone"><ET k="imprensa.sidebar.presskit.btn" v="Baixar press kit completo" l="Imprensa — botão do card Press Kit" /></HubButton>
+              <HubButton size="sm" variant="navy" iconKey="imprensa.sidebar.presskit.btn.icone" iconLabel="Imprensa — botão do card Press Kit, ícone" styleKey="imprensa.sidebar.presskit.btn" styleLabel="Imprensa — botão do card Press Kit"><ET k="imprensa.sidebar.presskit.btn" v="Baixar press kit completo" l="Imprensa — botão do card Press Kit" /></HubButton>
             </div>
 
             <div className="rounded-[20px] p-7" {...cardBgProps} style={{ background: cardBg }} data-animate>
@@ -200,7 +200,7 @@ export default function Imprensa() {
                   </span>
                 ))}
               </div>
-              <HubButton size="sm" variant="navy" iconKey="imprensa.sidebar.fotos.btn.icone" iconLabel="Imprensa — botão do card Fotos institucionais, ícone"><ET k="imprensa.sidebar.fotos.btn" v="Baixar álbum completo" l="Imprensa — botão do card Fotos institucionais" /></HubButton>
+              <HubButton size="sm" variant="navy" iconKey="imprensa.sidebar.fotos.btn.icone" iconLabel="Imprensa — botão do card Fotos institucionais, ícone" styleKey="imprensa.sidebar.fotos.btn" styleLabel="Imprensa — botão do card Fotos institucionais"><ET k="imprensa.sidebar.fotos.btn" v="Baixar álbum completo" l="Imprensa — botão do card Fotos institucionais" /></HubButton>
             </div>
 
             <div className="rounded-[20px] p-7" style={{ border: '1px dashed #dcdcdc' }} data-animate>

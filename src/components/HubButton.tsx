@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 import ArrowIcon from './ArrowIcon';
 import { EIcon } from '../editor/fields';
+import { useEditorStore } from '../editor/store';
 
 type Size = 'lg' | 'md' | 'sm' | 'xs';
 type Variant = 'blue' | 'lime' | 'navy' | 'cyan' | 'outline-light' | 'outline-dark';
@@ -28,10 +30,24 @@ interface HubButtonProps {
   iconKey?: string;
   /** Rótulo mostrado no painel do editor pra esse ícone — obrigatório junto com `iconKey` */
   iconLabel?: string;
+  /** Chave editável de cor de fundo + link (abre os dois no mesmo painel/clique).
+   * Sem essa prop, o fundo do botão continua fixo pela `variant` e o botão
+   * continua 100% como hoje — compatível com uso já existente. */
+  styleKey?: string;
+  /** Rótulo mostrado no painel do editor — obrigatório junto com `styleKey` */
+  styleLabel?: string;
+  /** Botão de ENVIO DE FORMULÁRIO de verdade (ex: Contato, GovIA demonstração) —
+   * ganha cor editável junto com `styleKey`, mas nunca a opção de link (isso
+   * substituiria o envio do formulário). */
+  noLink?: boolean;
   className?: string;
   onClick?: () => void;
   as?: 'button' | 'a';
   href?: string;
+  /** Caminho interno padrão (react-router) — substitui envolver o `<HubButton>`
+   * externamente com `<Link to="...">`; precisa viver dentro do componente
+   * pra o link poder ser sobrescrito pelo editor via `styleKey`. */
+  to?: string;
 }
 
 // Proporções exatas do Figma por escala
@@ -68,11 +84,16 @@ export default function HubButton({
   icon,
   iconKey,
   iconLabel,
+  styleKey,
+  styleLabel,
+  noLink,
   className = '',
   onClick,
   as = 'button',
   href,
+  to,
 }: HubButtonProps) {
+  const { get, editMode, openPanel } = useEditorStore();
   const s = SCALES[size];
   const v = VARIANTS[variant];
   const defaultArrow = <ArrowIcon color={arrowColor ?? v.arrow} size={arrowSize ?? s.arrow} />;
@@ -81,6 +102,10 @@ export default function HubButton({
       {defaultArrow}
     </EIcon>
   ) : defaultArrow);
+
+  const bg = styleKey ? get(`${styleKey}.bg`, v.bg) : v.bg;
+  const linkHref = styleKey && !noLink ? get(`${styleKey}.href`, '') : '';
+  const linkTarget = get(`${styleKey}.target`, '_self') === '_blank' ? '_blank' : '_self';
 
   const style: React.CSSProperties = {
     height: s.height,
@@ -93,7 +118,7 @@ export default function HubButton({
     gap: withIcon ? s.gap : 0,
     paddingLeft: s.pl,
     paddingRight: withIcon ? s.pr : s.pl,
-    background: v.bg,
+    background: bg,
     color: textColor ?? v.text,
     border: v.border ?? 'none',
     whiteSpace: 'nowrap',
@@ -122,14 +147,41 @@ export default function HubButton({
     </>
   );
 
-  const commonProps = {
-    style,
-    className: `hover:brightness-95 active:brightness-90 ${className}`,
-    onClick,
-  };
+  const sharedClassName = `hover:brightness-95 active:brightness-90 ${className}`;
 
-  if (as === 'a') {
-    return <a href={href} {...commonProps}>{content}</a>;
+  /* Modo edição com styleKey: o clique (fora do ícone/texto, que já têm seus
+     próprios painéis) sempre abre o painel de cor+link — nunca dispara a
+     ação real (navegar/rolar/enviar formulário). */
+  if (styleKey && editMode) {
+    return (
+      <button
+        style={style}
+        className={sharedClassName}
+        data-ebuttonstyle=""
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openPanel({ type: 'buttonStyle', key: styleKey, label: styleLabel ?? 'Botão', colorFallback: v.bg, linkEditable: !noLink });
+        }}
+      >
+        {content}
+      </button>
+    );
   }
+
+  /* Link sobrescrito pelo editor: ignora `to`/`onClick` de sempre e navega/
+     abre de verdade pro destino escolhido. */
+  if (linkHref) {
+    const isExternal = /^https?:\/\//i.test(linkHref);
+    if (isExternal || linkTarget === '_blank') {
+      return <a href={linkHref} target={linkTarget} rel={linkTarget === '_blank' ? 'noreferrer' : undefined} style={style} className={sharedClassName}>{content}</a>;
+    }
+    return <Link to={linkHref} style={style} className={sharedClassName}>{content}</Link>;
+  }
+
+  /* Sem override: comportamento padrão de sempre — inalterado. */
+  const commonProps = { style, className: sharedClassName, onClick };
+  if (as === 'a') return <a href={href} {...commonProps}>{content}</a>;
+  if (to) return <Link to={to} {...commonProps}>{content}</Link>;
   return <button {...commonProps}>{content}</button>;
 }

@@ -1145,6 +1145,81 @@ padrão, intencionalmente fora do sistema Lucide). Total confirmado por
 grep: 58 `<HubButton`, 55 `iconKey=`, 2 `withIcon={false}`, 1 `icon=`
 explícito — bate exatamente.
 
+### Rodada 3 — cor de fundo do botão + sistema de link (só em `HubButton`, por ora)
+
+Depois de testar a rodada 2, o Bruno pediu mais duas coisas juntas: (1)
+poder trocar a cor do PRÓPRIO botão (o "pill" de fundo) — já dava pra
+trocar cor do texto e do ícone, mas o fundo vinha de um mapa fixo
+`VARIANTS` em `HubButton.tsx`, sem gancho nenhum; (2) começar o sistema
+de link editável (interno/externo, nova aba) — pedido original cobria
+botões, cards, imagens, ícones e texto, mas ele foi explícito: **nesta
+rodada só botões**, e as duas coisas (cor + link) no MESMO painel/clique.
+Regra crítica que ele reforçou: nada de destino existente muda sozinho —
+o comportamento atual de cada botão vira o **fallback padrão**, só fica
+editável.
+
+**Peça nova no editor** (`FieldKind` ganhou `'link'`, `PanelState` ganhou
+`{type:'buttonStyle', key, label, colorFallback, linkEditable?}` —
+`src/editor/store.tsx`). Como cor e link precisam abrir no MESMO clique,
+a solução foi **um painel só** (`ButtonStyleBody`, `src/editor/ui.tsx`),
+não dois hooks espalhados no mesmo elemento (evita de propósito a
+colisão de `onClick` já documentada acima). Corpo do painel empilha cor
+(reaproveita o mesmo grid de swatches do `ColorsBody`) e link (segmentado
+Sem link / Externo / Página do site — dropdown com as 10 páginas +
+âncora opcional em texto livre, checkbox "abrir em nova aba"), sem abas
+de verdade — mesmo padrão "empilhado" já usado no `IconBody`.
+
+**Armazenamento**: `${key}.bg` (cor), `${key}.href` (link — vazio =
+"sem override, usa o padrão"), `${key}.target` (`_self`/`_blank`) — só
+chaves novas com sufixo, sem migração de banco (mesmo padrão sidecar-key
+já usado em `.lh`/`.w` do `ERich`). O `href` guarda o destino já
+resolvido (`https://...` = externo; `/caminho` ou `/caminho#ancora` =
+interno) — o MODO (externo/interno) do painel é inferido de volta a
+partir desse formato ao reabrir, não precisa de um 4º campo.
+
+**`HubButton.tsx` — a peça que ficou mais delicada**: a prop nova
+`styleKey` (+ `styleLabel`) habilita cor+link juntos; `noLink` (nos 6
+botões de ENVIO DE FORMULÁRIO — Contato, demonstração GovIA, Fórum×2,
+PROINTER×2) mantém só a cor editável, sem a seção de link no painel (via
+`linkEditable: !noLink` no `PanelState`) — clicar num botão desses nunca
+deveria abrir a opção de "trocar o destino" de um botão que na verdade
+SUBMETE um formulário. Nova prop `to` (caminho interno) — substitui o
+padrão antigo de envolver `<HubButton>` externamente com
+`<Link to="...">`: o link só pode ser sobrescrito pelo editor se viver
+DENTRO do componente, então os ~15 usos que tinham esse wrapper externo
+migraram pra `to=`. **Resolução em 3 camadas, nessa ordem**: (1) em modo
+de edição com `styleKey`, o clique SEMPRE abre o painel (nunca navega/
+rola/envia formulário de verdade — `preventDefault`+`stopPropagation`,
+mesmo padrão do `EIcon`/`useEditColor`); (2) sem estar em edição, com
+`${styleKey}.href` salvo, renderiza como link de verdade pro destino
+escolhido (`<a>` se `http`/nova aba, `<Link>` do react-router se caminho
+interno); (3) sem override nenhum, comportamento 100% idêntico a antes —
+`to` (Link) ou `onClick` (scroll) ou botão puro, exatamente como cada
+call site já funcionava. **Confirmado no navegador** (`vite preview`
+local): botão sem override continua navegando/rolando igual a antes em
+várias páginas, zero erro de console.
+
+**Navegação cruzada com âncora** (escolher "página X, seção Y" a partir
+de OUTRA página) — `ScrollToTop.tsx` (antes só resetava o scroll pro
+topo a cada troca de rota) agora olha `location.hash`: se tiver âncora,
+tenta achar o elemento e chama `ScrollSmoother.get()?.scrollTo(...)`,
+repetindo por até 40 frames (a página de destino pode ser um chunk
+`lazy()` ainda carregando quando o efeito roda pela primeira vez) antes
+de desistir. Testado direto: `http://localhost:5173/govia#govia-planos`
+carrega já na seção "Planos e Preços", não no topo.
+
+**Rollout nos 52 botões que navegam de verdade** (dos 58 totais, os 6 de
+formulário só ganharam cor): `styleKey` derivado da mesma chave de texto
+já usada no botão (ex.: `k="s1.btn1"` → `styleKey="s1.btn1"`), igual à
+convenção do `iconKey` da rodada anterior. Grep de sanidade confirmou:
+58 `<HubButton`, 58 `styleKey=` (100%), 6 `noLink` nos formulários.
+Imports de `Link` que ficaram sem uso depois de mover pra `to=` foram
+removidos (`Glossario.tsx`, `insights/index.tsx`, `institucional/index.tsx`).
+
+**Não faz parte desta rodada** (explicitamente adiado, mesma base
+reaproveitável): link editável em cards, imagens, ícones soltos ou
+texto — fica pra próxima rodada.
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no

@@ -19,7 +19,7 @@ import { isSupabaseConfigured, supabase } from './supabaseClient';
    do setup (ver SETUP-EDITOR.md).
    ═══════════════════════════════════════════════════════════════════ */
 
-export type FieldKind = 'text' | 'color' | 'image';
+export type FieldKind = 'text' | 'color' | 'image' | 'link';
 export type Channel = 'draft' | 'published';
 
 export interface ImageSpec {
@@ -56,7 +56,8 @@ export type PanelState =
   | { type: 'history' }
   | { type: 'image'; key: string; label: string; fallback: string; spec: ImageSpec }
   | { type: 'colors'; title: string; fields: { key: string; label: string; fallback: string }[] }
-  | { type: 'icon'; key: string; label: string; defaultSize: number };
+  | { type: 'icon'; key: string; label: string; defaultSize: number }
+  | { type: 'buttonStyle'; key: string; label: string; colorFallback: string; linkEditable?: boolean };
 
 interface EditorCtx {
   overrides: Record<string, string>;

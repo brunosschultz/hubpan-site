@@ -64,7 +64,7 @@ export default function S6Numeros() {
                 </p>
                 <div style={{ flex: 1 }} />
                 <div className="self-start">
-                  <HubButton size="sm" variant="lime" iconKey={`s6.card.${c.id}.btn.icone`} iconLabel={`Números — botão do card "${c.desc}", ícone`}>
+                  <HubButton size="sm" variant="lime" iconKey={`s6.card.${c.id}.btn.icone`} iconLabel={`Números — botão do card "${c.desc}", ícone`} styleKey={`s6.card.${c.id}.btn`} styleLabel={`Números — botão do card "${c.desc}"`}>
                     <ET k={`s6.card.${c.id}.btn`} v={c.btn} l={`Números — botão do card "${c.desc}"`} />
                   </HubButton>
                 </div>

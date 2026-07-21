@@ -1,5 +1,4 @@
 import { useLayoutEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
@@ -182,8 +181,8 @@ function HeroInst() {
             </ERich>
           </p>
           <div className="flex flex-wrap gap-4" data-animate>
-            <Link to="/contato"><HubButton size="lg" variant="lime" iconKey="inst.hero.btn.principal.icone" iconLabel="Hero institucional — botão principal, ícone"><ET k="inst.hero.btn.principal" v="Fale com nossa equipe" l="Hero institucional — botão principal" /></HubButton></Link>
-            <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#inst-manifesto', true)} iconKey="inst.hero.btn.secundario.icone" iconLabel="Hero institucional — botão secundário, ícone">
+            <HubButton size="lg" variant="lime" iconKey="inst.hero.btn.principal.icone" iconLabel="Hero institucional — botão principal, ícone" to="/contato" styleKey="inst.hero.btn.principal" styleLabel="Hero institucional — botão principal"><ET k="inst.hero.btn.principal" v="Fale com nossa equipe" l="Hero institucional — botão principal" /></HubButton>
+            <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#inst-manifesto', true)} iconKey="inst.hero.btn.secundario.icone" iconLabel="Hero institucional — botão secundário, ícone" styleKey="inst.hero.btn.secundario" styleLabel="Hero institucional — botão secundário">
               <ET k="inst.hero.btn.secundario" v="Leia o manifesto" l="Hero institucional — botão secundário" />
             </HubButton>
           </div>
@@ -275,7 +274,7 @@ function SecManifesto() {
               </p>
             </div>
             <div data-animate>
-              <Link to="/contato"><HubButton size="lg" variant="navy" iconKey="inst.manifesto.btn.icone" iconLabel="Manifesto — botão, ícone"><ET k="inst.manifesto.btn" v="Fale com nossa equipe" l="Manifesto — botão" /></HubButton></Link>
+              <HubButton size="lg" variant="navy" iconKey="inst.manifesto.btn.icone" iconLabel="Manifesto — botão, ícone" to="/contato" styleKey="inst.manifesto.btn" styleLabel="Manifesto — botão"><ET k="inst.manifesto.btn" v="Fale com nossa equipe" l="Manifesto — botão" /></HubButton>
             </div>
           </div>
         </div>
@@ -686,7 +685,7 @@ function SecMipad() {
             </span>
           </div>
           <div data-animate>
-            <HubButton size="md" variant="lime" iconKey="inst.mipad.btn.icone" iconLabel="MIPAD — botão, ícone"><ET k="inst.mipad.btn" v="Saiba mais sobre o MIPAD" l="MIPAD — botão" /></HubButton>
+            <HubButton size="md" variant="lime" iconKey="inst.mipad.btn.icone" iconLabel="MIPAD — botão, ícone" styleKey="inst.mipad.btn" styleLabel="MIPAD — botão"><ET k="inst.mipad.btn" v="Saiba mais sobre o MIPAD" l="MIPAD — botão" /></HubButton>
           </div>
         </div>
 
@@ -836,7 +835,7 @@ function SecGovernanca() {
               Todo o conteúdo, metodologias, programas, marcas e ativos digitais do ecossistema HUB PAN são protegidos por registro de propriedade intelectual e por políticas internas de uso e licenciamento. Parceiros e patrocinadores recebem autorização formal e documentada de uso.
             </ERich>
           </p>
-          <HubButton size="sm" variant="lime" iconKey="inst.governanca.pi.btn.icone" iconLabel="Governança — botão Propriedade Intelectual, ícone"><ET k="inst.governanca.pi.btn" v="Ver política de governança" l="Governança — botão Propriedade Intelectual" /></HubButton>
+          <HubButton size="sm" variant="lime" iconKey="inst.governanca.pi.btn.icone" iconLabel="Governança — botão Propriedade Intelectual, ícone" styleKey="inst.governanca.pi.btn" styleLabel="Governança — botão Propriedade Intelectual"><ET k="inst.governanca.pi.btn" v="Ver política de governança" l="Governança — botão Propriedade Intelectual" /></HubButton>
         </div>
       </div>
     </section>
@@ -891,8 +890,8 @@ export default function Institucional() {
         sub={<ET k="inst.cta.sub" v="Seja como governo, empresa, educador, investidor ou comunidade — há um caminho para você no HUB PAN." l="CTA final — subtítulo" />}
         actions={
           <>
-            <Link to="/contato"><HubButton size="lg" variant="lime" iconKey="inst.cta.btn.principal.icone" iconLabel="CTA final — botão principal, ícone"><ET k="inst.cta.btn.principal" v="Fale com nossa equipe" l="CTA final — botão principal" /></HubButton></Link>
-            <Link to="/prointer"><HubButton size="lg" variant="navy" iconKey="inst.cta.btn.secundario.icone" iconLabel="CTA final — botão secundário, ícone"><ET k="inst.cta.btn.secundario" v="Conhecer o PROINTER" l="CTA final — botão secundário" /></HubButton></Link>
+            <HubButton size="lg" variant="lime" iconKey="inst.cta.btn.principal.icone" iconLabel="CTA final — botão principal, ícone" to="/contato" styleKey="inst.cta.btn.principal" styleLabel="CTA final — botão principal"><ET k="inst.cta.btn.principal" v="Fale com nossa equipe" l="CTA final — botão principal" /></HubButton>
+            <HubButton size="lg" variant="navy" iconKey="inst.cta.btn.secundario.icone" iconLabel="CTA final — botão secundário, ícone" to="/prointer" styleKey="inst.cta.btn.secundario" styleLabel="CTA final — botão secundário"><ET k="inst.cta.btn.secundario" v="Conhecer o PROINTER" l="CTA final — botão secundário" /></HubButton>
           </>
         }
       />

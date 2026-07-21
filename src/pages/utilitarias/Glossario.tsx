@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import PageHero from '../../components/PageHero';
 import HubButton from '../../components/HubButton';
 import { useReveal } from '../../components/useReveal';
@@ -126,7 +125,7 @@ export default function Glossario() {
           <p style={{ fontFamily: 'Inter', fontSize: 16, color: '#797979' }}>
             <ERich k="gloss.cta.texto" l="Glossário — texto de sugestão de termo">Não encontrou o termo que buscava? Sugira uma entrada para o glossário.</ERich>
           </p>
-          <Link to="/contato"><HubButton size="md" variant="navy" iconKey="gloss.cta.btn.icone" iconLabel="Glossário — botão de sugestão, ícone"><ET k="gloss.cta.btn" v="Sugerir um termo" l="Glossário — botão de sugestão" /></HubButton></Link>
+          <HubButton size="md" variant="navy" iconKey="gloss.cta.btn.icone" iconLabel="Glossário — botão de sugestão, ícone" to="/contato" styleKey="gloss.cta.btn" styleLabel="Glossário — botão de sugestão"><ET k="gloss.cta.btn" v="Sugerir um termo" l="Glossário — botão de sugestão" /></HubButton>
         </div>
       </section>
     </>

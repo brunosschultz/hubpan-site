@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
@@ -118,7 +117,7 @@ function SecDestaque() {
           <p className="mb-8" style={{ fontFamily: 'Inter', fontSize: 13, color: '#a7a4a4' }}>
             <ET k="insights.destaque.meta" v={DESTAQUE.meta} l="Insights — meta do destaque" />
           </p>
-          <div><HubButton size="md" variant="blue" iconKey="insights.destaque.btn.icone" iconLabel="Insights — botão do destaque, ícone"><ET k="insights.destaque.btn" v="Ler pesquisa completa" l="Insights — botão do destaque" /></HubButton></div>
+          <div><HubButton size="md" variant="blue" iconKey="insights.destaque.btn.icone" iconLabel="Insights — botão do destaque, ícone" styleKey="insights.destaque.btn" styleLabel="Insights — botão do destaque"><ET k="insights.destaque.btn" v="Ler pesquisa completa" l="Insights — botão do destaque" /></HubButton></div>
         </div>
       </div>
     </section>
@@ -208,7 +207,7 @@ function ObservatorioCard({ o }: { o: (typeof OBSERVATORIOS)[number] }) {
           ))}
         </div>
       )}
-      {o.ativo && <div className="mt-auto"><HubButton size="sm" variant="lime" iconKey={`insights.observatorio.${o.id}.btn.icone`} iconLabel={`Insights — botão do observatório "${o.nome}", ícone`}><ET k={`insights.observatorio.${o.id}.btn`} v="Acessar dados" l={`Insights — botão do observatório "${o.nome}"`} /></HubButton></div>}
+      {o.ativo && <div className="mt-auto"><HubButton size="sm" variant="lime" iconKey={`insights.observatorio.${o.id}.btn.icone`} iconLabel={`Insights — botão do observatório "${o.nome}", ícone`} styleKey={`insights.observatorio.${o.id}.btn`} styleLabel={`Insights — botão do observatório "${o.nome}"`}><ET k={`insights.observatorio.${o.id}.btn`} v="Acessar dados" l={`Insights — botão do observatório "${o.nome}"`} /></HubButton></div>}
     </div>
   );
 }
@@ -249,8 +248,8 @@ export default function Insights() {
         title={<ERich k="insights.hero.titulo" l="Insights — título do hero">HUB PAN Insights</ERich>}
         sub={<ERich k="insights.hero.sub" l="Insights — descrição do hero" baseW={660}>A plataforma de inteligência e conteúdo do ecossistema. Observatórios temáticos, pesquisas, artigos, entrevistas, relatórios e white papers sobre inovação, IA, governança, educação e cooperação internacional.</ERich>}
         actions={<>
-          <HubButton size="lg" variant="lime" onClick={() => ScrollSmoother.get()?.scrollTo('#insights-artigos', true)} iconKey="insights.hero.cta1.icone" iconLabel="Insights — botão do hero (principal), ícone"><ET k="insights.hero.cta1" v="Ver todos os conteúdos" l="Insights — botão do hero (principal)" /></HubButton>
-          <Link to="/#newsletter"><HubButton size="lg" variant="blue" iconKey="insights.hero.cta2.icone" iconLabel="Insights — botão do hero (secundário), ícone"><ET k="insights.hero.cta2" v="Assinar newsletter" l="Insights — botão do hero (secundário)" /></HubButton></Link>
+          <HubButton size="lg" variant="lime" onClick={() => ScrollSmoother.get()?.scrollTo('#insights-artigos', true)} iconKey="insights.hero.cta1.icone" iconLabel="Insights — botão do hero (principal), ícone" styleKey="insights.hero.cta1" styleLabel="Insights — botão do hero (principal)"><ET k="insights.hero.cta1" v="Ver todos os conteúdos" l="Insights — botão do hero (principal)" /></HubButton>
+          <HubButton size="lg" variant="blue" iconKey="insights.hero.cta2.icone" iconLabel="Insights — botão do hero (secundário), ícone" to="/#newsletter" styleKey="insights.hero.cta2" styleLabel="Insights — botão do hero (secundário)"><ET k="insights.hero.cta2" v="Assinar newsletter" l="Insights — botão do hero (secundário)" /></HubButton>
         </>}
         stats={STATS}
         strip={{ ...STRIP_THEMES.light, bg: stripBg }}

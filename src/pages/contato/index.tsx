@@ -115,7 +115,7 @@ function ImprensaMidiaCard() {
       <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 13.5, lineHeight: '22px', color: 'rgba(255,255,255,0.75)' }}>
         <ERich k="contato.imprensa.desc" l="Contato — descrição da caixa Imprensa & Mídia">Para press kit, dados do Observatório de IA ou cobertura do lançamento do portal.</ERich>
       </p>
-      <Link to="/imprensa"><HubButton size="sm" variant="lime" iconKey="contato.imprensa.btn.icone" iconLabel="Contato — botão da caixa Imprensa & Mídia, ícone"><ET k="contato.imprensa.btn" v="Baixar press kit" l="Contato — botão da caixa Imprensa & Mídia" /></HubButton></Link>
+      <HubButton size="sm" variant="lime" iconKey="contato.imprensa.btn.icone" iconLabel="Contato — botão da caixa Imprensa & Mídia, ícone" to="/imprensa" styleKey="contato.imprensa.btn" styleLabel="Contato — botão da caixa Imprensa & Mídia"><ET k="contato.imprensa.btn" v="Baixar press kit" l="Contato — botão da caixa Imprensa & Mídia" /></HubButton>
     </div>
   );
 }
@@ -183,7 +183,7 @@ function FormCard() {
         </select>
         <textarea required placeholder="Mensagem" rows={5} value={mensagem} onChange={(e) => setMensagem(e.target.value)} style={{ ...INPUT_STYLE, height: 'auto', padding: '14px 18px', resize: 'vertical' }} />
         {error && <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#c0392b' }}>{error}</p>}
-        <HubButton size="lg" variant="blue" className={`w-full justify-center ${sending ? 'opacity-60 pointer-events-none' : ''}`} iconKey="contato.form.btn.icone" iconLabel="Contato — botão de envio do formulário, ícone">
+        <HubButton size="lg" variant="blue" className={`w-full justify-center ${sending ? 'opacity-60 pointer-events-none' : ''}`} iconKey="contato.form.btn.icone" iconLabel="Contato — botão de envio do formulário, ícone" styleKey="contato.form.btn" styleLabel="Contato — botão de envio do formulário" noLink>
           <ET k="contato.form.btn" v={sending ? 'Enviando…' : 'Enviar mensagem'} l="Contato — botão de envio do formulário" />
         </HubButton>
       </div>

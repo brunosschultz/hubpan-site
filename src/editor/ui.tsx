@@ -6,6 +6,22 @@ import { parseIconValue } from './fields';
 import { LUCIDE_CHOICES, LUCIDE_NAMES } from './editorIcons';
 import { glass, initials, label11, PALETTE, text13 } from './theme';
 
+/** Páginas públicas do site pro seletor de link interno — cópia leve de
+ * `pageRoutes.ts` (só slug/label/path, sem os componentes de página) pra não
+ * puxar as 10 páginas pro bundle do editor só por causa desse dropdown. */
+const INTERNAL_PAGES: { label: string; path: string }[] = [
+  { label: 'Home', path: '/' },
+  { label: 'O HUB PAN', path: '/o-hub-pan' },
+  { label: 'PROINTER', path: '/prointer' },
+  { label: 'GovIA', path: '/govia' },
+  { label: 'Fórum Mundial de IA', path: '/forum-mundial-ia' },
+  { label: 'Insights', path: '/insights' },
+  { label: 'Contato', path: '/contato' },
+  { label: 'Glossário', path: '/glossario' },
+  { label: 'Imprensa', path: '/imprensa' },
+  { label: 'Casos de Uso', path: '/casos-de-uso' },
+];
+
 /* ═══════════════════════════════════════════════════════════════════
    UI do editor — login, toolbar flutuante, painéis (cor / imagem /
    ícone / histórico) e o chip de cor que aparece no hover dos textos.
@@ -202,6 +218,7 @@ function Panel({ panel }: { panel: PanelState }) {
     panel.type === 'history' ? 'Histórico de edições' :
     panel.type === 'image' ? panel.label :
     panel.type === 'icon' ? panel.label :
+    panel.type === 'buttonStyle' ? panel.label :
     panel.title;
 
   return (
@@ -219,6 +236,7 @@ function Panel({ panel }: { panel: PanelState }) {
         {panel.type === 'colors' && <ColorsBody fields={panel.fields} />}
         {panel.type === 'image' && <ImageBody panel={panel} />}
         {panel.type === 'icon' && <IconBody panel={panel} />}
+        {panel.type === 'buttonStyle' && <ButtonStyleBody panel={panel} />}
         {panel.type === 'history' && <HistoryBody />}
       </div>
     </div>
@@ -282,6 +300,170 @@ function ColorsBody({ fields }: { fields: { key: string; label: string; fallback
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/* ---------- Cor do botão + link (mesmo painel, mesmo clique) ---------- */
+
+function ButtonStyleBody({ panel }: { panel: Extract<PanelState, { type: 'buttonStyle' }> }) {
+  const { get, setValue, overrides } = useEditorStore();
+  const bgKey = `${panel.key}.bg`;
+  const hrefKey = `${panel.key}.href`;
+  const targetKey = `${panel.key}.target`;
+
+  const bg = get(bgKey, panel.colorFallback);
+  const bgOverridden = bgKey in overrides;
+  const applyBg = (hex: string | null) =>
+    setValue(bgKey, hex === panel.colorFallback ? null : hex, { label: `${panel.label} — cor do botão`, kind: 'color' });
+
+  const savedHref = get(hrefKey, '');
+  const savedIsExternal = /^https?:\/\//i.test(savedHref);
+  const [mode, setMode] = useState<'none' | 'external' | 'internal'>(
+    savedHref === '' ? 'none' : savedIsExternal ? 'external' : 'internal'
+  );
+  const [extUrl, setExtUrl] = useState(savedIsExternal ? savedHref : '');
+  const [intPath, setIntPath] = useState(!savedIsExternal && savedHref ? savedHref.split('#')[0] : INTERNAL_PAGES[0].path);
+  const [intAnchor, setIntAnchor] = useState(!savedIsExternal && savedHref.includes('#') ? savedHref.split('#')[1] : '');
+  const target = get(targetKey, '_self') === '_blank' ? '_blank' : '_self';
+
+  const commitTarget = (t: '_self' | '_blank') =>
+    setValue(targetKey, t === '_blank' ? '_blank' : null, { label: `${panel.label} — abrir em nova aba`, kind: 'link' });
+
+  const clearLink = () => {
+    setMode('none');
+    setExtUrl('');
+    setValue(hrefKey, null, { label: `${panel.label} — link`, kind: 'link' });
+    setValue(targetKey, null, { label: `${panel.label} — abrir em nova aba`, kind: 'link' });
+  };
+
+  const commitExternal = () => {
+    const url = extUrl.trim();
+    setValue(hrefKey, url || null, { label: `${panel.label} — link`, kind: 'link' });
+  };
+
+  const commitInternal = (path = intPath, anchor = intAnchor) => {
+    const href = path + (anchor.trim() ? `#${anchor.trim().replace(/^#/, '')}` : '');
+    setValue(hrefKey, href, { label: `${panel.label} — link`, kind: 'link' });
+  };
+
+  const segBtn = (active: boolean): CSSProperties => ({
+    flex: 1, height: 34, borderRadius: 8, fontFamily: 'Inter', fontWeight: 600, fontSize: 12,
+    color: active ? '#152852' : 'rgba(255,255,255,0.75)', background: active ? '#d2e718' : 'transparent',
+  });
+
+  const inputStyle: CSSProperties = {
+    height: 40, borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+    fontFamily: 'Inter', fontSize: 13, color: '#fff', padding: '0 14px',
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <p className="mb-3" style={label11}>Cor do botão</p>
+        <div className="grid grid-cols-5 gap-2 mb-3">
+          {PALETTE.map((c) => (
+            <button
+              key={c.hex}
+              title={c.name}
+              onClick={() => applyBg(c.hex)}
+              className="rounded-[10px] transition-transform hover:scale-110"
+              style={{
+                height: 40, background: c.hex,
+                border: c.hex.toLowerCase() === bg.toLowerCase() ? '2px solid #00e4ff' : '1px solid rgba(255,255,255,0.15)',
+              }}
+            />
+          ))}
+          <label
+            className="relative rounded-[10px] cursor-pointer overflow-hidden flex items-center justify-center transition-transform hover:scale-110"
+            title="Cor personalizada"
+            style={{ height: 40, border: '1px dashed rgba(255,255,255,0.3)', background: 'conic-gradient(#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)' }}
+          >
+            <input
+              type="color"
+              value={/^#[0-9a-fA-F]{6}$/.test(bg) ? bg : '#ffffff'}
+              onChange={(e) => applyBg(e.target.value)}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
+          </label>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="rounded-[8px] shrink-0" style={{ width: 26, height: 26, background: bg, border: '1px solid rgba(255,255,255,0.2)' }} />
+          <span style={{ fontFamily: 'Inter', fontSize: 12.5, color: '#8b90a3' }}>{bg}</span>
+          {bgOverridden && (
+            <button
+              onClick={() => applyBg(panel.colorFallback)}
+              className="ml-auto flex items-center gap-1.5 hover:text-white transition-colors"
+              style={{ fontFamily: 'Inter', fontSize: 12, color: '#8b90a3' }}
+            >
+              <RotateCcw size={12} /> Restaurar padrão
+            </button>
+          )}
+        </div>
+      </div>
+
+      {panel.linkEditable !== false && (
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 20 }}>
+          <p className="mb-3" style={label11}>Link do botão</p>
+          <div className="flex gap-1 mb-3 rounded-[10px] p-1" style={{ background: 'rgba(255,255,255,0.05)' }}>
+            <button style={segBtn(mode === 'none')} onClick={clearLink}>Sem link</button>
+            <button style={segBtn(mode === 'external')} onClick={() => setMode('external')}>Externo</button>
+            <button style={segBtn(mode === 'internal')} onClick={() => { setMode('internal'); commitInternal(); }}>Página do site</button>
+          </div>
+
+          {mode === 'none' && (
+            <p style={{ fontFamily: 'Inter', fontSize: 12, lineHeight: '18px', color: '#8b90a3' }}>
+              Sem link definido — o botão continua com o comportamento padrão dele
+              (navegar ou rolar até a seção, como já funciona hoje).
+            </p>
+          )}
+
+          {mode === 'external' && (
+            <input
+              placeholder="https://..."
+              value={extUrl}
+              onChange={(e) => setExtUrl(e.target.value)}
+              onBlur={commitExternal}
+              className="w-full outline-none"
+              style={inputStyle}
+            />
+          )}
+
+          {mode === 'internal' && (
+            <div className="space-y-2.5">
+              <select
+                value={intPath}
+                onChange={(e) => { setIntPath(e.target.value); commitInternal(e.target.value, intAnchor); }}
+                className="w-full outline-none"
+                style={inputStyle}
+              >
+                {INTERNAL_PAGES.map((p) => <option key={p.path} value={p.path}>{p.label}</option>)}
+              </select>
+              <input
+                placeholder="Âncora da seção (opcional, ex.: govia-planos)"
+                value={intAnchor}
+                onChange={(e) => setIntAnchor(e.target.value)}
+                onBlur={() => commitInternal(intPath, intAnchor)}
+                className="w-full outline-none"
+                style={inputStyle}
+              />
+            </div>
+          )}
+
+          {mode !== 'none' && (
+            <label className="flex items-center gap-2 mt-3.5 cursor-pointer">
+              <input type="checkbox" checked={target === '_blank'} onChange={(e) => commitTarget(e.target.checked ? '_blank' : '_self')} />
+              <span style={{ fontFamily: 'Inter', fontSize: 12.5, color: 'rgba(255,255,255,0.8)' }}>Abrir em nova aba</span>
+            </label>
+          )}
+        </div>
+      )}
+
+      {panel.linkEditable === false && (
+        <p style={{ fontFamily: 'Inter', fontSize: 11.5, lineHeight: '17px', color: '#5c6072' }}>
+          Este botão envia um formulário — não tem opção de link.
+        </p>
+      )}
     </div>
   );
 }

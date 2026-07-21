@@ -139,7 +139,7 @@ function PerfilCard({ p }: { p: (typeof PERFIS)[number] }) {
       <p className="mb-7" style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '23px', color: c.desc }}>
         <ERich k={`casos.perfil.${p.id}.desc`} l={`Casos de Uso — descrição do perfil "${p.titulo}"`}>{p.desc}</ERich>
       </p>
-      <div className="mt-auto"><Link to={p.to}><HubButton size="sm" variant={c.btn} iconKey={`casos.perfil.${p.id}.btn.icone`} iconLabel={`Casos de Uso — botão do perfil "${p.titulo}", ícone`}><ET k={`casos.perfil.${p.id}.btn`} v={p.btn} l={`Casos de Uso — botão do perfil "${p.titulo}"`} /></HubButton></Link></div>
+      <div className="mt-auto"><HubButton size="sm" variant={c.btn} iconKey={`casos.perfil.${p.id}.btn.icone`} iconLabel={`Casos de Uso — botão do perfil "${p.titulo}", ícone`} to={p.to} styleKey={`casos.perfil.${p.id}.btn`} styleLabel={`Casos de Uso — botão do perfil "${p.titulo}"`}><ET k={`casos.perfil.${p.id}.btn`} v={p.btn} l={`Casos de Uso — botão do perfil "${p.titulo}"`} /></HubButton></div>
     </div>
   );
 }

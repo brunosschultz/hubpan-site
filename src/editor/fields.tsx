@@ -836,3 +836,31 @@ export function useEditColor(key: string, fallback: string, label: string, title
   const [values, props] = useEditColors(title ?? label, [{ key, label, fallback }]);
   return [values[0], props];
 }
+
+/* ---------- Estilo de botão (cor de fundo + link, no mesmo clique/painel) ---------- */
+
+export interface ButtonStyleValue {
+  bg: string;
+  /** '' = sem override — o botão usa o comportamento padrão (to/onClick já existente) */
+  href: string;
+  target: '_self' | '_blank';
+}
+
+/** Cor de fundo do botão + link (externo ou página do site), combinados no
+ * mesmo painel/clique — pedido explícito do Bruno. Sem override de link,
+ * `href` volta vazio e o HubButton usa seu comportamento padrão de sempre. */
+export function useButtonStyle(key: string, label: string, colorFallback: string): [ButtonStyleValue, Record<string, unknown>] {
+  const { get, editMode, openPanel } = useEditorStore();
+  const bg = get(`${key}.bg`, colorFallback);
+  const href = get(`${key}.href`, '');
+  const target = get(`${key}.target`, '_self') === '_blank' ? '_blank' : '_self';
+  const props = editMode ? {
+    'data-ebuttonstyle': '',
+    onClick: (e: MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      openPanel({ type: 'buttonStyle', key, label, colorFallback });
+    },
+  } : {};
+  return [{ bg, href, target }, props];
+}
