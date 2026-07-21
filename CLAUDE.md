@@ -1323,6 +1323,28 @@ O Bruno reportou dois pontos na mesma mensagem:
    preenchido automaticamente pelo `HubButton` ao abrir o painel — nenhum
    dos 52 call sites precisou ser tocado.
 
+### Bug real: clicar 2x no mesmo botão de âncora só rolava na primeira vez
+
+O Bruno reportou: clica no botão, desce até a seção — funciona. Rola de
+volta pra cima manualmente, clica no MESMO botão de novo — nada
+acontece. Causa raiz em `ScrollToTop.tsx`: o efeito rodava a partir de
+`[pathname, hash]` (strings simples) do `useLocation()`. No segundo
+clique, o destino é EXATAMENTE igual ao já atual (mesmo `pathname`,
+mesmo `hash`) — nenhum dos dois valores muda, então o React nem roda o
+efeito de novo (comparação de dependências por igualdade). O React
+Router, porém, ainda registra a navegação de verdade por baixo dos
+panos, só que isso não aparecia nas duas strings que o efeito observava.
+
+**Fix**: trocar a dependência por `location.key` (`navKey` no código) —
+o React Router gera uma chave ÚNICA a cada navegação/clique, mesmo
+quando o destino é idêntico ao atual (é o mecanismo padrão da própria
+biblioteca `history` por baixo do React Router pra distinguir "naveguei
+nessa página de novo" de "nunca saí daqui"). **Regra permanente**: todo
+efeito baseado em navegação que precisa reagir a "o usuário clicou de
+novo no mesmo link" tem que depender de `location.key`, nunca só de
+`pathname`/`hash`/`search` — esses três só mudam quando o destino é
+literalmente diferente do atual.
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no

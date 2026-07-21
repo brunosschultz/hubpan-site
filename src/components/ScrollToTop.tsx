@@ -12,9 +12,17 @@ import { ScrollSmoother } from 'gsap/ScrollSmoother';
  * rolar até o elemento. A página de destino pode ser um chunk lazy ainda
  * carregando quando este efeito roda, então tenta de novo por alguns frames
  * até o elemento existir (ou desiste e cai no topo normal).
+ *
+ * `navKey` (não `pathname`/`hash`) é a dependência que dispara o efeito —
+ * o React Router muda `location.key` a CADA navegação, mesmo quando o
+ * destino é idêntico ao atual (clicar duas vezes no mesmo botão de âncora:
+ * desce, o usuário rola pra cima manualmente, clica de novo). Se a
+ * dependência fosse só `[pathname, hash]`, o segundo clique não mudaria
+ * nenhum dos dois valores (já estavam nesse hash) e o efeito simplesmente
+ * não rodava de novo — bug real reportado pelo Bruno.
  */
 export default function ScrollToTop() {
-  const { pathname, hash } = useLocation();
+  const { pathname, hash, key: navKey } = useLocation();
   const prevPathname = useRef(pathname);
 
   useLayoutEffect(() => {
@@ -55,7 +63,7 @@ export default function ScrollToTop() {
     if (smoother) smoother.scrollTop(0);
     window.scrollTo(0, 0);
     requestAnimationFrame(() => ScrollTrigger.refresh());
-  }, [pathname, hash]);
+  }, [pathname, hash, navKey]);
 
   return null;
 }
