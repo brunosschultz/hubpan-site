@@ -50,6 +50,15 @@ const lbl: React.CSSProperties = { fontFamily: 'Inter', fontSize: 18, lineHeight
 
 const HERO_BG_SPEC = { w: 2560, h: 1440, shape: 'paisagem' as const, note: 'Tela cheia. A área mais importante fica à direita — o texto cobre a metade esquerda.' };
 
+/* Ajustes do efeito dos glass cards — mexer só nesses números pra regular
+ * a "força" (o Bruno já pediu isso 1x, deixa fácil de achar da próxima). */
+const TILT_MAX_ROT = 12;     // graus — o quanto o card gira quando o cursor está bem perto
+const TILT_MAX_SHIFT = 7;    // px — quanto o conteúdo interno desliza por cima do card
+const TILT_FALLOFF = 420;    // px — distância (do centro do card) onde o efeito já chega a zero;
+                              // menor = precisa do cursor bem mais perto pra sentir; maior = reage de mais longe
+const PULSE_SCALE = 1.025;   // "respiração" leve dos cards — 1 = sem pulsar, 1.05+ fica bem perceptível
+const PULSE_DURATION = 2.6;  // segundos por metade do ciclo — maior = mais lento/suave
+
 export default function S1Hero() {
   const ref = useRef<HTMLElement>(null);
   const [bgSrc, bgProps] = useEditImage('s1.bg', '/images/s1-hero-bg.webp', 'Hero — imagem de fundo', HERO_BG_SPEC);
@@ -68,6 +77,23 @@ export default function S1Hero() {
        * deslizar (y) pelo acabamento visual, sem esconder o conteúdo. */
       gsap.from('[data-hero-text]', { y: 20, duration: 0.6, stagger: 0.12, ease: 'power2.out', delay: 0.1 });
       gsap.from('[data-animate]', { opacity: 0, y: 15, scale: 0.95, duration: 0.5, stagger: 0.15, ease: 'power2.out', delay: 0.5 });
+
+      /* Pulsação leve, contínua, independente do tilt — GSAP soma
+       * `scale` (aqui) com `rotationX`/`rotationY` (no tilt abaixo) no
+       * mesmo elemento sem conflito, são propriedades de transform
+       * separadas internamente. `stagger` evita que os 4 pulsem em
+       * sincronia perfeita (fica mais orgânico). Dentro do gsap.context
+       * pra ser limpo automaticamente pelo ctx.revert() — é um tween
+       * infinito (`repeat: -1`), sem isso ficaria rodando pra sempre
+       * mesmo depois do componente desmontar. */
+      gsap.to('[data-tilt-card]', {
+        scale: PULSE_SCALE,
+        duration: PULSE_DURATION,
+        ease: 'sine.inOut',
+        yoyo: true,
+        repeat: -1,
+        stagger: { each: 0.4, from: 'start' },
+      });
     }, el);
 
     /* Cursor-driven perspective tilt — baseado no exemplo GSAP que o Bruno
@@ -81,21 +107,30 @@ export default function S1Hero() {
      * rotação a partir da posição do cursor relativa à SUA própria posição
      * na tela — cards diferentes tiltam diferente ao mesmo tempo
      * (individual, não em conjunto como o parallax de camada única da
-     * tentativa anterior). O retângulo de cada card é cacheado uma vez
-     * (recalculado só no resize) — não são elementos que mudam de posição
-     * sozinhos, então não precisa reconsultar a cada movimento do mouse. */
+     * tentativa anterior).
+     *
+     * Proximidade de verdade: a intensidade do efeito cai suavemente
+     * (curva smoothstep, não linear) conforme o cursor se afasta do
+     * CENTRO de cada card, chegando a zero em `TILT_FALLOFF` px — antes
+     * o valor só saturava no máximo pra qualquer card longe do cursor
+     * (sem essa queda), o que parecia "todo mundo reagindo igual". A
+     * DIREÇÃO do tilt (pra que lado inclina) continua vindo da posição
+     * relativa ao retângulo do próprio card, só a FORÇA final é que
+     * agora é multiplicada por essa intensidade. */
     let cleanupTilt: (() => void) | undefined;
     const cardEls = Array.from(el.querySelectorAll<HTMLElement>('[data-tilt-card]'));
     if (cardEls.length) {
       gsap.set(el, { perspective: 800 });
-      const MAX_ROT = 12;   // graus — rotação do card inteiro
-      const MAX_SHIFT = 7;  // px — deslocamento do conteúdo interno (camada de cima)
-      const clamp = gsap.utils.clamp(-1, 1);
+      const clampDir = gsap.utils.clamp(-1, 1);
+      const clamp01 = gsap.utils.clamp(0, 1);
       const trackers = cardEls.map((card) => {
         const inner = card.querySelector<HTMLElement>('[data-tilt-inner]');
+        const rect = card.getBoundingClientRect();
         return {
           card,
-          rect: card.getBoundingClientRect(),
+          rect,
+          cx: rect.left + rect.width / 2,
+          cy: rect.top + rect.height / 2,
           rx: gsap.quickTo(card, 'rotationX', { duration: 0.6, ease: 'power3' }),
           ry: gsap.quickTo(card, 'rotationY', { duration: 0.6, ease: 'power3' }),
           ix: inner ? gsap.quickTo(inner, 'x', { duration: 0.6, ease: 'power3' }) : null,
@@ -104,19 +139,28 @@ export default function S1Hero() {
       });
       const onMove = (e: PointerEvent) => {
         for (const t of trackers) {
-          const nx = clamp(((e.clientX - t.rect.left) / t.rect.width - 0.5) * 2);
-          const ny = clamp(((e.clientY - t.rect.top) / t.rect.height - 0.5) * 2);
-          t.rx(-ny * MAX_ROT);
-          t.ry(nx * MAX_ROT);
-          t.ix?.(nx * MAX_SHIFT);
-          t.iy?.(ny * MAX_SHIFT);
+          const dx = e.clientX - t.cx;
+          const dy = e.clientY - t.cy;
+          const dist = Math.hypot(dx, dy);
+          const p = clamp01(1 - dist / TILT_FALLOFF);
+          const intensity = p * p * (3 - 2 * p); // smoothstep — queda mais suave que linear
+          const nx = clampDir(dx / (t.rect.width / 2));
+          const ny = clampDir(dy / (t.rect.height / 2));
+          t.rx(-ny * TILT_MAX_ROT * intensity);
+          t.ry(nx * TILT_MAX_ROT * intensity);
+          t.ix?.(nx * TILT_MAX_SHIFT * intensity);
+          t.iy?.(ny * TILT_MAX_SHIFT * intensity);
         }
       };
       const onLeave = () => {
         for (const t of trackers) { t.rx(0); t.ry(0); t.ix?.(0); t.iy?.(0); }
       };
       const onResize = () => {
-        for (const t of trackers) t.rect = t.card.getBoundingClientRect();
+        for (const t of trackers) {
+          t.rect = t.card.getBoundingClientRect();
+          t.cx = t.rect.left + t.rect.width / 2;
+          t.cy = t.rect.top + t.rect.height / 2;
+        }
       };
       el.addEventListener('pointermove', onMove);
       el.addEventListener('pointerleave', onLeave);

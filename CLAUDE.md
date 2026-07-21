@@ -1547,6 +1547,50 @@ duration-300`. Removido o `group-hover:opacity-0` do bloco de conteúdo.
 Testado: a estrutura confirma que o wrapper de conteúdo não tem mais
 classe de opacidade nenhuma.
 
+### Refinamento — proximidade do mouse no tilt do Hero + pulsação suave
+
+O Bruno pediu dois ajustes pontuais no tilt já corrigido acima: (1) a
+força do efeito devia respeitar a PROXIMIDADE real do cursor em relação
+a cada card (não só a direção), e (2) um efeito de "pulsação" bem suave
+nos 4 glass cards.
+
+**Constantes nomeadas** (topo de `S1Hero.tsx`, junto de `HERO_BG_SPEC`)
+— feitas assim de propósito pra qualquer pedido futuro de "regular a
+força" virar troca de um número, não reescrita de lógica:
+`TILT_MAX_ROT` (rotação máxima em graus), `TILT_MAX_SHIFT` (deslocamento
+máximo do `data-tilt-inner`), `TILT_FALLOFF` (distância em px do centro
+do card em que o efeito já chega a zero), `PULSE_SCALE`/`PULSE_DURATION`
+(amplitude e duração do "respirar").
+
+**Falloff de proximidade**: antes, a força do tilt vinha só da direção
+(`nx`/`ny`, posição do cursor relativa ao retângulo do card, sem limite
+de distância) — um card do outro lado do Hero ainda tiltava, só que na
+direção "errada" ao invés de ficar parado. Agora cada card guarda seu
+próprio centro (`cx`/`cy`, calculado do `getBoundingClientRect()`
+cacheado) e a cada `pointermove` calcula a distância real do cursor até
+esse centro (`Math.hypot`), convertida numa `intensity` de 0 a 1 via
+curva smoothstep (`p*p*(3-2*p)`, mais suave que linear perto das
+pontas) que vale 1 no centro do card e 0 a partir de `TILT_FALLOFF` px.
+A rotação/deslocamento final é a direção de sempre MULTIPLICADA por essa
+intensidade — direção e força agora são dois cálculos separados.
+Testado despachando `PointerEvent` sintético: perto do centro de um
+card, rotação pequena (correto — intensidade alta mas direção quase
+zero, já que é o centro); a 800px de distância (bem além de 420px de
+`TILT_FALLOFF`), o `transform` não tem mais `rotateX`/`rotateY` nenhum,
+só o `scale` da pulsação — intensidade zerou como esperado.
+
+**Pulsação**: `gsap.to('[data-tilt-card]', { scale: PULSE_SCALE,
+duration: PULSE_DURATION, ease: 'sine.inOut', yoyo: true, repeat: -1,
+stagger: {...} })`, dentro do `gsap.context()` já existente (assim
+`ctx.revert()` já mata a animação infinita sozinho, sem precisar de
+cleanup manual — diferente do listener de `pointermove`, que continua
+com cleanup manual próprio). `stagger` faz os 4 cards pulsarem fora de
+sincronia entre si, pra não parecer um bloco só respirando junto.
+Testado: os 4 cards mostraram `scale(...)` DIFERENTES entre si na mesma
+leitura (prova do stagger rodando). `scale` (pulso) e `rotationX`/
+`rotationY` (tilt) convivem sem conflito no mesmo elemento — GSAP trata
+cada sub-propriedade de transform separadamente.
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no
