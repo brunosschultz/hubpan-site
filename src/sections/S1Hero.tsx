@@ -2,9 +2,11 @@ import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import HubButton from '../components/HubButton';
+import { useTilt } from '../components/useTilt';
 import { BgEditChip, EImg, ERich, ET, useEditImage } from '../editor/fields';
 
-/* Glass card — pill ou accent */
+/* Glass card — pill ou accent. Perspectiva 3D no cursor via useTilt (mesmo
+ * hook já usado em ~10 outros lugares do site). */
 function GlassCard({
   variant, accent, children, className = '', style,
 }: {
@@ -14,14 +16,20 @@ function GlassCard({
   className?: string;
   style?: React.CSSProperties;
 }) {
+  const tiltRef = useTilt<HTMLDivElement>(5, 7);
   return (
     <div
+      ref={tiltRef}
       className={`absolute flex items-center justify-center gap-[14px] px-5 ${className}`}
       style={{
         width: 233, height: 115,
         backdropFilter: 'blur(17.6px)', WebkitBackdropFilter: 'blur(17.6px)',
         background: 'rgba(250,255,202,0.10)',
-        border: variant === 'pill' ? '0.88px solid rgba(255,255,255,0.15)' : undefined,
+        /* As duas variantes (pill e accent) usam a MESMA borda geral do
+         * design system ("glass-stat", DESIGN-SYSTEM.md §1.8) — o accent só
+         * soma a barra colorida à esquerda por cima. Antes só a pill tinha
+         * essa borda (esquecimento, não decisão de design). */
+        border: '0.88px solid rgba(255,255,255,0.15)',
         borderRadius: variant === 'pill' ? 57 : '20px 57px 20px 57px',
         borderLeft: variant === 'accent' ? `10px solid ${accent}` : undefined,
         ...style,
@@ -40,6 +48,7 @@ const HERO_BG_SPEC = { w: 2560, h: 1440, shape: 'paisagem' as const, note: 'Tela
 
 export default function S1Hero() {
   const ref = useRef<HTMLElement>(null);
+  const cardsWrapRef = useRef<HTMLDivElement>(null);
   const [bgSrc, bgProps] = useEditImage('s1.bg', '/images/s1-hero-bg.webp', 'Hero — imagem de fundo', HERO_BG_SPEC);
 
   useLayoutEffect(() => {
@@ -55,9 +64,41 @@ export default function S1Hero() {
        * visível era esse parágrafo, não a imagem de fundo). Mantém o leve
        * deslizar (y) pelo acabamento visual, sem esconder o conteúdo. */
       gsap.from('[data-hero-text]', { y: 20, duration: 0.6, stagger: 0.12, ease: 'power2.out', delay: 0.1 });
-      gsap.from('[data-animate]', { opacity: 0, scale: 0.95, duration: 0.5, stagger: 0.15, ease: 'power2.out', delay: 0.5 });
+      gsap.from('[data-animate]', { opacity: 0, y: 15, scale: 0.95, duration: 0.5, stagger: 0.15, ease: 'power2.out', delay: 0.5 });
     }, el);
-    return () => ctx.revert();
+
+    /* Parallax leve na camada inteira dos 4 glass cards — segue o cursor
+     * conforme ele se move em QUALQUER lugar do Hero (não só sobre um card,
+     * isso é o tilt do useTilt em cada card). Mesma técnica do useTilt.ts:
+     * gsap.quickTo + retângulo cacheado só no mouseenter, pra não forçar
+     * reflow a cada mousemove. Fica FORA do gsap.context porque seu cleanup
+     * é de listeners DOM, não de tweens/timelines — ctx.revert() não sabe
+     * removê-los. */
+    const wrap = cardsWrapRef.current;
+    let cleanupParallax: (() => void) | undefined;
+    if (wrap) {
+      const AMPLITUDE = 10;
+      const px = gsap.quickTo(wrap, 'x', { duration: 0.6, ease: 'power2.out' });
+      const py = gsap.quickTo(wrap, 'y', { duration: 0.6, ease: 'power2.out' });
+      let rect: DOMRect | null = null;
+      const onEnter = () => { rect = el.getBoundingClientRect(); };
+      const onMove = (e: MouseEvent) => {
+        if (!rect) rect = el.getBoundingClientRect();
+        px(((e.clientX - rect.left) / rect.width - 0.5) * AMPLITUDE);
+        py(((e.clientY - rect.top) / rect.height - 0.5) * AMPLITUDE);
+      };
+      const onLeave = () => { px(0); py(0); rect = null; };
+      el.addEventListener('mouseenter', onEnter);
+      el.addEventListener('mousemove', onMove);
+      el.addEventListener('mouseleave', onLeave);
+      cleanupParallax = () => {
+        el.removeEventListener('mouseenter', onEnter);
+        el.removeEventListener('mousemove', onMove);
+        el.removeEventListener('mouseleave', onLeave);
+      };
+    }
+
+    return () => { ctx.revert(); cleanupParallax?.(); };
   }, []);
 
   return (
@@ -89,7 +130,7 @@ export default function S1Hero() {
       </div>
 
       {/* 4 Glass cards — posições % do Figma (só ≥lg) */}
-      <div className="hidden lg:block absolute inset-0 z-[6] pointer-events-none">
+      <div ref={cardsWrapRef} className="hidden lg:block absolute inset-0 z-[6] pointer-events-none">
         <GlassCard variant="accent" accent="#00e4ff" className="pointer-events-auto" style={{ right: '37.4%', top: '47.4%' }}>
           <span style={num}><ET k="s1.g1.num" v="10" l="Hero — card flutuante 1, número" /></span>
           <ET k="s1.g1.lbl" v={'Anos de\ntrajetória'} l="Hero — card flutuante 1, rótulo" multiline style={lbl} />

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useReveal } from '../components/useReveal';
 import HubButton, { WHATSAPP_URL } from '../components/HubButton';
-import { EIcon, EImg, ERich, ET, useEditColor } from '../editor/fields';
+import { BgEditChip, EIcon, EImg, ERich, ET, useEditColor } from '../editor/fields';
 
 /* ---------- Accordion (linha 1) ---------- */
 interface AccItem {
@@ -100,7 +100,7 @@ function AccordionCard({ item, active, onHover }: { item: AccItem; active: boole
 interface PlatCard {
   id: string; icon: string; iconSize: number; label: string; name: string; nameColor: string;
   desc: string; bg: string; labelColor: string; hubColor: string; descColor: string;
-  btnBg: string; btnText: string; btnCircle: string; btnArrow: string;
+  btnBg: string; btnText: string; btnCircle: string; btnArrow: string; img: string;
 }
 
 const PLAT: PlatCard[] = [
@@ -109,24 +109,28 @@ const PLAT: PlatCard[] = [
     desc: 'Formação, cursos, extensão, pós-graduação e comunidades educacionais.',
     bg: '#fff', labelColor: '#a7a4a4', hubColor: '#152852', descColor: '#797979',
     btnBg: '#d2e718', btnText: '#152852', btnCircle: 'rgba(0,0,0,0.1)', btnArrow: '#152852',
+    img: '/images/s7-persona-1.webp',
   },
   {
     id: 'alliance', icon: '/icons/s3-icon-alliance.svg', iconSize: 51, label: 'ALLIANCE', name: 'Alliance', nameColor: '#d2e718',
     desc: 'Rede estratégica de empresas, startups, universidades, ICTs e governos.',
     bg: '#2d4ebf', labelColor: 'rgba(255,255,255,0.7)', hubColor: '#fff', descColor: '#fff',
     btnBg: '#d2e718', btnText: '#2d4ebf', btnCircle: 'rgba(0,0,0,0.1)', btnArrow: '#2d4ebf',
+    img: '/images/s7-persona-2.webp',
   },
   {
     id: 'insights', icon: '/icons/s3-icon-insights.svg', iconSize: 44, label: 'INSIGHT', name: 'Insights', nameColor: '#d2e718',
     desc: 'Observatórios, pesquisas, white papers, artigos e inteligência estratégica.',
     bg: '#152852', labelColor: '#a7a4a4', hubColor: '#fff', descColor: '#fff',
     btnBg: '#d2e718', btnText: '#152852', btnCircle: 'rgba(0,0,0,0.1)', btnArrow: '#152852',
+    img: '/images/s9-insight-1.webp',
   },
   {
     id: 'digital', icon: '/icons/s3-icon-digital.svg', iconSize: 45, label: 'DIGITAL', name: 'Digital', nameColor: '#2d4ebf',
     desc: 'Portal, app, AVA, área do aluno e infraestrutura de acesso ao ecossistema.',
     bg: '#d2e718', labelColor: 'rgba(21,40,82,0.5)', hubColor: '#152852', descColor: '#152852',
     btnBg: '#2d4ebf', btnText: '#fff', btnCircle: 'rgba(0,0,0,0.1)', btnArrow: '#fff',
+    img: '/images/s7-persona-4.webp',
   },
 ];
 
@@ -138,29 +142,60 @@ function PlatformCard({ c }: { c: PlatCard }) {
   const [bg, bgProps] = useEditColor(`s3.plat.${c.id}.bg`, c.bg, `Card ${c.name} — cor de fundo`, `Card HUB PAN ${c.name}`);
   const to = PLAT_TO[c.id];
   return (
-    <div className="flex flex-col" {...bgProps} style={{ background: bg, borderRadius: 17, height: 372, padding: '36px 68px 48px 67px', border: bg === '#fff' ? '1px solid #ecedf0' : undefined }} data-animate>
-      {/* gap ícone→rótulo varia por card p/ manter o rótulo sempre na mesma altura, como no Figma */}
-      <EIcon k={`s3.plat.${c.id}.icone`} l={`Card ${c.name} — ícone`} defaultSize={c.iconSize} className="self-start" style={{ marginBottom: 75 - c.iconSize }}>
-        <img src={c.icon} alt="" style={{ width: c.iconSize, height: c.iconSize }} />
-      </EIcon>
-      <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11.9, letterSpacing: '3.58px', textTransform: 'uppercase', color: c.labelColor, marginBottom: 18 }}>
-        <ET k={`s3.plat.${c.id}.label`} v={c.label} l={`Card ${c.name} — selo`} />
-      </p>
-      <p style={{ marginBottom: 13 }}>
-        <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 30, color: c.hubColor }}>
-          <ET k="s3.plat.marca" v="HUB PAN" l="Cards de plataforma — marca" />
-        </span>{' '}
-        <span style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: 20, color: c.nameColor }}>
-          <ET k={`s3.plat.${c.id}.nome`} v={c.name} l={`Card ${c.name} — nome`} />
-        </span>
-      </p>
-      {/* margin-bottom:auto empurra o botão pra base do card, independente do nº de linhas da descrição */}
-      <p style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '21px', color: c.descColor, marginBottom: 'auto' }}>
-        <ERich k={`s3.plat.${c.id}.desc`} l={`Card ${c.name} — descrição`}>
-          {c.desc}
-        </ERich>
-      </p>
-      <div className="self-start mt-5">
+    <div
+      className="group relative overflow-hidden flex flex-col"
+      {...bgProps}
+      style={{ background: bg, borderRadius: 17, height: 372, padding: '36px 68px 48px 67px', border: bg === '#fff' ? '1px solid #ecedf0' : undefined }}
+      data-animate
+    >
+      {/* Foto revelada no hover — mesmo padrão do TerritorioTile (Presença
+       * Global): opacidade+leve zoom-out na foto, camada escura por cima,
+       * BgEditChip dedicado (clique direto não é confiável — a foto some
+       * atrás do conteúdo/camada escura no empilhamento). Imagens hoje são
+       * placeholders (fotos já existentes no site) — trocar pelo painel. */}
+      <EImg
+        k={`s3.plat.${c.id}.img`} v={c.img}
+        l={`Card ${c.name} — foto (revelada no hover)`}
+        spec={{ w: 900, h: 900, shape: 'quadrada', note: 'Só aparece quando o mouse passa por cima do card.' }}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover opacity-0 scale-110 transition-all duration-500 ease-out group-hover:opacity-100 group-hover:scale-100"
+      />
+      <div className="absolute inset-0 bg-black/55 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      <BgEditChip
+        k={`s3.plat.${c.id}.img`} v={c.img}
+        l={`Card ${c.name} — foto (revelada no hover)`}
+        spec={{ w: 900, h: 900, shape: 'quadrada', note: 'Só aparece quando o mouse passa por cima do card.' }}
+        style={{ bottom: 12, right: 12, height: 30, fontSize: 11 }}
+      />
+
+      {/* Conteúdo original — some no hover pra foto tomar conta (cores de
+       * texto são inline por card, não dá pra virar branco via Tailwind) */}
+      <div className="relative z-10 flex flex-col flex-1 transition-opacity duration-300 group-hover:opacity-0">
+        {/* gap ícone→rótulo varia por card p/ manter o rótulo sempre na mesma altura, como no Figma */}
+        <EIcon k={`s3.plat.${c.id}.icone`} l={`Card ${c.name} — ícone`} defaultSize={c.iconSize} className="self-start" style={{ marginBottom: 75 - c.iconSize }}>
+          <img src={c.icon} alt="" style={{ width: c.iconSize, height: c.iconSize }} />
+        </EIcon>
+        <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11.9, letterSpacing: '3.58px', textTransform: 'uppercase', color: c.labelColor, marginBottom: 18 }}>
+          <ET k={`s3.plat.${c.id}.label`} v={c.label} l={`Card ${c.name} — selo`} />
+        </p>
+        <p style={{ marginBottom: 13 }}>
+          <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 30, color: c.hubColor }}>
+            <ET k="s3.plat.marca" v="HUB PAN" l="Cards de plataforma — marca" />
+          </span>{' '}
+          <span style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: 20, color: c.nameColor }}>
+            <ET k={`s3.plat.${c.id}.nome`} v={c.name} l={`Card ${c.name} — nome`} />
+          </span>
+        </p>
+        {/* margin-bottom:auto empurra o resto pro fim do bloco, independente do nº de linhas da descrição */}
+        <p style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '21px', color: c.descColor, marginBottom: 'auto' }}>
+          <ERich k={`s3.plat.${c.id}.desc`} l={`Card ${c.name} — descrição`}>
+            {c.desc}
+          </ERich>
+        </p>
+      </div>
+      {/* Botão FORA do bloco que some — continua clicável durante o hover,
+       * tem cor sólida própria (sempre legível sobre a foto). */}
+      <div className="relative z-10 self-start mt-5">
         <HubButton
           size="sm"
           variant={c.btnBg === '#d2e718' ? 'lime' : 'blue'}

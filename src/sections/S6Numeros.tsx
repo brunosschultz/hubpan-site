@@ -39,7 +39,7 @@ export default function S6Numeros() {
           const fontSize = c.num.length >= 4 ? 140 : 150;
           const tracking = c.num.length >= 4 ? '-7px' : '-7.5px';
           return (
-            <div key={c.id} className="flex flex-col bg-white overflow-hidden" style={{ borderRadius: 20, height: 330 }} data-animate>
+            <div key={c.id} className="group flex flex-col bg-white overflow-hidden" style={{ borderRadius: 20, height: 330 }} data-animate>
               {/* Imagem full-bleed + número — overflow:clip (não hidden): hidden ainda
                   permite scroll programático, e o focus da edição do número rolava o
                   recorte pra mostrar o cursor, "encolhendo" a foto visualmente */}
@@ -48,7 +48,7 @@ export default function S6Numeros() {
                   k={`s6.card.${c.id}.img`} v={`/images/${c.img}.webp`}
                   l={`Números — foto do card "${c.desc}"`}
                   spec={{ w: 800, h: 460, shape: 'paisagem', note: 'O número grande fica sobre a parte de baixo da foto.' }}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                   alt={c.desc}
                 />
                 <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 32%, rgba(0,0,0,0.4))' }} />

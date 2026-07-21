@@ -1406,6 +1406,82 @@ botões de hero de cada página (mesmo `onClick`/`scrollTo`); (2) `tsc -b`
 limpo; (3) o atributo renderizado (`href`/ausência de `href` num
 `<button>`) bate exatamente com o esperado pra cada botão testado.
 
+### Ajustes pontuais — Hero, Plataformas, Jornada Global, Números
+
+Rodada de 5 pedidos visuais pontuais do Bruno, cada um numa seção
+diferente da Home:
+
+- **Hero — glass cards sem outline** (`S1Hero.tsx`, `GlassCard`): a
+  variante `accent` (2 dos 4 cards flutuantes, os com barra colorida à
+  esquerda) nunca tinha recebido a borda geral que a variante `pill` já
+  tinha — confirmado no `DESIGN-SYSTEM.md` que as duas deviam ter a
+  MESMA borda (`0.88px solid rgba(255,255,255,0.15)`), só o accent soma
+  a barra lateral por cima. Era esquecimento, não decisão de design —
+  corrigido tirando o `variant === 'pill' ?` condicional.
+- **Hero — tilt + parallax nos 4 cards**: `GlassCard` ganhou
+  `useTilt<HTMLDivElement>(5, 7)` (hook já existente, usado em ~10
+  lugares do site — cursor-driven perspective tilt via
+  `gsap.quickTo(rotationX/rotationY)`). Parallax é NOVO no projeto (não
+  existia antes em lugar nenhum) — implementado com a MESMA técnica do
+  `useTilt.ts` (retângulo cacheado só no `mouseenter`, `gsap.quickTo`
+  em x/y), só que aplicado na CAMADA INTEIRA dos 4 cards (não por card
+  — isso já é o tilt), reagindo ao mouse em qualquer lugar do Hero.
+  **Detalhe técnico que vale registrar**: o cleanup desses listeners de
+  `mousemove`/`mouseenter`/`mouseleave` teve que ficar FORA do
+  `gsap.context(fn, el)` — `ctx.revert()` só desfaz tweens/timelines
+  criados pelo GSAP dentro do callback, não listeners DOM crus
+  adicionados ali dentro (um `return` dentro do callback do
+  `gsap.context` não é usado como cleanup, diferente de `useEffect`).
+- **Plataformas Estratégicas — foto no hover nos 4 cards**: reaproveita
+  o padrão EXATO já em produção do `TerritorioTile` (Presença Global,
+  `institucional/index.tsx`) — `EImg` com
+  `opacity-0 scale-110 → group-hover:opacity-100 scale-100`, camada
+  escura `bg-black/55`, `<BgEditChip>` dedicado (mesmo motivo de
+  sempre: a foto fica coberta no empilhamento, clique direto não é
+  confiável). Diferença nova aqui: como as cores de texto desses cards
+  são inline e variam por card (`c.labelColor`, `c.nameColor` etc.),
+  não dava pra forçar branco no hover via Tailwind `group-hover:` (CSS
+  inline sempre vence a classe) — resolvido fazendo o BLOCO DE
+  CONTEÚDO inteiro (ícone+label+nome+descrição) sumir
+  (`group-hover:opacity-0`) em vez de tentar recolorir; o botão fica
+  DE FORA desse bloco, continua visível/clicável durante o hover (tem
+  cor sólida própria). `PlatCard` ganhou campo `img` — os 4 valores são
+  fotos JÁ EXISTENTES no site usadas como placeholder (`s7-persona-1/2/4.webp`,
+  `s9-insight-1.webp`) — o Bruno troca depois pelo painel, já fica
+  editável de fábrica (mesma convenção `useEditColor`+`EImg`+`BgEditChip`
+  de sempre).
+- **Jornada Global — círculo cresce 50% + legenda desce**: o SVG
+  decorativo atrás da foto (`/icons/s2-selo-rotativo.svg`) já existia,
+  só não crescia (só opacidade 0→1). Trocado pra crescer via
+  `transform: scale(1.5)` em vez de animar `width`/`height` — como o
+  elemento já é centralizado pelo pai flex, `scale()` cresce em torno
+  do próprio centro sem precisar recalcular posição (mais simples E
+  mais suave que a alternativa). A legenda abaixo (antes em fluxo
+  normal, sem position) ganhou um wrapper com `translateY(22px)` no
+  hover — desce suavemente pra não ficar atrás do círculo maior, sem
+  precisar sincronizar a altura do holder com o tamanho do círculo.
+  Ambas as transições em 500ms (mais lentas que o padrão de 300ms do
+  resto do site) — pedido explícito do Bruno de "animação fluida e
+  suave" nesse item.
+- **Números Validados — zoom na foto**: aplicado o padrão de zoom já
+  usado em `S7ParaQuem`/`S9Insights`/Insights
+  (`group-hover:scale-105 transition-transform`), só que com
+  `duration-500` em vez do `duration-300` padrão (mesmo pedido de
+  suavidade). O wrapper da foto já usa `overflow: 'clip'` (não
+  `overflow-hidden`) por um motivo documentado — o número editável
+  dentro precisa disso pra não "encolher" a foto quando ganha foco;
+  zoom via `transform` funciona igual com `clip`, não precisou mudar
+  esse detalhe.
+
+**Verificação**: automação de clique/hover neste projeto não consegue
+simular `:hover` real (CSS `:hover` só responde a eventos de ponteiro
+de verdade do SO, não a `MouseEvent` sintético via JS — limitação já
+documentada nesta mesma seção do arquivo, não é bug). Confirmei cada
+efeito pela ESTRUTURA renderizada em vez de tentar disparar o hover:
+`group`/`group-hover:` nas classes certas, `EImg`+overlay+`BgEditChip`
+como filhos do card certo, `transform: scale(1)` (repouso) no SVG da
+Jornada. `tsc -b` e `npm run build` (10 rotas) limpos.
+
 ## Editor visual de conteúdo (/editar)
 
 A home tem um painel de edição estilo Framer em `/editar` (login → clica no

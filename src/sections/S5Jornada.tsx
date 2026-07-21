@@ -88,12 +88,14 @@ export default function S5Jornada() {
                 >
                   {/* Holder de altura fixa — o círculo cresce sem sair do eixo da linha */}
                   <div className="relative flex items-center justify-center shrink-0 mb-4" style={{ width: CIRCLE_HOLDER, height: CIRCLE_HOLDER }}>
-                    {/* Globo decorativo — só no hover */}
+                    {/* Globo decorativo — só no hover, cresce 50% via transform (fica
+                     * centralizado sozinho, já que o elemento é centralizado pelo pai
+                     * flex — animar width/height exigiria recalcular offset). */}
                     <img
                       src="/icons/s2-selo-rotativo.svg"
                       alt=""
-                      className="absolute pointer-events-none transition-opacity duration-300"
-                      style={{ width: CIRCLE_HOLDER + 60, height: CIRCLE_HOLDER + 60, opacity: isActive ? 1 : 0 }}
+                      className="absolute pointer-events-none transition-[transform,opacity] duration-500 ease-out"
+                      style={{ width: CIRCLE_HOLDER + 60, height: CIRCLE_HOLDER + 60, opacity: isActive ? 1 : 0, transform: isActive ? 'scale(1.5)' : 'scale(1)' }}
                     />
                     <div
                       className="relative rounded-full overflow-hidden transition-all duration-300"
@@ -111,28 +113,32 @@ export default function S5Jornada() {
                       />
                     </div>
                   </div>
-                  <p style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: c.origin ? 28 : 24, lineHeight: '25px', color: c.origin ? '#2d4ebf' : '#152852', marginBottom: 6 }}>
-                    <ET k={`s5.cidade.${c.id}.nome`} v={c.name} l={`Jornada — nome de ${c.name}`} />
-                  </p>
-                  {c.origin ? (
-                    <>
-                      <span className="inline-flex items-center justify-center px-3 py-1 mb-2" style={{ border: '1px solid #2d4ebf', borderRadius: 60, fontFamily: 'Inter', fontSize: 11, letterSpacing: '1.65px', textTransform: 'uppercase', color: '#2d4ebf' }}>
-                        <ET k={`s5.cidade.${c.id}.label`} v={c.label} l={`Jornada — rótulo de ${c.name}`} />
-                      </span>
-                      <span style={{ fontFamily: 'Inter', fontSize: 14, color: '#2d4ebf' }}>
-                        <ET k={`s5.cidade.${c.id}.sub`} v={c.sub} l={`Jornada — subtítulo de ${c.name}`} />
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span style={{ fontFamily: 'Inter', fontSize: 12, letterSpacing: '2.4px', textTransform: 'uppercase', color: '#797979', marginBottom: 2 }}>
-                        <ET k={`s5.cidade.${c.id}.label`} v={c.label} l={`Jornada — rótulo de ${c.name}`} />
-                      </span>
-                      <span style={{ fontFamily: 'Inter', fontSize: 14, color: '#2d4ebf' }}>
-                        <ET k={`s5.cidade.${c.id}.sub`} v={c.sub} l={`Jornada — subtítulo de ${c.name}`} />
-                      </span>
-                    </>
-                  )}
+                  {/* Legenda desce suavemente no hover pra não ficar embaixo do
+                   * globo decorativo, que cresce além da altura do holder acima. */}
+                  <div style={{ transform: isActive ? 'translateY(22px)' : 'translateY(0)', transition: 'transform 500ms ease-out' }}>
+                    <p style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: c.origin ? 28 : 24, lineHeight: '25px', color: c.origin ? '#2d4ebf' : '#152852', marginBottom: 6 }}>
+                      <ET k={`s5.cidade.${c.id}.nome`} v={c.name} l={`Jornada — nome de ${c.name}`} />
+                    </p>
+                    {c.origin ? (
+                      <>
+                        <span className="inline-flex items-center justify-center px-3 py-1 mb-2" style={{ border: '1px solid #2d4ebf', borderRadius: 60, fontFamily: 'Inter', fontSize: 11, letterSpacing: '1.65px', textTransform: 'uppercase', color: '#2d4ebf' }}>
+                          <ET k={`s5.cidade.${c.id}.label`} v={c.label} l={`Jornada — rótulo de ${c.name}`} />
+                        </span>
+                        <span style={{ fontFamily: 'Inter', fontSize: 14, color: '#2d4ebf' }}>
+                          <ET k={`s5.cidade.${c.id}.sub`} v={c.sub} l={`Jornada — subtítulo de ${c.name}`} />
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span style={{ fontFamily: 'Inter', fontSize: 12, letterSpacing: '2.4px', textTransform: 'uppercase', color: '#797979', marginBottom: 2 }}>
+                          <ET k={`s5.cidade.${c.id}.label`} v={c.label} l={`Jornada — rótulo de ${c.name}`} />
+                        </span>
+                        <span style={{ fontFamily: 'Inter', fontSize: 14, color: '#2d4ebf' }}>
+                          <ET k={`s5.cidade.${c.id}.sub`} v={c.sub} l={`Jornada — subtítulo de ${c.name}`} />
+                        </span>
+                      </>
+                    )}
+                  </div>
                 </div>
               );
             })}
