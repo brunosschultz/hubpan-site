@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import gsap from 'gsap';
 import { useReveal } from './useReveal';
+import { useSplitTitle } from './useSplitTitle';
 import { ERich } from '../editor/fields';
 
 /* ═══════════ Contador animado (conta de 0 até o valor ao entrar na viewport) ═══════════ */
@@ -92,6 +93,7 @@ function statsGridClass(n: number): string {
 
 export default function Hero80({ id, img, imgAlt = '', eyebrow, title, sub, badge, actions, stats, strip, imgPosition, stripProps }: Hero80Props) {
   const ref = useReveal<HTMLElement>();
+  const titleRef = useSplitTitle<HTMLHeadingElement>();
   return (
     <section ref={ref} id={id} className="relative w-full">
       <div className="relative w-full h-[80vh] min-h-[560px] flex items-center overflow-hidden">
@@ -104,7 +106,7 @@ export default function Hero80({ id, img, imgAlt = '', eyebrow, title, sub, badg
           <p className="text-[13px] font-medium uppercase mb-6" style={{ fontFamily: 'Inter', letterSpacing: '5.85px', color: 'rgba(255,255,255,0.5)' }} data-animate>
             {eyebrow}
           </p>
-          <h1 className="mb-7 text-white" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 3vw + 18px, 62px)', lineHeight: 1, letterSpacing: '-1.2px' }} data-animate>
+          <h1 ref={titleRef} className="mb-7 text-white" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 3vw + 18px, 62px)', lineHeight: 1, letterSpacing: '-1.2px' }} data-split-reveal>
             {title}
           </h1>
           <p className="mb-9" style={{ fontFamily: 'Inter', fontSize: 17, lineHeight: '29px', color: '#d6d6d6', maxWidth: 660 }} data-animate>

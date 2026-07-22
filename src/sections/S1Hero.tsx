@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import HubButton from '../components/HubButton';
+import { useSplitTitle } from '../components/useSplitTitle';
 import { BgEditChip, EImg, ERich, ET, useEditImage } from '../editor/fields';
 
 /* Glass card — pill ou accent. `data-tilt-card`/`data-tilt-inner` marcam os
@@ -62,6 +63,7 @@ const TILT_FALLOFF = 420;    // px — distância (do centro do card) onde o efe
 
 export default function S1Hero() {
   const ref = useRef<HTMLElement>(null);
+  const titleRef = useSplitTitle<HTMLHeadingElement>();
   const [bgSrc, bgProps] = useEditImage('s1.bg', '/images/s1-hero-bg.webp', 'Hero — imagem de fundo', HERO_BG_SPEC);
 
   useLayoutEffect(() => {
@@ -171,7 +173,7 @@ export default function S1Hero() {
         <p data-hero-text className="text-[13px] font-medium uppercase mb-6 pointer-events-auto self-start" style={{ letterSpacing: '5.85px', color: 'rgba(255,255,255,0.5)' }}>
           <ET k="s1.eyebrow" v="Plataforma Internacional" l="Hero — selo superior" />
         </p>
-        <h1 data-hero-text className="mb-8 pointer-events-auto self-start" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 4vw + 20px, 65px)', lineHeight: 1, letterSpacing: '-1.95px', color: '#f5f4f4' }}>
+        <h1 ref={titleRef} data-hero-text className="mb-8 pointer-events-auto self-start" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 4vw + 20px, 65px)', lineHeight: 1, letterSpacing: '-1.95px', color: '#f5f4f4' }}>
           <ERich k="s1.titulo" l="Hero — título" baseW={720}>
             Unimos as Américas e África ao <span style={{ color: '#fff' }}>ecossistema</span> <span style={{ color: '#d2e718' }}>global de inovação.</span>
           </ERich>

@@ -66,6 +66,34 @@ button { font-synthesis: none; cursor: pointer; }
   html { scroll-behavior: auto; }
 }
 
+/* Botão CTA com ícone — efeito "swap" no hover (o círculo do ícone desliza
+ * pro lado oposto e o texto troca de posição com ele), baseado no
+ * "button-01" do shadcn/ui (o projeto não usa shadcn/ui de verdade — só o
+ * efeito visual foi portado pro HubButton existente, adaptado às escalas/
+ * cores próprias). Os valores exatos (padding, posição do círculo) vêm de
+ * custom properties setadas por instância em HubButton.tsx; essa regra só
+ * define a transição/troca em si. */
+.hub-btn {
+  position: relative;
+  overflow: hidden;
+  padding-left: var(--btn-pl);
+  padding-right: var(--btn-pr);
+  transition: padding 500ms ease, filter 200ms ease-out;
+}
+.hub-btn:hover { padding-left: var(--btn-pl-hover); padding-right: var(--btn-pr-hover); }
+.hub-btn-label { position: relative; z-index: 1; }
+.hub-btn-circle {
+  position: absolute;
+  top: 50%;
+  right: var(--btn-circle-right);
+  transform: translateY(-50%);
+  transition: right 500ms ease, transform 500ms ease;
+}
+.hub-btn:hover .hub-btn-circle { right: var(--btn-circle-right-hover); transform: translateY(-50%) rotate(45deg); }
+@media (prefers-reduced-motion: reduce) {
+  .hub-btn, .hub-btn-circle { transition: none; }
+}
+
 /* ═══════════ Editor visual (/editar) — modo edição ═══════════ */
 /* Textos editáveis (simples e ricos): contorno tracejado no hover, sólido enquanto edita */
 body[data-edit-mode] [data-et],

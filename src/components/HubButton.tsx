@@ -114,6 +114,24 @@ export default function HubButton({
   const linkHref = styleKey && !noLink ? get(`${styleKey}.href`, '') : '';
   const linkTarget = get(`${styleKey}.target`, '_self') === '_blank' ? '_blank' : '_self';
 
+  /* Efeito "swap" no hover (baseado no button-01 do shadcn/ui — só o efeito
+   * visual foi portado, o projeto não usa shadcn/ui de verdade): o círculo
+   * do ícone desliza pro lado esquerdo (via `right` de 100%) e o texto troca
+   * de padding com ele, como se os dois cruzassem de posição. `circleD`
+   * (diâmetro) entra na conta da posição "voada" do círculo — precisa do
+   * valor renderizado de verdade (`circleSize` sobrescrito ou o da escala),
+   * não só do valor da escala. Só se aplica com ícone — botão sem ícone
+   * (`withIcon=false`) continua uma pill simples, sem essa troca. */
+  const circleD = circleSize ?? s.circle;
+  const swapVars = withIcon ? ({
+    '--btn-pl': `${s.pl}px`,
+    '--btn-pr': `${circleD + s.gap + s.pr}px`,
+    '--btn-pl-hover': `${circleD + s.gap + s.pr}px`,
+    '--btn-pr-hover': `${s.pl}px`,
+    '--btn-circle-right': `${s.pr}px`,
+    '--btn-circle-right-hover': `calc(100% - ${circleD + s.pr}px)`,
+  } as React.CSSProperties) : {};
+
   const style: React.CSSProperties = {
     height: s.height,
     borderRadius: 100,
@@ -122,19 +140,18 @@ export default function HubButton({
     fontFamily: 'Inter, sans-serif',
     display: 'inline-flex',
     alignItems: 'center',
-    gap: withIcon ? s.gap : 0,
-    paddingLeft: s.pl,
-    paddingRight: withIcon ? s.pr : s.pl,
     background: bg,
     color: textColor ?? v.text,
     border: v.border ?? 'none',
     whiteSpace: 'nowrap',
-    transition: 'filter 200ms ease-out, transform 200ms ease-out',
+    ...(withIcon
+      ? swapVars
+      : { paddingLeft: s.pl, paddingRight: s.pl, transition: 'filter 200ms ease-out' }),
   };
 
   const circle: React.CSSProperties = {
-    width: circleSize ?? s.circle,
-    height: circleSize ?? s.circle,
+    width: circleD,
+    height: circleD,
     borderRadius: '50%',
     background: circleBg,
     display: 'flex',
@@ -145,16 +162,16 @@ export default function HubButton({
 
   const content = (
     <>
-      <span>{children}</span>
+      <span className={withIcon ? 'hub-btn-label' : undefined}>{children}</span>
       {withIcon && (
-        <span style={circle}>
+        <span className="hub-btn-circle" style={circle}>
           {resolvedIcon}
         </span>
       )}
     </>
   );
 
-  const sharedClassName = `hover:brightness-95 active:brightness-90 ${className}`;
+  const sharedClassName = `hover:brightness-95 active:brightness-90 ${withIcon ? 'hub-btn' : ''} ${className}`;
 
   /* Modo edição com styleKey: o clique (fora do ícone/texto, que já têm seus
      próprios painéis) sempre abre o painel de cor+link — nunca dispara a

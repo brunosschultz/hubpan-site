@@ -9,6 +9,7 @@ import FAQAccordion from '../../components/FAQAccordion';
 import CTABanner from '../../components/CTABanner';
 import HubButton, { WHATSAPP_URL } from '../../components/HubButton';
 import { useReveal, useRevealBidirectional } from '../../components/useReveal';
+import { useSplitTitle } from '../../components/useSplitTitle';
 import { useTilt } from '../../components/useTilt';
 import { BgEditChip, EIcon, EImg, ERich, ET, useEditColor, useEditColors, useEditImage } from '../../editor/fields';
 
@@ -145,6 +146,7 @@ function Counter({ value, prefix = '' }: { value: number; prefix?: string }) {
 
 function HeroInst() {
   const ref = useReveal<HTMLElement>();
+  const titleRef = useSplitTitle<HTMLHeadingElement>();
   const [bgSrc, bgImgProps] = useEditImage(
     'inst.hero.bg', '/images/inst-hero-onu.webp', 'Hero institucional — imagem de fundo',
     { w: 2400, h: 1600, shape: 'paisagem', note: 'Fica atrás de um degradê escuro com texto branco por cima — prefira fotos com boa área escura à esquerda.' }
@@ -168,7 +170,7 @@ function HeroInst() {
             <ET k="inst.hero.eyebrow" v="QUEM SOMOS · LEGADO · PROPÓSITO · PRESENÇA GLOBAL" l="Hero institucional — selo" />
           </p>
           {/* Quebras manuais de melhor encaixe — padrão para os H1 das páginas internas */}
-          <h1 className="mb-7 text-white" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 3vw + 18px, 62px)', lineHeight: 1, letterSpacing: '-1.2px' }} data-animate>
+          <h1 ref={titleRef} className="mb-7 text-white" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 3vw + 18px, 62px)', lineHeight: 1, letterSpacing: '-1.2px' }} data-split-reveal>
             <ERich k="inst.hero.titulo" l="Hero institucional — título">
               Uma narrativa global<br />
               construída sobre uma<br />

@@ -1,9 +1,13 @@
-import { useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import HubButton, { WHATSAPP_URL } from './HubButton';
 import { EImg, ET } from '../editor/fields';
+
+gsap.registerPlugin(ScrollTrigger);
 
 /* Rótulos do menu são editáveis pelo editor visual (chaves nav.*) — como o
    NavBar é compartilhado, a edição vale automaticamente pra todas as páginas. */
@@ -24,9 +28,47 @@ const UTIL_LINKS: { label: string; to: string }[] = [
 
 const navKey = (to: string) => `nav.link.${to.replace(/\//g, '') || 'inicio'}`;
 
+/* Altura da barra fixa que aparece ao rolar. */
+const STICKY_H = 90;
+/* A partir de quanto de scroll (px) a barra fixa aparece — ~a soma da barra
+ * utilitária + nav principal originais, pra ela só entrar quando a versão
+ * "normal" já saiu de vista. */
+const SCROLL_THRESHOLD = 140;
+
 export default function NavBar() {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { pathname } = useLocation();
+
+  /* A barra fixa (sticky) precisa viver FORA de #smooth-content (ver
+   * `createPortal` abaixo) — position:fixed dentro do conteúdo transformado
+   * pelo ScrollSmoother não fica relativo à viewport de verdade, mesmo bug
+   * documentado que já fez o menu mobile usar portal. O scroll é lido via
+   * ScrollTrigger (não window.scroll*), que é quem reflete corretamente a
+   * posição sob o ScrollSmoother.
+   *
+   * Tom único (navy 85% + blur), sem alternância clara/escura — a 1ª versão
+   * tentava adivinhar a cor do fundo por trás pra trocar entre branco/preto
+   * translúcido, mas a leitura ficava errada em vários pontos do scroll
+   * (pedido do Bruno pra simplificar). */
+  useLayoutEffect(() => {
+    // StrictMode roda o effect 2x em dev — mata qualquer instância antiga
+    // com esse id antes de criar a nova.
+    ScrollTrigger.getById('sticky-nav')?.kill();
+    const st = ScrollTrigger.create({
+      id: 'sticky-nav',
+      start: 0,
+      end: 'max',
+      onUpdate: (self) => {
+        const y = self.scroll();
+        setScrolled((prev) => {
+          const next = y > SCROLL_THRESHOLD;
+          return prev === next ? prev : next;
+        });
+      },
+    });
+    return () => st.kill();
+  }, []);
 
   return (
     <>
@@ -90,6 +132,63 @@ export default function NavBar() {
           <Menu size={26} />
         </button>
       </nav>
+
+      {/* Barra fixa compacta — só a linha da marca + links + botões (o
+          menuzinho utilitário acima fica de fora de propósito). Fica
+          invisível (opacity/translate) até passar do scroll threshold, tom
+          único (navy 85% + blur) sempre. Via portal: mesmo motivo do menu
+          mobile (position:fixed não funciona corretamente dentro do
+          conteúdo do ScrollSmoother). */}
+      {createPortal(
+        <div
+          className="fixed top-0 left-0 right-0 z-40 flex items-center gutter transition-[opacity,transform] duration-300 ease-out"
+          style={{
+            height: STICKY_H,
+            opacity: scrolled ? 1 : 0,
+            transform: scrolled ? 'translateY(0)' : 'translateY(-100%)',
+            // none no wrapper — os filhos clicáveis reativam com
+            // pointerEvents:'auto' individualmente (ver abaixo).
+            pointerEvents: 'none',
+            background: 'rgba(21,40,82,0.90)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+          }}
+        >
+          <Link to="/" className="flex-shrink-0 mr-8 xl:mr-[127px]" style={{ pointerEvents: 'auto' }}>
+            <EImg
+              k="nav.logo" v="/images/logo-hubpan.png"
+              l="Logo do site (menu)"
+              spec={{ w: 468, h: 456, shape: 'quadrada', fit: 'contain', note: 'Logo principal com fundo transparente (PNG ou SVG).' }}
+              alt="HUB PAN"
+              className="w-[72px] h-[70px] object-contain"
+            />
+          </Link>
+
+          <div className="hidden lg:flex items-center gap-8 xl:gap-[73px]" style={{ pointerEvents: 'auto' }}>
+            {LINKS.map((l) => (
+              <Link
+                key={l.to}
+                to={l.to}
+                className={`text-[14px] font-medium whitespace-nowrap transition-colors ${
+                  pathname === l.to ? 'text-lime' : 'text-white hover:text-lime'
+                }`}
+              >
+                <ET k={navKey(l.to)} v={l.label} l={`Menu — "${l.label}"`} />
+              </Link>
+            ))}
+          </div>
+
+          <div className="hidden lg:flex gap-3 ml-auto items-center" style={{ pointerEvents: 'auto' }}>
+            <HubButton size="xs" variant="cyan" iconKey="nav.btn1.icone" iconLabel="Menu — botão Acessar Portal, ícone" styleKey="nav.btn1" styleLabel="Menu — botão Acessar Portal" as="a" href={WHATSAPP_URL}><ET k="nav.btn1" v="ACESSAR PORTAL" l="Menu — botão Acessar Portal" /></HubButton>
+            <HubButton size="xs" variant="navy" withIcon={false} to="/contato" styleKey="nav.btn2" styleLabel="Menu — botão Conecte-se"><ET k="nav.btn2" v="CONECTE-SE" l="Menu — botão Conecte-se" /></HubButton>
+          </div>
+
+          <button className="lg:hidden ml-auto text-white p-2" onClick={() => setOpen(true)} aria-label="Abrir menu" style={{ pointerEvents: 'auto' }}>
+            <Menu size={26} />
+          </button>
+        </div>,
+        document.body
+      )}
 
       {/* Menu mobile (Sheet) — via portal: fica FORA do #smooth-content, senão o
           transform do ScrollSmoother quebra o position:fixed (vira relativo ao

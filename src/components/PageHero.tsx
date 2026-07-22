@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { useReveal } from './useReveal';
+import { useSplitTitle } from './useSplitTitle';
 import { useEditColor, useEditImage, BgEditChip } from '../editor/fields';
 import type { ImageSpec } from '../editor/store';
 
@@ -35,6 +36,7 @@ interface PageHeroProps {
  */
 export default function PageHero({ id, bgKey, eyebrow, title, sub, actions, aside }: PageHeroProps) {
   const ref = useReveal<HTMLElement>();
+  const titleRef = useSplitTitle<HTMLHeadingElement>();
   const [bg, bgProps] = useEditColor(`${bgKey}.bg`, '#060919', 'Hero — fundo');
   const [bgImage] = useEditImage(`${bgKey}.bgImage`, '', 'Hero — imagem de fundo (opcional)', HERO_BG_SPEC);
 
@@ -61,9 +63,10 @@ export default function PageHero({ id, bgKey, eyebrow, title, sub, actions, asid
             {/* Rótulo no padrão do hero da home: Inter 500 13px, tracking 5.85px, branco 50% */}
             <p className="text-[13px] font-medium uppercase mb-6" style={{ fontFamily: 'Inter', letterSpacing: '5.85px', color: 'rgba(255,255,255,0.5)' }} data-animate>{eyebrow}</p>
             <h1
+              ref={titleRef}
               className="mb-7 text-white"
               style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 3vw + 18px, 60px)', lineHeight: 1, letterSpacing: '-1px' }}
-              data-animate
+              data-split-reveal
             >
               {title}
             </h1>

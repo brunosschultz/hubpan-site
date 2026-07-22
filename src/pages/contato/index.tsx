@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Landmark, Sparkles, HeartHandshake, MapPin, Building2, Newspaper, CheckCircle2 } from 'lucide-react';
 import HubButton from '../../components/HubButton';
 import { useReveal } from '../../components/useReveal';
+import { useSplitTitle } from '../../components/useSplitTitle';
 import { useTilt } from '../../components/useTilt';
 import { EIcon, ERich, ET, useEditColor, useEditImage, BgEditChip } from '../../editor/fields';
 import type { ImageSpec } from '../../editor/store';
@@ -195,6 +196,7 @@ function FormCard() {
 
 export default function Contato() {
   const heroRef = useReveal<HTMLElement>();
+  const titleRef = useSplitTitle<HTMLHeadingElement>();
   const caminhosRef = useReveal<HTMLElement>();
   const [heroBg, heroBgProps] = useEditColor('contato.hero.bg', '#060919', 'Hero — fundo');
   const [heroBgImage] = useEditImage('contato.hero.bgImage', '', 'Hero — imagem de fundo (opcional)', HERO_BG_SPEC);
@@ -221,7 +223,7 @@ export default function Contato() {
           <p className="text-[13px] font-medium uppercase mb-6" style={{ fontFamily: 'Inter', letterSpacing: '5.85px', color: 'rgba(255,255,255,0.5)' }} data-animate>
             <ET k="contato.hero.eyebrow" v="CONTATO & CONEXÕES" l="Contato — selo do hero" />
           </p>
-          <h1 className="mb-5 text-white" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 3vw + 18px, 62px)', lineHeight: 1, letterSpacing: '-1.2px' }} data-animate>
+          <h1 ref={titleRef} className="mb-5 text-white" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 3vw + 18px, 62px)', lineHeight: 1, letterSpacing: '-1.2px' }} data-split-reveal>
             <ERich k="contato.hero.titulo" l="Contato — título do hero">Vamos conversar.</ERich>
           </h1>
           <p style={{ fontFamily: 'Inter', fontSize: 17, lineHeight: '29px', color: '#d6d6d6', maxWidth: 560 }} data-animate>

@@ -100,7 +100,10 @@ async function prerenderRoutes() {
           // torna visível qualquer coisa que dependa de scroll/animação de entrada —
           // o robô não rola a página, então nada deve depender disso pra ser lido
           await page.evaluate(() => {
-            document.querySelectorAll('[data-animate], [data-hero-text]').forEach((el) => {
+            // .char = spans que o GSAP SplitText cria dentro de [data-split-reveal]
+            // (título/frase com efeito "revert after animation") — cada caractere
+            // também precisa ser forçado a visível, não só o container do título.
+            document.querySelectorAll('[data-animate], [data-hero-text], [data-split-reveal], .char').forEach((el) => {
               el.style.opacity = '1';
               el.style.transform = 'none';
             });
