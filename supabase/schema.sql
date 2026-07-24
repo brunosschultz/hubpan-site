@@ -91,23 +91,48 @@ revoke all on function publish_all() from public, anon;
 grant execute on function publish_all() to authenticated;
 
 -- ═══════════════════════════════════════════════════════════════════
--- Leads: captação real dos formulários públicos (Contato e Newsletter)
+-- Leads: captação real dos formulários públicos (Contato, Newsletter,
+-- PROINTER ×2, GovIA, Fórum Mundial de IA ×2)
 -- ═══════════════════════════════════════════════════════════════════
 
--- Uma linha por envio. `source` distingue os dois formulários (contato tem
--- nome/organização/assunto/mensagem; newsletter só tem e-mail — os campos
--- que não se aplicam ficam null).
+-- Uma linha por envio. `source` distingue os 7 formulários — cada um só
+-- preenche os campos que usa, o resto fica null. `telefone`/`cargo`/
+-- `perfil`/`cidade`/`objetivo`/`quantidade` foram adicionados depois do
+-- lançamento inicial (só Contato/Newsletter) pra cobrir os campos dos
+-- formulários de PROINTER/GovIA/Fórum — ver bloco de migração logo abaixo
+-- pra quem já rodou este arquivo antes de essa rodada.
 create table if not exists leads (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
-  source text not null check (source in ('contato', 'newsletter')),
+  source text not null check (source in (
+    'contato', 'newsletter', 'prointer_apoio', 'prointer_inscricao', 'govia_demo', 'forum_empresas', 'forum_participantes'
+  )),
   nome text,
   email text not null,
+  telefone text,
+  cargo text,
+  perfil text,
+  cidade text,
   organizacao text,
   assunto text,
+  objetivo text,
+  quantidade text,
   mensagem text,
   lida boolean not null default false
 );
+
+-- Migração pra quem já tinha rodado a versão anterior (só contato/
+-- newsletter) — idempotente, seguro rodar de novo.
+alter table leads add column if not exists telefone text;
+alter table leads add column if not exists cargo text;
+alter table leads add column if not exists perfil text;
+alter table leads add column if not exists cidade text;
+alter table leads add column if not exists objetivo text;
+alter table leads add column if not exists quantidade text;
+alter table leads drop constraint if exists leads_source_check;
+alter table leads add constraint leads_source_check check (source in (
+  'contato', 'newsletter', 'prointer_apoio', 'prointer_inscricao', 'govia_demo', 'forum_empresas', 'forum_participantes'
+));
 
 alter table leads enable row level security;
 
@@ -115,7 +140,7 @@ alter table leads enable row level security;
 -- tabela criada via SQL puro não recebe GRANT básico pra anon/authenticated
 -- sozinho — sem isso todo insert/select falha com "permission denied" mesmo
 -- com as políticas certas.
-grant select, update on leads to authenticated;
+grant select, update, delete on leads to authenticated;
 grant insert on leads to anon, authenticated;
 
 -- Escrita: qualquer visitante do site (sempre "anon", não existe cadastro
@@ -135,6 +160,11 @@ create policy "leads_leitura_autenticada" on leads
 -- Edge Function + Database Webhook, ver supabase/functions/notify-lead).
 create policy "leads_atualizacao_autenticada" on leads
   for update to authenticated using (true) with check (true);
+
+-- Exclusão: só quem está logado (só o Bruno) — botão "Excluir" no painel
+-- (AdminLeads.tsx), pra limpar leads de teste/spam.
+create policy "leads_exclusao_autenticada" on leads
+  for delete to authenticated using (true);
 
 -- Webhook de notificação por e-mail: em vez de configurar isso manualmente
 -- em Dashboard → Database → Webhooks, é um trigger chamando `net.http_post`

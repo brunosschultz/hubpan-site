@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { Check, CloudUpload, ExternalLink, History, Loader2, LogOut, RotateCcw, Ruler, Undo2, Upload, WifiOff, X } from 'lucide-react';
-import { formatWhen, hexOpacityToRgba, parseColorToHexOpacity, processImage, useEditorStore, type HistoryEntry, type PanelState } from './store';
+import { useLocation } from 'react-router-dom';
+import { Check, CloudUpload, ExternalLink, History, Loader2, LogOut, Monitor, RotateCcw, Ruler, Smartphone, Tablet, Undo2, Upload, WifiOff, X } from 'lucide-react';
+import { editorPortalTarget, formatWhen, hexOpacityToRgba, parseColorToHexOpacity, processImage, useEditorStore, DEVICE_PRESETS, type HistoryEntry, type PanelState, type DeviceCategory } from './store';
 import { parseIconValue } from './fields';
 import { LUCIDE_CHOICES, LUCIDE_NAMES } from './editorIcons';
 import { glass, initials, label11, PALETTE, text13 } from './theme';
@@ -205,9 +206,10 @@ export function LoginScreen() {
 /* ═══════════ Toolbar + painéis (portal) ═══════════ */
 
 export function EditorChrome() {
-  const { user, logout, panel, openPanel, closePanel, history, connected, publish, publishing, hasUnpublished, syncError } = useEditorStore();
+  const { user, logout, panel, openPanel, closePanel, history, connected, publish, publishing, hasUnpublished, syncError, editingDevice } = useEditorStore();
   const [saved, setSaved] = useState(false);
   const prevLen = useRef(history.length);
+  const deviceLabel = editingDevice === 'mobile' ? 'Mobile' : editingDevice === 'tablet' ? 'Tablet' : null;
 
   useEffect(() => {
     if (history.length > prevLen.current) {
@@ -250,16 +252,30 @@ export function EditorChrome() {
           {syncError ? 'Erro ao salvar — tente de novo' : saved ? <span className="flex items-center gap-1.5" style={{ color: '#d2e718' }}><Check size={14} strokeWidth={2.5} /> Salvo</span> : 'Modo edição'}
         </span>
 
+        {deviceLabel && (
+          <span
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+            style={{ background: 'rgba(210,231,24,0.16)', fontFamily: 'Inter', fontWeight: 600, fontSize: 11.5, color: '#d2e718' }}
+            title="As edições feitas aqui ficam só nessa versão — não mudam o Desktop"
+          >
+            {deviceLabel === 'Mobile' ? <Smartphone size={12} /> : <Tablet size={12} />} Editando {deviceLabel}
+          </span>
+        )}
+
         <span style={{ width: 1, height: 22, background: 'rgba(255,255,255,0.12)' }} />
 
-        <a
-          href="/preview" target="_blank" rel="noreferrer"
-          className="hover:bg-white/10 transition-colors"
-          style={tbBtn}
-          title="Abrir a pré-visualização do rascunho em outra aba — o link que dá pra mandar pro cliente"
-        >
-          <ExternalLink size={15} /> Pré-visualizar
-        </a>
+        {!deviceLabel && (
+          <a
+            href="/preview" target="_blank" rel="noreferrer"
+            className="hover:bg-white/10 transition-colors"
+            style={tbBtn}
+            title="Abrir a pré-visualização do rascunho em outra aba — o link que dá pra mandar pro cliente"
+          >
+            <ExternalLink size={15} /> Pré-visualizar
+          </a>
+        )}
+
+        {!deviceLabel && <DevicePreviewButton tbBtn={tbBtn} />}
 
         <button
           onClick={() => (panel?.type === 'history' ? closePanel() : openPanel({ type: 'history' }))}
@@ -304,8 +320,136 @@ export function EditorChrome() {
       </div>
 
       {panel && <Panel panel={panel} />}
+      <DevicePreviewOverlay />
     </div>,
     document.body
+  );
+}
+
+/* ═══════════ "Visualizar em" — dropdown de larguras + overlay com edição real ═══════════
+
+   Larguras (não nomes de aparelho — o site é responsivo por FAIXA, não por
+   modelo exato, ver DEVICE_PRESETS em store.tsx) que abrem um <iframe> real
+   apontando pra /editar/<slug>?device=<categoria> — uma sessão de EDITOR
+   completa (não só visualização), com a própria toolbar/painéis, rodando
+   dentro de um documento do tamanho exato do preset. Precisa ser um
+   <iframe> de verdade (não um <div> encolhido) — um container só com
+   largura menor NÃO dispara as classes responsivas do Tailwind (elas
+   reagem à largura real da JANELA, não do container), só um documento à
+   parte tem viewport próprio pra isso funcionar de verdade.
+
+   `?device=` é lido pelo EditorProvider (ver `editingDevice` em store.tsx):
+   toda edição feita dentro do iframe grava numa chave-satélite
+   (`chave.mobile`/`chave.tablet`) em vez da chave normal — o texto, a cor,
+   o tamanho de fonte, o espaçamento, a imagem, tudo isolado por dispositivo,
+   sem tocar no valor de Desktop. A sessão de dentro do iframe esconde o
+   próprio botão "Visualizar em" (ver `deviceLabel` em EditorChrome) pra não
+   permitir abrir um iframe dentro do iframe. */
+
+function DevicePreviewButton({ tbBtn }: { tbBtn: CSSProperties }) {
+  const { previewDevice, setPreviewDevice } = useEditorStore();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="hover:bg-white/10 transition-colors"
+        style={{ ...tbBtn, background: open || previewDevice ? 'rgba(255,255,255,0.12)' : 'transparent' }}
+      >
+        {previewDevice ? <Smartphone size={15} /> : <Monitor size={15} />}
+        {previewDevice ? previewDevice.label : 'Visualizar em'}
+      </button>
+      {open && (
+        <div
+          className="absolute bottom-full mb-2 left-0 rounded-[14px] overflow-hidden p-1.5"
+          style={{ width: 220, ...glass }}
+        >
+          {DEVICE_PRESETS.map((d) => (
+            <button
+              key={d.id}
+              onClick={() => { setPreviewDevice(d); setOpen(false); }}
+              className="w-full flex items-center justify-between rounded-[10px] px-3 py-2 hover:bg-white/10 transition-colors text-left"
+              style={{ background: previewDevice?.id === d.id ? 'rgba(255,255,255,0.1)' : 'transparent' }}
+            >
+              <span style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: '#fff' }}>{d.label}</span>
+              <span style={{ fontFamily: 'Inter', fontSize: 11, color: '#8b90a3' }}>{d.width}×{d.height}</span>
+            </button>
+          ))}
+          {previewDevice && (
+            <button
+              onClick={() => { setPreviewDevice(null); setOpen(false); }}
+              className="w-full flex items-center gap-1.5 rounded-[10px] px-3 py-2 hover:bg-white/10 transition-colors mt-1"
+              style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: '#8b90a3', borderTop: '1px solid rgba(255,255,255,0.08)' }}
+            >
+              <Monitor size={13} /> Voltar pra edição normal
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DevicePreviewOverlay() {
+  const { previewDevice, setPreviewDevice, editingDevice } = useEditorStore();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!previewDevice) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setPreviewDevice(null); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [previewDevice, setPreviewDevice]);
+
+  // nunca abre um iframe dentro de outro iframe
+  if (!previewDevice || editingDevice !== 'desktop') return null;
+
+  const slug = location.pathname.replace(/^\/editar\/?/, '');
+  const category = previewDevice.category;
+  const categoryLabel = category === 'mobile' ? 'Mobile' : category === 'tablet' ? 'Tablet' : 'Desktop';
+
+  return (
+    <div
+      className="fixed inset-0 z-[900] flex flex-col items-center overflow-auto"
+      style={{ background: 'rgba(8,10,18,0.94)', padding: '80px 24px 40px' }}
+      onClick={(e) => { if (e.target === e.currentTarget) setPreviewDevice(null); }}
+    >
+      <div className="flex items-center gap-3 mb-5">
+        <span style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 13, color: '#fff' }}>
+          {previewDevice.label} — {previewDevice.width}×{previewDevice.height}px
+        </span>
+        <span style={{ fontFamily: 'Inter', fontSize: 12, color: '#8b90a3' }}>
+          Editando a versão {categoryLabel} — o que você mudar aqui fica só nessa versão, sem afetar as outras.
+        </span>
+        <button
+          onClick={() => setPreviewDevice(null)}
+          className="flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+          style={{ width: 28, height: 28, color: '#8b90a3', border: '1px solid rgba(255,255,255,0.14)' }}
+          title="Fechar (Esc)"
+        >
+          <X size={14} />
+        </button>
+      </div>
+      <iframe
+        key={previewDevice.id}
+        src={`/editar/${slug}?device=${category}`}
+        title={`Editor — ${previewDevice.label}`}
+        style={{
+          width: previewDevice.width, height: previewDevice.height, flexShrink: 0,
+          border: 'none', borderRadius: 16, background: '#fff',
+          boxShadow: '0 30px 80px rgba(0,0,0,0.5)',
+        }}
+      />
+    </div>
   );
 }
 
@@ -320,7 +464,15 @@ function Panel({ panel }: { panel: PanelState }) {
     panel.type === 'buttonStyle' ? panel.label :
     panel.title;
 
-  return (
+  // Portado pra própria janela (ver `editorPortalTarget`) — dentro do
+  // iframe de "Visualizar em" isso é a janela DE CIMA, então o painel
+  // "extrapola" o quadrinho pequeno do preset simulado e ganha a tela
+  // inteira pra se posicionar, em vez de ficar espremido em 375px de
+  // largura (bug real reportado pelo Bruno). `position:fixed` aqui já
+  // resolve sozinho contra o viewport de QUALQUER documento em que o nó
+  // realmente existe — não precisa de nenhuma conta de offset como a
+  // barra de formatação (`RichToolbar`), que segue um elemento específico.
+  return createPortal(
     <div
       className="fixed z-[1000] flex flex-col rounded-[20px] overflow-hidden"
       style={{ top: 20, right: 20, width: 340, maxHeight: 'calc(100vh - 110px)', ...glass }}
@@ -346,20 +498,21 @@ function Panel({ panel }: { panel: PanelState }) {
         {panel.type === 'buttonStyle' && <ButtonStyleBody key={panel.key} panel={panel} />}
         {panel.type === 'history' && <HistoryBody />}
       </div>
-    </div>
+    </div>,
+    editorPortalTarget()
   );
 }
 
 /* ---------- Cores ---------- */
 
 function ColorsBody({ fields }: { fields: { key: string; label: string; fallback: string }[] }) {
-  const { get, setValue, overrides } = useEditorStore();
+  const { get, setValue, overrides, scopedKey } = useEditorStore();
 
   return (
     <div className="space-y-6">
       {fields.map((f) => {
         const current = get(f.key, f.fallback);
-        const overridden = f.key in overrides;
+        const overridden = scopedKey(f.key) in overrides;
         const apply = (hex: string | null) =>
           setValue(f.key, hex === f.fallback ? null : hex, { label: f.label, kind: 'color' });
         return (
@@ -414,18 +567,18 @@ function ColorsBody({ fields }: { fields: { key: string; label: string; fallback
 /* ---------- Cor do botão + link (mesmo painel, mesmo clique) ---------- */
 
 function ButtonStyleBody({ panel }: { panel: Extract<PanelState, { type: 'buttonStyle' }> }) {
-  const { get, setValue, overrides } = useEditorStore();
+  const { get, setValue, overrides, scopedKey } = useEditorStore();
   const bgKey = `${panel.key}.bg`;
   const hrefKey = `${panel.key}.href`;
   const targetKey = `${panel.key}.target`;
 
   const bg = get(bgKey, panel.colorFallback);
-  const bgOverridden = bgKey in overrides;
+  const bgOverridden = scopedKey(bgKey) in overrides;
   const applyBg = (hex: string | null) =>
     setValue(bgKey, hex === panel.colorFallback ? null : hex, { label: `${panel.label} — cor do botão`, kind: 'color' });
 
   const circleBgKey = `${panel.key}.circleBg`;
-  const circleOverridden = circleBgKey in overrides;
+  const circleOverridden = scopedKey(circleBgKey) in overrides;
   const initialCircle = parseColorToHexOpacity(get(circleBgKey, panel.circleFallback));
   const [circleHex, setCircleHex] = useState(initialCircle.hex);
   const [circleOpacity, setCircleOpacity] = useState(initialCircle.opacity);
@@ -657,21 +810,28 @@ function ButtonStyleBody({ panel }: { panel: Extract<PanelState, { type: 'button
 
 /* ---------- Imagem ---------- */
 
+const DEVICE_LABEL: Record<DeviceCategory, string> = { desktop: 'Desktop', tablet: 'Tablet', mobile: 'Mobile' };
+
 function ImageBody({ panel }: { panel: Extract<PanelState, { type: 'image' }> }) {
-  const { get, setValue, overrides, uploadImage } = useEditorStore();
+  const { get, setValue, overrides, uploadImage, editingDevice, scopedKey } = useEditorStore();
   const [busy, setBusy] = useState(false);
   const [dragOver, setDragOver] = useState(false);
-  const current = get(panel.key, panel.fallback);
-  const overridden = panel.key in overrides;
   const { spec } = panel;
   const contain = spec.fit === 'contain';
+
+  // `get`/`setValue` já resolvem a gaveta certa sozinhos (ver `editingDevice`
+  // em store.tsx) — aqui só usamos a chave normal do campo. Sem override
+  // pra Tablet/Mobile, a imagem HERDA a de Desktop (mostrada com uma nota).
+  const displaySrc = get(panel.key, panel.fallback);
+  const inherited = editingDevice !== 'desktop' && !(scopedKey(panel.key) in overrides);
+  const overridden = scopedKey(panel.key) in overrides;
 
   const handleFile = async (file: File | undefined | null) => {
     if (!file || !file.type.startsWith('image/')) return;
     setBusy(true);
     try {
       const dataUrl = await processImage(file, spec);
-      const finalSrc = await uploadImage(dataUrl, panel.key);
+      const finalSrc = await uploadImage(dataUrl, scopedKey(panel.key));
       setValue(panel.key, finalSrc, { label: panel.label, kind: 'image' });
     } catch {
       alert('Não foi possível processar essa imagem. Tente outro arquivo (JPG, PNG, WebP ou SVG).');
@@ -682,21 +842,37 @@ function ImageBody({ panel }: { panel: Extract<PanelState, { type: 'image' }> })
 
   return (
     <div>
+      {editingDevice !== 'desktop' && (
+        <div
+          className="flex items-center gap-1.5 mb-4 px-3 py-2 rounded-[10px]"
+          style={{ background: 'rgba(210,231,24,0.1)', fontFamily: 'Inter', fontWeight: 600, fontSize: 12, color: '#d2e718' }}
+        >
+          {editingDevice === 'mobile' ? <Smartphone size={13} /> : <Tablet size={13} />}
+          Editando pra {DEVICE_LABEL[editingDevice]}
+        </div>
+      )}
+
       <div
-        className="rounded-[12px] overflow-hidden mb-4"
+        className="rounded-[12px] overflow-hidden mb-2"
         style={{
           border: '1px solid rgba(255,255,255,0.1)', aspectRatio: `${spec.w} / ${spec.h}`, maxHeight: 210,
           ...(contain ? { background: 'repeating-conic-gradient(rgba(255,255,255,0.06) 0% 25%, transparent 0% 50%) 50% / 16px 16px' } : {}),
         }}
       >
-        {current ? (
-          <img src={current} alt="" className={`w-full h-full ${contain ? 'object-contain' : 'object-cover'}`} />
+        {displaySrc ? (
+          <img src={displaySrc} alt="" className={`w-full h-full ${contain ? 'object-contain' : 'object-cover'}`} />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-center px-4" style={{ background: 'rgba(255,255,255,0.03)' }}>
             <span style={{ fontFamily: 'Inter', fontSize: 12, color: '#8b90a3' }}>Nenhuma imagem — usando cor sólida</span>
           </div>
         )}
       </div>
+
+      {inherited && (
+        <p className="mb-4" style={{ fontFamily: 'Inter', fontSize: 11.5, color: '#8b90a3' }}>
+          Sem imagem específica pra {DEVICE_LABEL[editingDevice].toLowerCase()} — usando a de Desktop. Envie uma abaixo pra trocar só nessa versão.
+        </p>
+      )}
 
       <div className="rounded-[12px] p-3.5 mb-4 flex gap-3" style={{ background: 'rgba(0,228,255,0.06)', border: '1px solid rgba(0,228,255,0.2)' }}>
         <Ruler size={16} color="#00e4ff" className="shrink-0 mt-0.5" />
@@ -725,7 +901,7 @@ function ImageBody({ panel }: { panel: Extract<PanelState, { type: 'image' }> })
         <input type="file" accept="image/*,.svg" className="hidden" onChange={(e) => { handleFile(e.target.files?.[0]); e.target.value = ''; }} />
         <Upload size={18} color={busy ? '#8b90a3' : '#d2e718'} />
         <span style={{ fontFamily: 'Inter', fontSize: 12.5, color: busy ? '#8b90a3' : 'rgba(255,255,255,0.85)' }}>
-          {busy ? 'Otimizando…' : 'Clique ou arraste a nova imagem aqui'}
+          {busy ? 'Otimizando…' : editingDevice === 'desktop' ? 'Clique ou arraste a nova imagem aqui' : `Clique ou arraste uma imagem só pra ${DEVICE_LABEL[editingDevice].toLowerCase()}`}
         </span>
       </label>
 
@@ -735,7 +911,7 @@ function ImageBody({ panel }: { panel: Extract<PanelState, { type: 'image' }> })
           className="mt-4 flex items-center gap-1.5 hover:text-white transition-colors"
           style={{ fontFamily: 'Inter', fontSize: 12.5, color: '#8b90a3' }}
         >
-          <RotateCcw size={13} /> Restaurar imagem original
+          <RotateCcw size={13} /> {editingDevice === 'desktop' ? 'Restaurar imagem original' : `Remover variante — voltar a herdar de Desktop`}
         </button>
       )}
     </div>
@@ -745,9 +921,9 @@ function ImageBody({ panel }: { panel: Extract<PanelState, { type: 'image' }> })
 /* ---------- Ícone (picker Lucide + upload SVG) ---------- */
 
 function IconBody({ panel }: { panel: Extract<PanelState, { type: 'icon' }> }) {
-  const { get, setValue, overrides, uploadImage } = useEditorStore();
+  const { get, setValue, overrides, uploadImage, scopedKey } = useEditorStore();
   const current = parseIconValue(get(panel.key, ''));
-  const overridden = panel.key in overrides;
+  const overridden = scopedKey(panel.key) in overrides;
 
   const [search, setSearch] = useState('');
   const [size, setSize] = useState(current?.size ?? panel.defaultSize);

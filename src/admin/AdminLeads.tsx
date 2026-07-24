@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Check, ChevronDown, ClipboardCopy, Loader2, Mail, MailOpen, RefreshCw } from 'lucide-react';
+import { Check, ChevronDown, ClipboardCopy, Loader2, Mail, MailOpen, RefreshCw, Trash2 } from 'lucide-react';
 import { supabase } from '../editor/supabaseClient';
 import { formatWhen } from '../editor/store';
-import { type Lead, LEAD_SOURCE_LABEL, buildLeadSummary, buildWeeklySummary } from './leads';
+import { type Lead, type LeadSource, LEAD_SOURCE_LABEL, LEAD_SOURCES, LEAD_FIELD_LABEL, buildLeadSummary, buildWeeklySummary } from './leads';
 import AdminLayout from './AdminLayout';
 import { t } from './theme';
+
+const EXTRA_FIELDS = ['telefone', 'cargo', 'perfil', 'cidade', 'organizacao', 'assunto', 'objetivo', 'quantidade'] as const;
 
 export default function AdminLeads() {
   const [leads, setLeads] = useState<Lead[] | null>(null);
@@ -13,6 +15,7 @@ export default function AdminLeads() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [copiedWeekly, setCopiedWeekly] = useState(false);
+  const [filter, setFilter] = useState<'all' | LeadSource>('all');
 
   const load = useCallback(async () => {
     if (!supabase) { setError('Painel sem conexão com o banco de dados.'); return; }
@@ -34,6 +37,16 @@ export default function AdminLeads() {
     if (updateError) setLeads(leads.map((l) => (l.id === lead.id ? { ...l, lida: lead.lida } : l)));
   };
 
+  const deleteLead = async (lead: Lead) => {
+    if (!supabase || !leads) return;
+    if (!window.confirm('Excluir este lead? Essa ação não pode ser desfeita.')) return;
+    const prev = leads;
+    setLeads(leads.filter((l) => l.id !== lead.id));
+    setExpanded((cur) => (cur === lead.id ? null : cur));
+    const { error: deleteError } = await supabase.from('leads').delete().eq('id', lead.id);
+    if (deleteError) { setLeads(prev); setError('Não foi possível excluir — tente novamente.'); }
+  };
+
   const copyLead = (lead: Lead) => {
     navigator.clipboard.writeText(buildLeadSummary(lead)).then(() => {
       setCopiedId(lead.id);
@@ -50,14 +63,27 @@ export default function AdminLeads() {
     }).catch(() => setError('Não foi possível copiar — tente novamente.'));
   };
 
-  const naoLidos = leads?.filter((l) => !l.lida).length ?? 0;
+  const counts = useMemo(() => {
+    const c: Partial<Record<'all' | LeadSource, number>> = { all: leads?.length ?? 0 };
+    for (const s of LEAD_SOURCES) c[s] = leads?.filter((l) => l.source === s).length ?? 0;
+    return c;
+  }, [leads]);
+
+  // "caixa de e-mail" — abas por fonte, sempre visíveis mesmo com 0 (o
+  // Bruno pediu pra sempre poder filtrar por qualquer uma das origens).
+  const filtered = useMemo(() => {
+    if (!leads) return null;
+    return filter === 'all' ? leads : leads.filter((l) => l.source === filter);
+  }, [leads, filter]);
+
+  const naoLidos = filtered?.filter((l) => !l.lida).length ?? 0;
 
   return (
     <AdminLayout title="Leads">
       <div className="flex items-center justify-between mb-6">
         <p style={{ fontFamily: 'Inter', fontSize: 13.5, color: t.mutedForeground, maxWidth: 560 }}>
-          Envios reais dos formulários de Contato e Newsletter do site. Clique numa linha pra ver os detalhes e
-          marcar como lido. Use "Copiar resumo" pra trazer aqui no chat e eu ajudar a redigir uma resposta.
+          Envios reais dos formulários do site. Clique numa linha pra ver os detalhes e marcar como lido.
+          Use "Copiar resumo" pra trazer aqui no chat e eu ajudar a redigir uma resposta.
         </p>
         <div className="flex items-center gap-4 shrink-0">
           <button
@@ -81,23 +107,43 @@ export default function AdminLeads() {
         </div>
       </div>
 
+      {/* Abas de filtro — estilo caixa de e-mail: Todos por padrão + uma por fonte */}
+      <div className="flex items-center gap-2 mb-5 overflow-x-auto no-scrollbar pb-1">
+        {(['all', ...LEAD_SOURCES] as const).map((s) => (
+          <button
+            key={s}
+            onClick={() => setFilter(s)}
+            className="shrink-0 px-3.5 py-1.5 rounded-full transition"
+            style={{
+              fontFamily: 'Inter', fontWeight: 600, fontSize: 12.5,
+              background: filter === s ? t.primary : t.muted,
+              color: filter === s ? t.primaryForeground : t.mutedForeground,
+            }}
+          >
+            {s === 'all' ? 'Todos' : LEAD_SOURCE_LABEL[s]} ({counts[s] ?? 0})
+          </button>
+        ))}
+      </div>
+
       {error && <p className="mb-4" style={{ fontFamily: 'Inter', fontSize: 13, color: t.destructive }}>{error}</p>}
 
       {!error && loading && !leads && (
         <p style={{ fontFamily: 'Inter', fontSize: 13.5, color: t.mutedForeground }}>Carregando leads…</p>
       )}
 
-      {leads && leads.length === 0 && (
-        <p style={{ fontFamily: 'Inter', fontSize: 13.5, color: t.mutedForeground }}>Nenhum lead recebido ainda.</p>
+      {filtered && filtered.length === 0 && (
+        <p style={{ fontFamily: 'Inter', fontSize: 13.5, color: t.mutedForeground }}>
+          {filter === 'all' ? 'Nenhum lead recebido ainda.' : `Nenhum lead de "${LEAD_SOURCE_LABEL[filter]}" ainda.`}
+        </p>
       )}
 
-      {leads && leads.length > 0 && (
+      {filtered && filtered.length > 0 && (
         <>
           <p className="mb-3" style={{ fontFamily: 'Inter', fontSize: 12.5, color: t.mutedForeground }}>
-            {naoLidos > 0 ? `${naoLidos} não lido${naoLidos > 1 ? 's' : ''} de ${leads.length}` : `Todos os ${leads.length} já foram lidos`}
+            {naoLidos > 0 ? `${naoLidos} não lido${naoLidos > 1 ? 's' : ''} de ${filtered.length}` : `Todos os ${filtered.length} já foram lidos`}
           </p>
           <div className="overflow-hidden" style={{ borderRadius: t.radius, background: t.card, border: `1px solid ${t.border}` }}>
-            {leads.map((lead) => (
+            {filtered.map((lead) => (
               <LeadRow
                 key={lead.id}
                 lead={lead}
@@ -105,6 +151,7 @@ export default function AdminLeads() {
                 onToggle={() => setExpanded((cur) => (cur === lead.id ? null : lead.id))}
                 onToggleLida={() => void toggleLida(lead)}
                 onCopy={() => copyLead(lead)}
+                onDelete={() => void deleteLead(lead)}
                 copied={copiedId === lead.id}
               />
             ))}
@@ -116,8 +163,8 @@ export default function AdminLeads() {
 }
 
 function LeadRow({
-  lead, open, onToggle, onToggleLida, onCopy, copied,
-}: { lead: Lead; open: boolean; onToggle: () => void; onToggleLida: () => void; onCopy: () => void; copied: boolean }) {
+  lead, open, onToggle, onToggleLida, onCopy, onDelete, copied,
+}: { lead: Lead; open: boolean; onToggle: () => void; onToggleLida: () => void; onCopy: () => void; onDelete: () => void; copied: boolean }) {
   return (
     <div style={{ borderBottom: `1px solid ${t.border}` }}>
       <button
@@ -141,8 +188,9 @@ function LeadRow({
       {open && (
         <div className="px-6 pb-5" style={{ background: t.muted }}>
           <div className="pt-4 space-y-1.5" style={{ fontFamily: 'Inter', fontSize: 13.5, color: t.foreground }}>
-            {lead.organizacao && <p><b>Organização:</b> {lead.organizacao}</p>}
-            {lead.assunto && <p><b>Assunto:</b> {lead.assunto}</p>}
+            {EXTRA_FIELDS.filter((f) => lead[f]).map((f) => (
+              <p key={f}><b>{LEAD_FIELD_LABEL[f]}:</b> {lead[f]}</p>
+            ))}
             {lead.mensagem && <p style={{ whiteSpace: 'pre-line' }}><b>Mensagem:</b> {lead.mensagem}</p>}
           </div>
           <div className="flex items-center gap-4 mt-4">
@@ -161,6 +209,14 @@ function LeadRow({
             >
               {copied ? <Check size={13} /> : <ClipboardCopy size={13} />}
               {copied ? 'Copiado!' : 'Copiar resumo'}
+            </button>
+            <button
+              onClick={onDelete}
+              className="flex items-center gap-1.5 transition hover:opacity-70"
+              style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: t.destructive }}
+            >
+              <Trash2 size={13} />
+              Excluir lead
             </button>
           </div>
         </div>

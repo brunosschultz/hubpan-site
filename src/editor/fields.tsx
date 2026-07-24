@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type CSSProperties, type FocusEvent as RFocusEvent, type MouseEvent, type PointerEvent as RPointerEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent as RPointerEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { ALargeSmall, ArrowLeftRight, ArrowUpDown, Baseline, Bold, Check, Eraser, Italic, Minus, Plus, Underline } from 'lucide-react';
-import { useEditorStore, type ImageSpec } from './store';
+import { ALargeSmall, ArrowLeftRight, ArrowUpDown, Baseline, Bold, Check, Eraser, Italic, Maximize2, Minus, Move, Plus, Underline } from 'lucide-react';
+import { useEditorStore, deviceCategoryForWidth, editorPortalTarget, editorViewport, frameOffset, DEVICE_BREAKPOINTS, type ImageSpec, type DeviceCategory } from './store';
 import { LUCIDE_CHOICES } from './editorIcons';
 import { glass, PALETTE } from './theme';
 
@@ -83,9 +83,26 @@ function sanitizeRich(html: string): string {
   return [...root.childNodes].map(walk).join('').replace(/(<br>)+$/, '');
 }
 
-/** Blur que veio de um clique na toolbar de formatação não deve encerrar a edição. */
-function blurParaToolbar(e: RFocusEvent): boolean {
-  return !!(e.relatedTarget as Element | null)?.closest?.('[data-rich-toolbar]');
+/** A barra de formatação pode estar portada pra fora do iframe, na janela
+ * de cima (ver `editorPortalTarget`) — o `relatedTarget` do evento `blur`
+ * não é confiável atravessando documentos diferentes, então em vez de
+ * decidir na hora, adia um tick (`requestAnimationFrame`) e confere o
+ * foco de verdade em QUALQUER um dos dois documentos possíveis. */
+function toolbarHasFocus(): boolean {
+  const focado = (doc: Document) => !!doc.activeElement?.closest?.('[data-rich-toolbar]');
+  if (focado(document)) return true;
+  try {
+    if (window.top && window.top !== window.self && window.top.document !== document) {
+      return focado(window.top.document);
+    }
+  } catch { /* ok */ }
+  return false;
+}
+
+/** onBlur do campo editável (ET/ERich) — não encerra a edição quando o
+ * foco foi pra dentro da própria barra (ex.: campo numérico de tamanho). */
+function onEditableBlur(commit: () => void) {
+  return () => { requestAnimationFrame(() => { if (!toolbarHasFocus()) commit(); }); };
 }
 
 /* ---------- Campo numérico da toolbar (−/input/+, aplicação imediata) ---------- */
@@ -193,7 +210,19 @@ function RichToolbar({ anchor, editHost, onLeading, onDone }: RichToolbarProps) 
     const update = () => setPos(anchor.getBoundingClientRect());
     window.addEventListener('scroll', update, true);
     window.addEventListener('resize', update);
-    return () => { window.removeEventListener('scroll', update, true); window.removeEventListener('resize', update); };
+    /* dentro do iframe, a barra é portada pra janela de cima (ver
+     * `editorPortalTarget`) — rolar/redimensionar a JANELA DE CIMA também
+     * precisa reposicionar a barra (o fundo escurecido do overlay rola). */
+    let top: Window | null = null;
+    try { top = window.top !== window.self ? window.top : null; } catch { top = null; }
+    top?.addEventListener('scroll', update, true);
+    top?.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', update);
+      top?.removeEventListener('scroll', update, true);
+      top?.removeEventListener('resize', update);
+    };
   }, [anchor]);
 
   const leadDe = () => {
@@ -374,9 +403,24 @@ function RichToolbar({ anchor, editHost, onLeading, onDone }: RichToolbarProps) 
     background: isActive ? 'rgba(0,228,255,0.16)' : 'transparent',
   });
 
-  /* posição: acima do bloco; se não couber, abaixo — e sempre 100% dentro da tela */
-  const top = pos.top - 50 >= 8 ? pos.top - 50 : Math.min(pos.bottom + 8, window.innerHeight - 52);
-  const left = Math.min(Math.max(8, pos.left), Math.max(8, window.innerWidth - tbW - 8));
+  /* posição: acima do bloco; se não couber, abaixo — e sempre 100% dentro da
+   * tela DISPONÍVEL. Dentro do iframe de "Visualizar em", a barra (~640px de
+   * botões) é portada pra JANELA DE CIMA (`editorPortalTarget`) em vez de
+   * ficar presa aos poucos pixels do preset simulado — daí ela "extrapola"
+   * visualmente o quadrinho do celular/tablet, com toda a tela real
+   * disponível pra se posicionar. `pos` vem de `anchor.getBoundingClientRect()`
+   * — coordenadas DENTRO do iframe — por isso soma `frameOffset()` (a
+   * posição do próprio `<iframe>` na janela de cima) antes de usar; fora do
+   * iframe os dois valores são `{x:0,y:0}`/iguais aos de sempre. */
+  const offset = frameOffset();
+  const viewport = editorViewport();
+  const maxTbW = Math.max(200, viewport.w - 16);
+  const shownW = Math.min(tbW, maxTbW);
+  const anchorTop = pos.top + offset.y;
+  const anchorBottom = pos.bottom + offset.y;
+  const anchorLeft = pos.left + offset.x;
+  const top = anchorTop - 50 >= 8 ? anchorTop - 50 : Math.min(anchorBottom + 8, viewport.h - 52);
+  const left = Math.min(Math.max(8, anchorLeft), Math.max(8, viewport.w - shownW - 8));
   const divider = <span style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.15)', margin: '0 3px' }} />;
 
   return createPortal(
@@ -386,7 +430,7 @@ function RichToolbar({ anchor, editHost, onLeading, onDone }: RichToolbarProps) 
       data-rich-toolbar
       tabIndex={-1}
       className="fixed z-[1001] flex items-center gap-0.5 px-1.5 py-1.5 rounded-[12px] whitespace-nowrap"
-      style={{ top, left, ...glass }}
+      style={{ top, left, maxWidth: maxTbW, overflowX: tbW > maxTbW ? 'auto' : 'visible', ...glass }}
       /* preventDefault mantém a seleção do texto — exceto nos inputs, que precisam de foco */
       onMouseDown={(e) => { if (!(e.target as Element).closest('input')) e.preventDefault(); }}
     >
@@ -446,7 +490,7 @@ function RichToolbar({ anchor, editHost, onLeading, onDone }: RichToolbarProps) 
         <Check size={13} strokeWidth={3} /> Concluir
       </button>
     </div>,
-    document.body
+    editorPortalTarget()
   );
 }
 
@@ -525,7 +569,7 @@ export function ET({ k, v, l, multiline, className, style }: ETProps) {
         contentEditable={editing || undefined}
         suppressContentEditableWarning
         onClick={editMode ? (e) => { e.stopPropagation(); e.preventDefault(); if (!editing) setEditing(true); } : undefined}
-        onBlur={editing ? (e) => { if (!blurParaToolbar(e)) commit(); } : undefined}
+        onBlur={editing ? onEditableBlur(commit) : undefined}
         onKeyDown={editing ? (e) => {
           if (e.key === 'Enter' && !multiline) { e.preventDefault(); commit(); }
           if (e.key === 'Escape') cancel();
@@ -647,7 +691,7 @@ export function ERich({ k, l, children, baseW, className, style }: ERichProps) {
         style={{ display: 'block', outline: 'none', ...(lh ? { lineHeight: `${lh}px` } : {}) }}
         contentEditable={editing || undefined}
         suppressContentEditableWarning
-        onBlur={editing ? (e) => { if (!blurParaToolbar(e)) commit(); } : undefined}
+        onBlur={editing ? onEditableBlur(commit) : undefined}
         onKeyDown={editing ? (e) => {
           if (e.key === 'Escape') { e.preventDefault(); cancel(); }
           e.stopPropagation();
@@ -689,6 +733,210 @@ export function ERich({ k, l, children, baseW, className, style }: ERichProps) {
 
 /* ---------- Imagem (<img>) ---------- */
 
+/** Categoria de dispositivo da largura REAL da janela (não simulada) —
+ * usada só onde não dá pra resolver a imagem certa via CSS puro (fundo via
+ * `useEditImage`, e o painel do editor pra escolher a aba inicial). Pra
+ * `<EImg>` (a maioria dos casos) a troca é 100% CSS via `<picture>`, sem
+ * JS — ver `EImg` abaixo. */
+export function useDeviceBreakpoint(): DeviceCategory {
+  const [device, setDevice] = useState<DeviceCategory>(() =>
+    deviceCategoryForWidth(typeof window !== 'undefined' ? window.innerWidth : 1440)
+  );
+  useEffect(() => {
+    const mqMobile = window.matchMedia(`(max-width: ${DEVICE_BREAKPOINTS.mobileMax}px)`);
+    const mqTablet = window.matchMedia(`(min-width: ${DEVICE_BREAKPOINTS.mobileMax + 1}px) and (max-width: ${DEVICE_BREAKPOINTS.tabletMax}px)`);
+    const update = () => setDevice(mqMobile.matches ? 'mobile' : mqTablet.matches ? 'tablet' : 'desktop');
+    update();
+    mqMobile.addEventListener('change', update);
+    mqTablet.addEventListener('change', update);
+    return () => {
+      mqMobile.removeEventListener('change', update);
+      mqTablet.removeEventListener('change', update);
+    };
+  }, []);
+  return device;
+}
+
+/* ---------- Layout por dispositivo: ordem e posição fina ---------- */
+
+/** Resolve o valor de uma chave-satélite por dispositivo PRA EXIBIÇÃO —
+ * decide pela largura REAL da tela de quem está vendo (`useDeviceBreakpoint`),
+ * nunca por `editingDevice` (que só existe DENTRO do editor, vindo da URL
+ * `?device=`; um visitante real do site nunca tem isso). Mesmo padrão que já
+ * resolve a imagem de fundo por dispositivo em `useEditImage`, generalizado
+ * pra qualquer valor textual (ordem, deslocamento, etc.). `get()` já resolve
+ * a chave `.tablet`/`.mobile` sozinha mesmo estando "errada" pro
+ * `editingDevice` atual (a leitura cai pra chave literal quando a
+ * combinada não existe) — ver `get` em `store.tsx`. Sem override pro
+ * dispositivo atual, HERDA o valor base (Desktop). */
+function useDeviceScopedValue(baseKey: string, fallback: string): string {
+  const { get } = useEditorStore();
+  const bp = useDeviceBreakpoint();
+  const mobile = get(`${baseKey}.mobile`, '');
+  const tablet = get(`${baseKey}.tablet`, '');
+  if (bp === 'mobile' && mobile) return mobile;
+  if (bp === 'tablet' && tablet) return tablet;
+  return get(baseKey, fallback);
+}
+
+/** Inverte a ordem visual (CSS `order`) de 2 elementos irmãos — mesma
+ * gaveta por dispositivo de tudo mais no editor: inverter no Mobile não
+ * mexe no Tablet nem no Desktop. Funciona tanto em `flex` quanto em
+ * `grid` (ambos respeitam `order`), então cobre o padrão comum do site de
+ * "flex-col no mobile, grid-cols-2 no desktop" sem precisar de 2 lógicas. */
+export function useEditOrder(k: string, label: string): { inverted: boolean; toggle: () => void } {
+  const { get, setValue, editMode } = useEditorStore();
+  const inverted = useDeviceScopedValue(k, '0') === '1';
+  const toggle = () => {
+    if (!editMode) return;
+    const current = get(k, '0') === '1';
+    setValue(k, current ? null : '1', { label, kind: 'text' });
+  };
+  return { inverted, toggle };
+}
+
+/** Chip flutuante "inverter ordem" — só existe em modo edição. Posicionar
+ * via `style` (mesmo padrão do `BgEditChip`), em algum canto livre da
+ * seção; não precisa acompanhar visualmente o elemento que reordena. */
+export function OrderEditChip({ k, label, style }: { k: string; label: string; style?: CSSProperties }) {
+  const { editMode } = useEditorStore();
+  const { inverted, toggle } = useEditOrder(k, label);
+  if (!editMode) return null;
+  return (
+    <button
+      data-editor-ui
+      onClick={(e) => { e.stopPropagation(); toggle(); }}
+      className="absolute z-30 flex items-center gap-2 rounded-full px-4 hover:brightness-110 transition"
+      style={{ height: 36, ...glass, fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, color: '#fff', ...style }}
+      title="Inverte a ordem entre imagem e conteúdo — só nesta versão de tela (Mobile/Tablet/Desktop)"
+    >
+      <ArrowLeftRight size={14} color={inverted ? '#d2e718' : '#00e4ff'} />
+      {inverted ? 'Ordem invertida' : 'Inverter ordem'}
+    </button>
+  );
+}
+
+/** Desloca um elemento (`transform: translate`) em X/Y, arrastando uma
+ * alça dedicada — mesma gaveta por dispositivo: arrastar em Mobile não
+ * mexe no Tablet nem no Desktop. Chaves-satélite `${k}.dx`/`${k}.dy` (px),
+ * mesmo padrão de `.w` da largura de caixa de texto (`ERich`). A alça é
+ * separada do elemento em si (não o elemento inteiro) pra não conflitar
+ * com o clique-pra-editar que ele já tem (ex.: `EImg` abre o painel de
+ * imagem ao clicar) — arrastar vs. clicar ficaria ambíguo no mesmo alvo. */
+export function useEditOffset(k: string, label: string): { dx: number; dy: number; dragProps: Record<string, unknown> } {
+  const { get, setValue, editMode } = useEditorStore();
+  const dxBase = +useDeviceScopedValue(`${k}.dx`, '0') || 0;
+  const dyBase = +useDeviceScopedValue(`${k}.dy`, '0') || 0;
+  const [drag, setDrag] = useState<{ x: number; y: number } | null>(null);
+  const dx = drag ? drag.x : dxBase;
+  const dy = drag ? drag.y : dyBase;
+
+  const startDrag = (e: RPointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const baseX = +get(`${k}.dx`, '0') || 0;
+    const baseY = +get(`${k}.dy`, '0') || 0;
+    const move = (ev: PointerEvent) => setDrag({ x: baseX + ev.clientX - startX, y: baseY + ev.clientY - startY });
+    const up = (ev: PointerEvent) => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      const finalX = Math.round(baseX + ev.clientX - startX);
+      const finalY = Math.round(baseY + ev.clientY - startY);
+      setDrag(null);
+      setValue(`${k}.dx`, finalX === 0 ? null : String(finalX), { label: `${label} (posição X)`, kind: 'text' });
+      setValue(`${k}.dy`, finalY === 0 ? null : String(finalY), { label: `${label} (posição Y)`, kind: 'text' });
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+
+  return { dx, dy, dragProps: editMode ? { onPointerDown: startDrag } : {} };
+}
+
+/** Alça flutuante "arrastar pra posicionar" — só existe em modo edição.
+ * Posicionar via `style` num canto livre; arrastar ela move o elemento
+ * (o chamador aplica `transform: translate(dx,dy)` usando o retorno de
+ * `useEditOffset`), não a alça em si. */
+export function OffsetDragHandle({ k, label, style }: { k: string; label: string; style?: CSSProperties }) {
+  const { editMode } = useEditorStore();
+  const { dragProps } = useEditOffset(k, label);
+  if (!editMode) return null;
+  return (
+    <div
+      data-editor-ui
+      {...dragProps}
+      className="absolute z-30 flex items-center justify-center rounded-full hover:brightness-110 transition"
+      style={{ width: 36, height: 36, ...glass, color: '#00e4ff', cursor: 'grab', touchAction: 'none', ...style }}
+      title="Arrastar pra ajustar a posição — só nesta versão de tela (Mobile/Tablet/Desktop)"
+    >
+      <Move size={16} />
+    </div>
+  );
+}
+
+/** px arrastados na horizontal por 1% de escala — menor = mais sensível
+ * (mesma ideia dos ajustes de "força" do tilt do Hero, constante única
+ * fácil de achar se precisar recalibrar). */
+const SCALE_DRAG_SENSITIVITY = 3;
+
+/** Redimensiona um elemento (`transform: scale`) arrastando uma alça
+ * dedicada — mesma gaveta por dispositivo e mesmo motivo de alça separada
+ * do `useEditOffset` (não conflitar com o clique-pra-editar do elemento).
+ * Chave-satélite `${k}.scale` (percentual, "100" = tamanho original).
+ * `min`/`max` limitam o quanto dá pra encolher/ampliar (padrão 50%–200%). */
+export function useEditScale(k: string, label: string, opts?: { min?: number; max?: number }): { scale: number; dragProps: Record<string, unknown> } {
+  const { get, setValue, editMode } = useEditorStore();
+  const min = opts?.min ?? 50;
+  const max = opts?.max ?? 200;
+  const scaleBase = +useDeviceScopedValue(`${k}.scale`, '100') || 100;
+  const [drag, setDrag] = useState<number | null>(null);
+  const scale = drag ?? scaleBase;
+
+  const clamp = (v: number) => Math.min(max, Math.max(min, Math.round(v)));
+
+  const startDrag = (e: RPointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const baseScale = +get(`${k}.scale`, '100') || 100;
+    const move = (ev: PointerEvent) => setDrag(clamp(baseScale + (ev.clientX - startX) / SCALE_DRAG_SENSITIVITY));
+    const up = (ev: PointerEvent) => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      const final = clamp(baseScale + (ev.clientX - startX) / SCALE_DRAG_SENSITIVITY);
+      setDrag(null);
+      setValue(`${k}.scale`, final === 100 ? null : String(final), { label: `${label} (tamanho)`, kind: 'text' });
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+
+  return { scale, dragProps: editMode ? { onPointerDown: startDrag } : {} };
+}
+
+/** Alça flutuante "arrastar pra redimensionar" — só existe em modo
+ * edição. Posicionar via `style` num canto livre; arrastar pra
+ * direita/esquerda aumenta/diminui (o chamador aplica `transform:
+ * scale(...)` usando o retorno de `useEditScale`), não a alça em si. */
+export function ScaleDragHandle({ k, label, style }: { k: string; label: string; style?: CSSProperties }) {
+  const { editMode } = useEditorStore();
+  const { scale, dragProps } = useEditScale(k, label);
+  if (!editMode) return null;
+  return (
+    <div
+      data-editor-ui
+      {...dragProps}
+      className="absolute z-30 flex items-center justify-center rounded-full hover:brightness-110 transition"
+      style={{ width: 36, height: 36, ...glass, color: '#d2e718', cursor: 'ew-resize', touchAction: 'none', ...style }}
+      title={`Arrastar pra ajustar o tamanho (${scale}%) — só nesta versão de tela (Mobile/Tablet/Desktop)`}
+    >
+      <Maximize2 size={16} />
+    </div>
+  );
+}
+
 interface EImgProps {
   k: string;
   v: string;
@@ -699,31 +947,55 @@ interface EImgProps {
   style?: CSSProperties;
 }
 
+/** Imagem editável, com variante opcional por dispositivo (chaves-satélite
+ * `${k}.tablet`/`${k}.mobile` — mesmo padrão de `.w`/`.lh` do ERich, sem
+ * override elas simplesmente não existem e a imagem de sempre é usada).
+ * Sem nenhuma variante definida (o caso de ~100% das imagens do site hoje),
+ * renderiza um `<img>` puro, idêntico ao de antes — zero mudança de
+ * comportamento. Com variante, vira um `<picture>` com media query nos
+ * mesmos pontos de quebra do Tailwind (`DEVICE_BREAKPOINTS`) — a troca
+ * acontece via CSS, sem JS, então funciona igual no HTML pré-renderizado. */
 export function EImg({ k, v, l, spec, alt = '', className, style }: EImgProps) {
   const { get, editMode, openPanel } = useEditorStore();
-  const src = get(k, v);
+  const desktopSrc = get(k, v);
+  const tabletSrc = get(`${k}.tablet`, '');
+  const mobileSrc = get(`${k}.mobile`, '');
+  const openImagePanel = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    openPanel({ type: 'image', key: k, label: l, fallback: v, spec });
+  };
+
+  if (!tabletSrc && !mobileSrc) {
+    return (
+      <img
+        src={desktopSrc} alt={alt} className={className} style={style}
+        width={spec.w} height={spec.h}
+        data-eimg={editMode ? '' : undefined}
+        onClick={editMode ? openImagePanel : undefined}
+      />
+    );
+  }
+
   return (
-    <img
-      src={src}
-      alt={alt}
-      className={className}
-      style={style}
-      width={spec.w}
-      height={spec.h}
-      data-eimg={editMode ? '' : undefined}
-      onClick={editMode ? (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        openPanel({ type: 'image', key: k, label: l, fallback: v, spec });
-      } : undefined}
-    />
+    <picture data-eimg={editMode ? '' : undefined} onClick={editMode ? openImagePanel : undefined}>
+      {mobileSrc && <source media={`(max-width: ${DEVICE_BREAKPOINTS.mobileMax}px)`} srcSet={mobileSrc} />}
+      {tabletSrc && <source media={`(min-width: ${DEVICE_BREAKPOINTS.mobileMax + 1}px) and (max-width: ${DEVICE_BREAKPOINTS.tabletMax}px)`} srcSet={tabletSrc} />}
+      <img src={desktopSrc} alt={alt} className={className} style={style} width={spec.w} height={spec.h} />
+    </picture>
   );
 }
 
-/** Imagem editável aplicada como background CSS. */
+/** Imagem editável aplicada como background CSS — não dá pra usar
+ * `<picture>` num background, então a variante por dispositivo é resolvida
+ * via JS (`useDeviceBreakpoint`), nos MESMOS pontos de quebra. */
 export function useEditImage(k: string, v: string, l: string, spec: ImageSpec): [string, Record<string, unknown>] {
   const { get, editMode, openPanel } = useEditorStore();
-  const src = get(k, v);
+  const device = useDeviceBreakpoint();
+  const desktopSrc = get(k, v);
+  const tabletSrc = get(`${k}.tablet`, '');
+  const mobileSrc = get(`${k}.mobile`, '');
+  const src = device === 'mobile' && mobileSrc ? mobileSrc : device === 'tablet' && tabletSrc ? tabletSrc : desktopSrc;
   const props = editMode ? {
     'data-eimg': '',
     onClick: (e: MouseEvent) => {

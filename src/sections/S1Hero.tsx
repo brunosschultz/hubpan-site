@@ -4,6 +4,7 @@ import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import HubButton from '../components/HubButton';
 import { useSplitTitle } from '../components/useSplitTitle';
 import { BgEditChip, EImg, ERich, ET, useEditImage } from '../editor/fields';
+import { heroBgSpecForDevice, useEditorStore } from '../editor/store';
 
 /* Glass card — pill ou accent. `data-tilt-card`/`data-tilt-inner` marcam os
  * dois níveis do efeito de profundidade (ver useLayoutEffect do S1Hero,
@@ -64,7 +65,9 @@ const TILT_FALLOFF = 420;    // px — distância (do centro do card) onde o efe
 export default function S1Hero() {
   const ref = useRef<HTMLElement>(null);
   const titleRef = useSplitTitle<HTMLHeadingElement>();
-  const [bgSrc, bgProps] = useEditImage('s1.bg', '/images/s1-hero-bg.webp', 'Hero — imagem de fundo', HERO_BG_SPEC);
+  const { editingDevice } = useEditorStore();
+  const heroBgSpec = heroBgSpecForDevice(HERO_BG_SPEC, editingDevice);
+  const [bgSrc, bgProps] = useEditImage('s1.bg', '/images/s1-hero-bg.webp', 'Hero — imagem de fundo', heroBgSpec);
 
   useLayoutEffect(() => {
     const el = ref.current;
@@ -164,8 +167,12 @@ export default function S1Hero() {
   return (
     <section ref={ref} id="home-hero" className="relative w-full h-screen min-h-[700px] overflow-hidden">
       {/* BG */}
-      <div className="absolute inset-0 bg-navy900" {...bgProps} style={{ backgroundImage: `url(${bgSrc})`, backgroundSize: 'cover', backgroundPosition: 'center right' }} />
-      <BgEditChip k="s1.bg" v="/images/s1-hero-bg.webp" l="Hero — imagem de fundo" spec={HERO_BG_SPEC} style={{ bottom: 24, right: 24 }} />
+      {/* bg-center/lg:bg-right por CLASSE (breakpoint real do CSS) — não por
+          `editingDevice`, que só existe dentro do editor (a URL `?device=`
+          nunca aparece pra um visitante de verdade); a posição do recorte
+          tem que reagir à largura REAL da tela de quem está vendo o site. */}
+      <div className="absolute inset-0 bg-navy900 bg-center lg:bg-right" {...bgProps} style={{ backgroundImage: `url(${bgSrc})`, backgroundSize: 'cover' }} />
+      <BgEditChip k="s1.bg" v="/images/s1-hero-bg.webp" l="Hero — imagem de fundo" spec={heroBgSpec} style={{ bottom: 24, right: 24 }} />
 
       {/* Conteúdo — pointer-events none no wrapper deixa cliques em áreas vazias
           alcançarem o BG e os glass cards; os filhos reativam os próprios cliques */}

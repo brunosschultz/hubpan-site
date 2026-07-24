@@ -3,7 +3,14 @@
  * React, mesmo padrão de `seo.ts`.
  */
 
-export type LeadSource = 'contato' | 'newsletter';
+export type LeadSource =
+  | 'contato'
+  | 'newsletter'
+  | 'prointer_apoio'
+  | 'prointer_inscricao'
+  | 'govia_demo'
+  | 'forum_empresas'
+  | 'forum_participantes';
 
 export interface Lead {
   id: string;
@@ -11,8 +18,14 @@ export interface Lead {
   source: LeadSource;
   nome: string | null;
   email: string;
+  telefone: string | null;
+  cargo: string | null;
+  perfil: string | null;
+  cidade: string | null;
   organizacao: string | null;
   assunto: string | null;
+  objetivo: string | null;
+  quantidade: string | null;
   mensagem: string | null;
   lida: boolean;
 }
@@ -20,12 +33,39 @@ export interface Lead {
 export const LEAD_SOURCE_LABEL: Record<LeadSource, string> = {
   contato: 'Contato',
   newsletter: 'Newsletter',
+  prointer_apoio: 'PROINTER — Apoio',
+  prointer_inscricao: 'PROINTER — Inscrição',
+  govia_demo: 'GovIA — Demonstração',
+  forum_empresas: 'Fórum — Patrocínio',
+  forum_participantes: 'Fórum — Participação',
+};
+
+/** Todas as fontes, na ordem usada nas abas do painel. */
+export const LEAD_SOURCES: LeadSource[] = [
+  'contato', 'newsletter', 'prointer_apoio', 'prointer_inscricao', 'govia_demo', 'forum_empresas', 'forum_participantes',
+];
+
+/** Rótulo em português de cada campo extra — cada fonte só preenche os que
+ * fazem sentido pra ela (os demais ficam `null`), então a exibição/resumo
+ * é sempre dirigida por quais campos vieram preenchidos, não pela fonte. */
+export const LEAD_FIELD_LABEL: Record<'telefone' | 'cargo' | 'perfil' | 'cidade' | 'organizacao' | 'assunto' | 'objetivo' | 'quantidade' | 'mensagem', string> = {
+  telefone: 'Telefone',
+  cargo: 'Cargo',
+  perfil: 'Perfil',
+  cidade: 'Cidade',
+  organizacao: 'Organização',
+  assunto: 'Assunto',
+  objetivo: 'Objetivo',
+  quantidade: 'Quantidade',
+  mensagem: 'Mensagem',
 };
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
     ' às ' + new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
+
+const EXTRA_FIELDS = ['telefone', 'cargo', 'perfil', 'cidade', 'organizacao', 'assunto', 'objetivo', 'quantidade'] as const;
 
 /** Texto pronto pra colar no chat — resumo de um único lead. */
 export function buildLeadSummary(lead: Lead): string {
@@ -34,8 +74,7 @@ export function buildLeadSummary(lead: Lead): string {
     '',
     ...(lead.nome ? [`Nome: ${lead.nome}`] : []),
     `E-mail: ${lead.email}`,
-    ...(lead.organizacao ? [`Organização: ${lead.organizacao}`] : []),
-    ...(lead.assunto ? [`Assunto: ${lead.assunto}`] : []),
+    ...EXTRA_FIELDS.filter((f) => lead[f]).map((f) => `${LEAD_FIELD_LABEL[f]}: ${lead[f]}`),
     ...(lead.mensagem ? ['', 'Mensagem:', lead.mensagem] : []),
   ];
   return lines.join('\n');

@@ -22,6 +22,41 @@ import { isSupabaseConfigured, supabase } from './supabaseClient';
 export type FieldKind = 'text' | 'color' | 'image' | 'link';
 export type Channel = 'draft' | 'published';
 
+/* ---------- Imagem por dispositivo ---------- */
+
+/** As mesmas 3 faixas que o Tailwind já usa no site (`md`/`lg`) — qualquer
+ * imagem com variante mobile/tablet troca exatamente nesses pontos, tanto
+ * no site publicado (`<picture>`, CSS puro) quanto no editor (JS/matchMedia,
+ * só onde não dá pra usar `<picture>` — ex.: imagem de fundo). Mudar aqui
+ * exige mudar os dois lugares que leem esses valores (ver fields.tsx). */
+export const DEVICE_BREAKPOINTS = { mobileMax: 767, tabletMax: 1023 } as const;
+export type DeviceCategory = 'mobile' | 'tablet' | 'desktop';
+
+export function deviceCategoryForWidth(width: number): DeviceCategory {
+  if (width <= DEVICE_BREAKPOINTS.mobileMax) return 'mobile';
+  if (width <= DEVICE_BREAKPOINTS.tabletMax) return 'tablet';
+  return 'desktop';
+}
+
+/** Presets de largura pro seletor "visualizar em" do editor — larguras
+ * reais (não nomes de aparelho: o site é responsivo por FAIXA de largura,
+ * um iPhone 14 e um iPhone 17 caem na mesma faixa "mobile" pro CSS, não
+ * faz sentido ter preset por modelo — ver decisão registrada no CLAUDE.md).
+ * `category` vem FIXA em cada preset (não recalculada de `width` via
+ * `deviceCategoryForWidth`) — bug real encontrado pelo Bruno: "Tablet —
+ * paisagem" tem 1024px de largura, e `tabletMax` é 1023, então a conta caía
+ * em 'desktop' por 1px, fazendo aquele preset editar Desktop de verdade
+ * (nada isolado). Category explícita elimina esse tipo de erro de limite. */
+export interface DevicePreset { id: string; label: string; width: number; height: number; category: DeviceCategory }
+export const DEVICE_PRESETS: DevicePreset[] = [
+  { id: 'mobile-sm', label: 'Mobile — pequeno', width: 375, height: 812, category: 'mobile' },
+  { id: 'mobile-lg', label: 'Mobile — grande', width: 430, height: 932, category: 'mobile' },
+  { id: 'tablet-sm', label: 'Tablet — retrato', width: 768, height: 1024, category: 'tablet' },
+  { id: 'tablet-lg', label: 'Tablet — paisagem', width: 1024, height: 768, category: 'tablet' },
+  { id: 'desktop-sm', label: 'Desktop', width: 1440, height: 900, category: 'desktop' },
+  { id: 'desktop-lg', label: 'Desktop — tela grande', width: 1920, height: 1080, category: 'desktop' },
+];
+
 export interface ImageSpec {
   w: number;
   h: number;
@@ -29,6 +64,24 @@ export interface ImageSpec {
   /** cover = corta pra preencher (fotos) · contain = cabe inteira com fundo transparente (logos) */
   fit?: 'cover' | 'contain';
   note?: string;
+}
+
+/** Deriva o spec certo pro fundo cheio-tela (`background-size:cover`) de um
+ * Hero, a partir do spec pensado pro Desktop (paisagem) — pro Mobile/Tablet,
+ * troca largura↔altura (mesma proporção, agora de pé). Sem isso, o upload
+ * feito em Mobile era recortado (`processImage`) na moldura HORIZONTAL do
+ * Desktop antes mesmo de chegar na tela — uma foto vertical ficava
+ * violentamente ampliada e cortada pra caber numa caixa larga e baixa (bug
+ * real reportado pelo Bruno: "a imagem ficou bem grande" no Hero mobile).
+ * `background-size:cover` já preenche 100%×100% de QUALQUER contêiner
+ * sozinho — o problema nunca foi a exibição, era o CROP salvo no upload. */
+export function heroBgSpecForDevice(desktopSpec: ImageSpec, device: DeviceCategory): ImageSpec {
+  if (device === 'desktop') return desktopSpec;
+  const deviceLabel = device === 'mobile' ? 'Mobile' : 'Tablet';
+  return {
+    ...desktopSpec, w: desktopSpec.h, h: desktopSpec.w, shape: 'retrato',
+    note: `Tela cheia — versão ${deviceLabel} (vertical, 100% da largura e altura).`,
+  };
 }
 
 export interface HistoryEntry {
@@ -65,6 +118,19 @@ interface EditorCtx {
   user: EditorUser | null;
   editMode: boolean;
   panel: PanelState | null;
+  /** Preset ativo do "visualizar em" da barra do editor — null = edição
+   * normal (o padrão). Ver `DEVICE_PRESETS`. */
+  previewDevice: DevicePreset | null;
+  setPreviewDevice: (d: DevicePreset | null) => void;
+  /** Dispositivo "ambiente" desta sessão do editor — vem da URL (`?device=`),
+   * nunca de um botão. A sessão normal (`/editar/<slug>`) é sempre 'desktop';
+   * só a sessão aberta dentro do iframe de "Visualizar em" carrega
+   * `?device=mobile|tablet` e passa a editar nessa gaveta. Ver `get`/`setValue`. */
+  editingDevice: DeviceCategory;
+  /** Aplica o sufixo de dispositivo numa chave (`titulo` → `titulo.mobile`),
+   * pros painéis conferirem override (`scopedKey(k) in overrides`) sem
+   * duplicar a regra de sufixo — a regra de verdade vive em `get`/`setValue`. */
+  scopedKey: (key: string) => string;
   channel: Channel;
   connected: boolean;
   publishing: boolean;
@@ -154,8 +220,17 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<EditorUser | null>(() => loadJSON(LS_USER, null));
   const [editMode, setEditModeState] = useState(false);
   const [panel, setPanel] = useState<PanelState | null>(null);
+  const [previewDevice, setPreviewDevice] = useState<DevicePreset | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
+
+  /* dispositivo desta sessão — só a URL decide (ver `EditorCtx.editingDevice`) */
+  const editingDevice: DeviceCategory = useMemo(() => {
+    const p = new URLSearchParams(location.search).get('device');
+    return p === 'mobile' || p === 'tablet' ? p : 'desktop';
+  }, [location.search]);
+  const dSuffix = editingDevice === 'desktop' ? '' : `.${editingDevice}`;
+  const scopedKey = useCallback((key: string) => (dSuffix ? `${key}${dSuffix}` : key), [dSuffix]);
 
   const rowsRef = useRef(rows);
   useEffect(() => { rowsRef.current = rows; }, [rows]);
@@ -211,26 +286,41 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     return () => { mounted = false; void sb.removeChannel(channelSub); };
   }, [connected]);
 
-  const get = useCallback((key: string, fallback: string) => {
-    if (!connected) return rows[key]?.draft ?? fallback; // modo local: um pool só
+  /** Leitura crua de UMA chave literal — sem sufixo de dispositivo. */
+  const readRaw = useCallback((key: string): string | null | undefined => {
+    if (!connected) return rows[key]?.draft;
     const r = rows[key];
-    const v = channel === 'draft' ? r?.draft : r?.published;
-    return v ?? fallback;
+    return channel === 'draft' ? r?.draft : r?.published;
   }, [connected, rows, channel]);
+
+  /** Toda leitura passa pela "gaveta" do dispositivo desta sessão primeiro
+   * (`${key}.mobile`) — sem valor lá, cai pra chave base (Desktop), que é
+   * sempre o valor "herdado" até alguém definir um específico. Fora do
+   * editor (ou dentro dele em Desktop), `dSuffix` é vazio e isso equivale
+   * ao comportamento de sempre — nenhuma mudança de rota fora do editor. */
+  const get = useCallback((key: string, fallback: string) => {
+    if (dSuffix) {
+      const scoped = readRaw(`${key}${dSuffix}`);
+      if (scoped != null) return scoped;
+    }
+    return readRaw(key) ?? fallback;
+  }, [readRaw, dSuffix]);
 
   const setValue = useCallback<EditorCtx['setValue']>((key, value, meta) => {
     if (channel !== 'draft') return; // edição só faz sentido em /editar (ou /preview, mas lá não há UI de edição)
-    const oldValue = rowsRef.current[key]?.draft ?? null;
+    const finalKey = scopedKey(key);
+    const oldValue = rowsRef.current[finalKey]?.draft ?? null;
     if (oldValue === value) return;
 
-    const nextRows = { ...rowsRef.current, [key]: { draft: value, published: rowsRef.current[key]?.published ?? null } };
+    const nextRows = { ...rowsRef.current, [finalKey]: { draft: value, published: rowsRef.current[finalKey]?.published ?? null } };
     rowsRef.current = nextRows;
     setRows(nextRows);
 
+    const deviceLabel = editingDevice === 'mobile' ? ' — Mobile' : editingDevice === 'tablet' ? ' — Tablet' : '';
     const entry: HistoryEntry = {
       id: crypto.randomUUID(), ts: Date.now(),
       userName: user?.name ?? 'Desconhecido', userEmail: user?.email ?? '',
-      key, label: meta.label, kind: meta.kind, oldValue, newValue: value, restaurado: meta.restaurado, event: 'edit',
+      key: finalKey, label: `${meta.label}${deviceLabel}`, kind: meta.kind, oldValue, newValue: value, restaurado: meta.restaurado, event: 'edit',
     };
     setHistory((h) => [entry, ...h].slice(0, HISTORY_CAP));
 
@@ -240,7 +330,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       // ao recarregar mesmo o editor tendo mostrado "Salvo" (já aconteceu em
       // produção — ver nota de GRANT em supabase/schema.sql).
       void supabase.from('content_overrides')
-        .upsert({ key, draft_value: value, updated_at: new Date().toISOString(), updated_by: user?.email ?? null }, { onConflict: 'key' })
+        .upsert({ key: finalKey, draft_value: value, updated_at: new Date().toISOString(), updated_by: user?.email ?? null }, { onConflict: 'key' })
         .then(({ error }) => {
           if (error) { console.error('[editor] falha ao salvar conteúdo:', error); setSyncError(error.message); }
           else setSyncError(null);
@@ -357,9 +447,9 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<EditorCtx>(() => ({
-    overrides: flatOverrides, history, user, editMode, panel, channel, connected, publishing, hasUnpublished, pendingCount, syncError,
+    overrides: flatOverrides, history, user, editMode, panel, previewDevice, setPreviewDevice, editingDevice, scopedKey, channel, connected, publishing, hasUnpublished, pendingCount, syncError,
     get, setValue, login, logout, setEditMode, openPanel, closePanel, publish, uploadImage,
-  }), [flatOverrides, history, user, editMode, panel, channel, connected, publishing, hasUnpublished, pendingCount, syncError,
+  }), [flatOverrides, history, user, editMode, panel, previewDevice, editingDevice, scopedKey, channel, connected, publishing, hasUnpublished, pendingCount, syncError,
       get, setValue, login, logout, setEditMode, openPanel, closePanel, publish, uploadImage]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
@@ -372,6 +462,42 @@ export function useEditorStore(): EditorCtx {
 }
 
 /* ---------- Utilidades compartilhadas ---------- */
+
+/* Dentro do iframe de "Visualizar em" (mesma origem, sempre — é a mesma
+ * aplicação), a UI flutuante do editor (barra de formatação, painel
+ * lateral) precisa renderizar na janela DE CIMA, não presa aos poucos
+ * pixels de largura do preset simulado — senão parte dos botões fica
+ * fora da área visível e inacessível (bug real reportado pelo Bruno). */
+
+/** Documento onde portar a UI flutuante — o da janela de cima quando
+ * estamos dentro do iframe, senão o de sempre. */
+export function editorPortalTarget(): HTMLElement {
+  try {
+    if (window.top && window.top !== window.self) return window.top.document.body;
+  } catch { /* nunca deveria acontecer aqui (mesma origem sempre) */ }
+  return document.body;
+}
+
+/** Retângulo do próprio `<iframe>` dentro da janela de cima — converte uma
+ * coordenada medida DENTRO do iframe (`getBoundingClientRect` de um
+ * elemento da página) pra coordenada da janela de cima, onde a barra é de
+ * fato desenhada. `{x:0,y:0}` fora do iframe (não precisa converter nada). */
+export function frameOffset(): { x: number; y: number } {
+  try {
+    const fe = window.frameElement as HTMLElement | null;
+    if (fe) { const r = fe.getBoundingClientRect(); return { x: r.left, y: r.top }; }
+  } catch { /* ok */ }
+  return { x: 0, y: 0 };
+}
+
+/** Largura/altura disponíveis pra posicionar a UI flutuante — as da janela
+ * de cima quando embutido no iframe, senão as da própria janela. */
+export function editorViewport(): { w: number; h: number } {
+  try {
+    if (window.top && window.top !== window.self) return { w: window.top.innerWidth, h: window.top.innerHeight };
+  } catch { /* ok */ }
+  return { w: window.innerWidth, h: window.innerHeight };
+}
 
 /** Converte qualquer cor CSS (hex de 6 dígitos ou rgb/rgba) num par
  * {hex, opacity 0-100} — usado pra inicializar o painel de cor+opacidade

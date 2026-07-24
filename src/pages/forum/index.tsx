@@ -8,6 +8,7 @@ import FAQAccordion from '../../components/FAQAccordion';
 import HubButton from '../../components/HubButton';
 import { useReveal } from '../../components/useReveal';
 import { useTilt } from '../../components/useTilt';
+import { useLeadForm, LeadFormSuccess } from '../../components/useLeadForm';
 import { BgEditChip, ERich, ET, useEditColor, useEditImage } from '../../editor/fields';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -352,72 +353,113 @@ function SecPatrocinio() {
 }
 
 /* Formulários duplos — empresas / palestrantes */
+function FormEmpresas() {
+  const { values, set, handleSubmit, sending, sent, error } = useLeadForm(
+    'forum_empresas',
+    { nome: '', organizacao: '', cargo: '', email: '', assunto: '', objetivo: '', mensagem: '' },
+    ['nome', 'organizacao', 'email', 'assunto'],
+  );
+
+  if (sent) {
+    return (
+      <div className="rounded-[20px] bg-white" style={{ border: '1px solid #ecedf0' }}>
+        <LeadFormSuccess titulo="Proposta solicitada!" desc="Nossa equipe entra em contato com os detalhes de patrocínio." />
+      </div>
+    );
+  }
+
+  return (
+    <form className="rounded-[20px] bg-white p-8 lg:p-9" style={{ border: '1px solid #ecedf0' }} onSubmit={handleSubmit}>
+      <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', color: '#2d4ebf' }}>
+        <ET k="forum.form.empresas.eyebrow" v="PARA EMPRESAS E MARCAS" l="Formulário Empresas — selo" />
+      </p>
+      <h3 className="mb-6" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 24, lineHeight: 1.1, color: '#152852' }}>
+        <ERich k="forum.form.empresas.titulo" l="Formulário Empresas — título">Patrocinar o WAIF 2027</ERich>
+      </h3>
+      <p className="mb-7" style={{ fontFamily: 'Inter', fontSize: 14.5, lineHeight: '23px', color: '#797979' }}>
+        <ERich k="forum.form.empresas.desc" l="Formulário Empresas — descrição">Sua marca ao lado dos principais players globais de inteligência artificial em Cambridge.</ERich>
+      </p>
+      <div className="space-y-4">
+        <input required placeholder="Nome completo" value={values.nome} onChange={set('nome')} style={INPUT_STYLE} />
+        <div className="grid sm:grid-cols-2 gap-4">
+          <input required placeholder="Empresa" value={values.organizacao} onChange={set('organizacao')} style={INPUT_STYLE} />
+          <input placeholder="Cargo" value={values.cargo} onChange={set('cargo')} style={INPUT_STYLE} />
+        </div>
+        <input required type="email" placeholder="E-mail corporativo" value={values.email} onChange={set('email')} style={INPUT_STYLE} />
+        <select required value={values.assunto} onChange={set('assunto')} style={{ ...INPUT_STYLE, color: '#152852' }}>
+          <option value="" disabled>Nível de patrocínio</option>
+          <option>Bronze — visibilidade e presença</option><option>Prata — ativações e conteúdo</option><option>Ouro — parceria estratégica</option><option>Personalizado — quero ser o patrocinador título</option>
+        </select>
+        <select value={values.objetivo} onChange={set('objetivo')} style={{ ...INPUT_STYLE, color: '#152852' }}>
+          <option value="" disabled>Objetivo principal</option>
+          {OBJETIVOS.map((o) => <option key={o}>{o}</option>)}
+        </select>
+        <textarea placeholder="Mensagem" rows={3} value={values.mensagem} onChange={set('mensagem')} style={{ ...INPUT_STYLE, height: 'auto', padding: '12px 16px', resize: 'vertical' }} />
+        {error && <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#c0392b' }}>{error}</p>}
+        <HubButton size="md" variant="blue" className={`w-full justify-center ${sending ? 'opacity-60 pointer-events-none' : ''}`} iconKey="forum.form.empresas.btn.icone" iconLabel="Formulário Empresas — botão, ícone" styleKey="forum.form.empresas.btn" styleLabel="Formulário Empresas — botão" noLink>
+          <ET k="forum.form.empresas.btn" v={sending ? 'Enviando…' : 'Solicitar proposta de patrocínio'} l="Formulário Empresas — botão" />
+        </HubButton>
+      </div>
+    </form>
+  );
+}
+
+function FormPalestrantes() {
+  const { values, set, handleSubmit, sending, sent, error } = useLeadForm(
+    'forum_participantes',
+    { nome: '', email: '', organizacao: '', assunto: '', objetivo: '', mensagem: '' },
+    ['nome', 'email', 'assunto'],
+  );
+
+  if (sent) {
+    return (
+      <div className="rounded-[20px] bg-white" style={{ border: '1px solid #ecedf0' }}>
+        <LeadFormSuccess titulo="Interesse registrado!" desc="Vamos avaliar seu perfil e retornamos em breve." />
+      </div>
+    );
+  }
+
+  return (
+    <form className="rounded-[20px] bg-white p-8 lg:p-9" style={{ border: '1px solid #ecedf0' }} onSubmit={handleSubmit}>
+      <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', color: '#2d4ebf' }}>
+        <ET k="forum.form.palestrantes.eyebrow" v="PARA PALESTRANTES E PARTICIPANTES" l="Formulário Palestrantes — selo" />
+      </p>
+      <h3 className="mb-6" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 24, lineHeight: 1.1, color: '#152852' }}>
+        <ERich k="forum.form.palestrantes.titulo" l="Formulário Palestrantes — título">Manifestar interesse no WAIF</ERich>
+      </h3>
+      <p className="mb-7" style={{ fontFamily: 'Inter', fontSize: 14.5, lineHeight: '23px', color: '#797979' }}>
+        <ERich k="forum.form.palestrantes.desc" l="Formulário Palestrantes — descrição">Inscrições abertas para 2027. Vagas limitadas com processo de seleção por perfil.</ERich>
+      </p>
+      <div className="space-y-4">
+        <input required placeholder="Nome completo" value={values.nome} onChange={set('nome')} style={INPUT_STYLE} />
+        <input required type="email" placeholder="E-mail" value={values.email} onChange={set('email')} style={INPUT_STYLE} />
+        <input placeholder="Organização e cargo" value={values.organizacao} onChange={set('organizacao')} style={INPUT_STYLE} />
+        <select required value={values.assunto} onChange={set('assunto')} style={{ ...INPUT_STYLE, color: '#152852' }}>
+          <option value="" disabled>Como deseja participar?</option>
+          {PARTICIPACAO.map((p) => <option key={p}>{p}</option>)}
+        </select>
+        <select value={values.objetivo} onChange={set('objetivo')} style={{ ...INPUT_STYLE, color: '#152852' }}>
+          <option value="" disabled>Área de expertise em IA</option>
+          {EXPERTISE.map((e) => <option key={e}>{e}</option>)}
+        </select>
+        <textarea placeholder="Por que você deve estar no WAIF 2027?" rows={3} value={values.mensagem} onChange={set('mensagem')} style={{ ...INPUT_STYLE, height: 'auto', padding: '12px 16px', resize: 'vertical' }} />
+        {error && <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#c0392b' }}>{error}</p>}
+        <HubButton size="md" variant="lime" className={`w-full justify-center ${sending ? 'opacity-60 pointer-events-none' : ''}`} iconKey="forum.form.palestrantes.btn.icone" iconLabel="Formulário Palestrantes — botão, ícone" styleKey="forum.form.palestrantes.btn" styleLabel="Formulário Palestrantes — botão" noLink>
+          <ET k="forum.form.palestrantes.btn" v={sending ? 'Enviando…' : 'Manifestar interesse'} l="Formulário Palestrantes — botão" />
+        </HubButton>
+      </div>
+    </form>
+  );
+}
+
 function SecFormularios() {
   const ref = useReveal<HTMLElement>();
   const [bg, bgProps] = useEditColor('forum.formularios.bg', '#f5f5f5', 'Fundo da seção Formulários');
   return (
     <section id="forum-form" ref={ref} className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
       <div className="grid lg:grid-cols-2 gap-6">
-        <form className="rounded-[20px] bg-white p-8 lg:p-9" style={{ border: '1px solid #ecedf0' }} onSubmit={(e) => e.preventDefault()}>
-          <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', color: '#2d4ebf' }}>
-            <ET k="forum.form.empresas.eyebrow" v="PARA EMPRESAS E MARCAS" l="Formulário Empresas — selo" />
-          </p>
-          <h3 className="mb-6" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 24, lineHeight: 1.1, color: '#152852' }}>
-            <ERich k="forum.form.empresas.titulo" l="Formulário Empresas — título">Patrocinar o WAIF 2027</ERich>
-          </h3>
-          <p className="mb-7" style={{ fontFamily: 'Inter', fontSize: 14.5, lineHeight: '23px', color: '#797979' }}>
-            <ERich k="forum.form.empresas.desc" l="Formulário Empresas — descrição">Sua marca ao lado dos principais players globais de inteligência artificial em Cambridge.</ERich>
-          </p>
-          <div className="space-y-4">
-            <input placeholder="Nome completo" style={INPUT_STYLE} />
-            <div className="grid sm:grid-cols-2 gap-4">
-              <input placeholder="Empresa" style={INPUT_STYLE} />
-              <input placeholder="Cargo" style={INPUT_STYLE} />
-            </div>
-            <input placeholder="E-mail corporativo" style={INPUT_STYLE} />
-            <select defaultValue="" style={{ ...INPUT_STYLE, color: '#152852' }}>
-              <option value="" disabled>Nível de patrocínio</option>
-              <option>Bronze — visibilidade e presença</option><option>Prata — ativações e conteúdo</option><option>Ouro — parceria estratégica</option><option>Personalizado — quero ser o patrocinador título</option>
-            </select>
-            <select defaultValue="" style={{ ...INPUT_STYLE, color: '#152852' }}>
-              <option value="" disabled>Objetivo principal</option>
-              {OBJETIVOS.map((o) => <option key={o}>{o}</option>)}
-            </select>
-            <textarea placeholder="Mensagem" rows={3} style={{ ...INPUT_STYLE, height: 'auto', padding: '12px 16px', resize: 'vertical' }} />
-            <HubButton size="md" variant="blue" className="w-full justify-center" iconKey="forum.form.empresas.btn.icone" iconLabel="Formulário Empresas — botão, ícone" styleKey="forum.form.empresas.btn" styleLabel="Formulário Empresas — botão" noLink>
-              <ET k="forum.form.empresas.btn" v="Solicitar proposta de patrocínio" l="Formulário Empresas — botão" />
-            </HubButton>
-          </div>
-        </form>
-
-        <form className="rounded-[20px] bg-white p-8 lg:p-9" style={{ border: '1px solid #ecedf0' }} onSubmit={(e) => e.preventDefault()}>
-          <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', color: '#2d4ebf' }}>
-            <ET k="forum.form.palestrantes.eyebrow" v="PARA PALESTRANTES E PARTICIPANTES" l="Formulário Palestrantes — selo" />
-          </p>
-          <h3 className="mb-6" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 24, lineHeight: 1.1, color: '#152852' }}>
-            <ERich k="forum.form.palestrantes.titulo" l="Formulário Palestrantes — título">Manifestar interesse no WAIF</ERich>
-          </h3>
-          <p className="mb-7" style={{ fontFamily: 'Inter', fontSize: 14.5, lineHeight: '23px', color: '#797979' }}>
-            <ERich k="forum.form.palestrantes.desc" l="Formulário Palestrantes — descrição">Inscrições abertas para 2027. Vagas limitadas com processo de seleção por perfil.</ERich>
-          </p>
-          <div className="space-y-4">
-            <input placeholder="Nome completo" style={INPUT_STYLE} />
-            <input placeholder="E-mail" style={INPUT_STYLE} />
-            <input placeholder="Organização e cargo" style={INPUT_STYLE} />
-            <select defaultValue="" style={{ ...INPUT_STYLE, color: '#152852' }}>
-              <option value="" disabled>Como deseja participar?</option>
-              {PARTICIPACAO.map((p) => <option key={p}>{p}</option>)}
-            </select>
-            <select defaultValue="" style={{ ...INPUT_STYLE, color: '#152852' }}>
-              <option value="" disabled>Área de expertise em IA</option>
-              {EXPERTISE.map((e) => <option key={e}>{e}</option>)}
-            </select>
-            <textarea placeholder="Por que você deve estar no WAIF 2027?" rows={3} style={{ ...INPUT_STYLE, height: 'auto', padding: '12px 16px', resize: 'vertical' }} />
-            <HubButton size="md" variant="lime" className="w-full justify-center" iconKey="forum.form.palestrantes.btn.icone" iconLabel="Formulário Palestrantes — botão, ícone" styleKey="forum.form.palestrantes.btn" styleLabel="Formulário Palestrantes — botão" noLink>
-              <ET k="forum.form.palestrantes.btn" v="Manifestar interesse" l="Formulário Palestrantes — botão" />
-            </HubButton>
-          </div>
-        </form>
+        <FormEmpresas />
+        <FormPalestrantes />
       </div>
     </section>
   );

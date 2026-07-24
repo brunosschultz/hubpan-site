@@ -12,6 +12,7 @@ import HubButton from '../../components/HubButton';
 import GlassHoverCard, { type HoverColor } from '../../components/GlassHoverCard';
 import { useReveal, useRevealBidirectional } from '../../components/useReveal';
 import { useTilt } from '../../components/useTilt';
+import { useLeadForm, LeadFormSuccess } from '../../components/useLeadForm';
 import { BgEditChip, EIcon, EImg, ERich, ET, useEditColor, useEditColors, useEditImage } from '../../editor/fields';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -374,10 +375,110 @@ function SecOrganizacoes() {
 
 /* ═══════════ Formulários — apoiar / candidatar, com faixa de cor no topo ═══════════ */
 
+function FormApoiar() {
+  const [apoiarBg, apoiarBgProps] = useEditColor('pro.formularios.apoiar.bg', '#152852', 'Fundo do cabeçalho — formulário Apoiar o PROINTER');
+  const { values, set, handleSubmit, sending, sent, error } = useLeadForm(
+    'prointer_apoio',
+    { nome: '', email: '', perfil: '', assunto: '', mensagem: '' },
+    ['nome', 'email', 'perfil', 'assunto'],
+  );
+
+  if (sent) {
+    return (
+      <div className="rounded-[20px] overflow-hidden bg-white" style={{ border: '1px solid #ecedf0' }}>
+        <LeadFormSuccess titulo="Apoio recebido!" desc="Nossa equipe entra em contato em breve com os próximos passos." />
+      </div>
+    );
+  }
+
+  return (
+    <form className="rounded-[20px] overflow-hidden bg-white" style={{ border: '1px solid #ecedf0' }} onSubmit={handleSubmit}>
+      <div className="p-8 lg:p-9" {...apoiarBgProps} style={{ background: apoiarBg }}>
+        <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', color: '#d2e718' }}>
+          <ET k="pro.formularios.apoiar.tag" v="PARA EMPRESAS, GOVERNOS E PESSOAS FÍSICAS" l="Formulário Apoiar — tag" />
+        </p>
+        <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 26, lineHeight: 1.1, color: '#fff' }}>
+          <ET k="pro.formularios.apoiar.titulo" v="Apoiar o PROINTER" l="Formulário Apoiar — título" />
+        </h3>
+        <p style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '22px', color: 'rgba(255,255,255,0.75)' }}>
+          <ERich k="pro.formularios.apoiar.desc" l="Formulário Apoiar — descrição">Financie bolsas de impacto real com ESG rastreável.</ERich>
+        </p>
+      </div>
+      <div className="p-8 lg:p-9 space-y-4">
+        <input required placeholder="Nome completo" value={values.nome} onChange={set('nome')} style={INPUT_STYLE} />
+        <div className="grid sm:grid-cols-2 gap-4">
+          <input required type="email" placeholder="E-mail" value={values.email} onChange={set('email')} style={INPUT_STYLE} />
+          <select required value={values.perfil} onChange={set('perfil')} style={{ ...INPUT_STYLE, color: '#152852' }}>
+            <option value="" disabled>Perfil</option>
+            <option>Pessoa física</option><option>Empresa privada</option><option>Fundação</option><option>Governo</option>
+          </select>
+        </div>
+        <select required value={values.assunto} onChange={set('assunto')} style={{ ...INPUT_STYLE, color: '#152852' }}>
+          <option value="" disabled>Nível de apoio</option>
+          {NIVEIS_APOIO.map((n) => <option key={n}>{n}</option>)}
+        </select>
+        <textarea placeholder="Mensagem opcional" rows={3} value={values.mensagem} onChange={set('mensagem')} style={{ ...INPUT_STYLE, height: 'auto', padding: '12px 16px', resize: 'vertical' }} />
+        {error && <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#c0392b' }}>{error}</p>}
+        <HubButton size="md" variant="blue" className={`w-full justify-center ${sending ? 'opacity-60 pointer-events-none' : ''}`} iconKey="pro.formularios.apoiar.btn.icone" iconLabel="Formulário Apoiar — botão, ícone" styleKey="pro.formularios.apoiar.btn" styleLabel="Formulário Apoiar — botão" noLink>
+          <ET k="pro.formularios.apoiar.btn" v={sending ? 'Enviando…' : 'Apoiar o PROINTER'} l="Formulário Apoiar — botão" />
+        </HubButton>
+      </div>
+    </form>
+  );
+}
+
+function FormCandidatar() {
+  const { values, set, handleSubmit, sending, sent, error } = useLeadForm(
+    'prointer_inscricao',
+    { nome: '', email: '', perfil: '', cidade: '', organizacao: '', mensagem: '' },
+    ['nome', 'email', 'perfil', 'cidade', 'organizacao', 'mensagem'],
+  );
+
+  if (sent) {
+    return (
+      <div className="rounded-[20px] overflow-hidden bg-white" style={{ border: '1px solid #ecedf0' }}>
+        <LeadFormSuccess titulo="Candidatura enviada!" desc="Boa sorte! Vamos avaliar seu perfil e retornamos em breve." />
+      </div>
+    );
+  }
+
+  return (
+    <form className="rounded-[20px] overflow-hidden bg-white" style={{ border: '1px solid #ecedf0' }} onSubmit={handleSubmit}>
+      <div className="p-8 lg:p-9 bg-lime">
+        <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(21,40,82,0.6)' }}>
+          <ET k="pro.formularios.candidatar.tag" v="PARA PROFESSORES E AFROEMPREENDEDORES" l="Formulário Candidatar — tag" />
+        </p>
+        <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 26, lineHeight: 1.1, color: '#152852' }}>
+          <ET k="pro.formularios.candidatar.titulo" v="Candidatar-se ao PROINTER" l="Formulário Candidatar — título" />
+        </h3>
+        <p style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '22px', color: 'rgba(21,40,82,0.75)' }}>
+          <ERich k="pro.formularios.candidatar.desc" l="Formulário Candidatar — descrição">Inscrições para a turma 2027 abertas.</ERich>
+        </p>
+      </div>
+      <div className="p-8 lg:p-9 space-y-4">
+        <input required placeholder="Nome completo" value={values.nome} onChange={set('nome')} style={INPUT_STYLE} />
+        <div className="grid sm:grid-cols-2 gap-4">
+          <input required type="email" placeholder="E-mail" value={values.email} onChange={set('email')} style={INPUT_STYLE} />
+          <select required value={values.perfil} onChange={set('perfil')} style={{ ...INPUT_STYLE, color: '#152852' }}>
+            <option value="" disabled>Perfil</option>
+            <option>Professor da rede pública</option><option>Afroempreendedor</option>
+          </select>
+        </div>
+        <input required placeholder="Cidade e estado" value={values.cidade} onChange={set('cidade')} style={INPUT_STYLE} />
+        <input required placeholder="Escola ou negócio onde atua" value={values.organizacao} onChange={set('organizacao')} style={INPUT_STYLE} />
+        <textarea required placeholder="Por que você deveria ser bolsista?" rows={3} value={values.mensagem} onChange={set('mensagem')} style={{ ...INPUT_STYLE, height: 'auto', padding: '12px 16px', resize: 'vertical' }} />
+        {error && <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#c0392b' }}>{error}</p>}
+        <HubButton size="md" variant="lime" className={`w-full justify-center ${sending ? 'opacity-60 pointer-events-none' : ''}`} iconKey="pro.formularios.candidatar.btn.icone" iconLabel="Formulário Candidatar — botão, ícone" styleKey="pro.formularios.candidatar.btn" styleLabel="Formulário Candidatar — botão" noLink>
+          <ET k="pro.formularios.candidatar.btn" v={sending ? 'Enviando…' : 'Enviar candidatura'} l="Formulário Candidatar — botão" />
+        </HubButton>
+      </div>
+    </form>
+  );
+}
+
 function SecFormularios() {
   const ref = useReveal<HTMLElement>();
   const [bg, bgProps] = useEditColor('pro.formularios.bg', '#f5f5f5', 'Fundo da seção Participe ou Apoie');
-  const [apoiarBg, apoiarBgProps] = useEditColor('pro.formularios.apoiar.bg', '#152852', 'Fundo do cabeçalho — formulário Apoiar o PROINTER');
   return (
     <section id="prointer-apoie" ref={ref} className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
       <div className="mb-14 max-w-[700px]">
@@ -387,67 +488,8 @@ function SecFormularios() {
         </h2>
       </div>
       <div className="grid lg:grid-cols-2 gap-6">
-        <form className="rounded-[20px] overflow-hidden bg-white" style={{ border: '1px solid #ecedf0' }} onSubmit={(e) => e.preventDefault()}>
-          <div className="p-8 lg:p-9" {...apoiarBgProps} style={{ background: apoiarBg }}>
-            <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', color: '#d2e718' }}>
-              <ET k="pro.formularios.apoiar.tag" v="PARA EMPRESAS, GOVERNOS E PESSOAS FÍSICAS" l="Formulário Apoiar — tag" />
-            </p>
-            <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 26, lineHeight: 1.1, color: '#fff' }}>
-              <ET k="pro.formularios.apoiar.titulo" v="Apoiar o PROINTER" l="Formulário Apoiar — título" />
-            </h3>
-            <p style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '22px', color: 'rgba(255,255,255,0.75)' }}>
-              <ERich k="pro.formularios.apoiar.desc" l="Formulário Apoiar — descrição">Financie bolsas de impacto real com ESG rastreável.</ERich>
-            </p>
-          </div>
-          <div className="p-8 lg:p-9 space-y-4">
-            <input placeholder="Nome completo" style={INPUT_STYLE} />
-            <div className="grid sm:grid-cols-2 gap-4">
-              <input placeholder="E-mail" style={INPUT_STYLE} />
-              <select defaultValue="" style={{ ...INPUT_STYLE, color: '#152852' }}>
-                <option value="" disabled>Perfil</option>
-                <option>Pessoa física</option><option>Empresa privada</option><option>Fundação</option><option>Governo</option>
-              </select>
-            </div>
-            <select defaultValue="" style={{ ...INPUT_STYLE, color: '#152852' }}>
-              <option value="" disabled>Nível de apoio</option>
-              {NIVEIS_APOIO.map((n) => <option key={n}>{n}</option>)}
-            </select>
-            <textarea placeholder="Mensagem opcional" rows={3} style={{ ...INPUT_STYLE, height: 'auto', padding: '12px 16px', resize: 'vertical' }} />
-            <HubButton size="md" variant="blue" className="w-full justify-center" iconKey="pro.formularios.apoiar.btn.icone" iconLabel="Formulário Apoiar — botão, ícone" styleKey="pro.formularios.apoiar.btn" styleLabel="Formulário Apoiar — botão" noLink>
-              <ET k="pro.formularios.apoiar.btn" v="Apoiar o PROINTER" l="Formulário Apoiar — botão" />
-            </HubButton>
-          </div>
-        </form>
-
-        <form className="rounded-[20px] overflow-hidden bg-white" style={{ border: '1px solid #ecedf0' }} onSubmit={(e) => e.preventDefault()}>
-          <div className="p-8 lg:p-9 bg-lime">
-            <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(21,40,82,0.6)' }}>
-              <ET k="pro.formularios.candidatar.tag" v="PARA PROFESSORES E AFROEMPREENDEDORES" l="Formulário Candidatar — tag" />
-            </p>
-            <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 26, lineHeight: 1.1, color: '#152852' }}>
-              <ET k="pro.formularios.candidatar.titulo" v="Candidatar-se ao PROINTER" l="Formulário Candidatar — título" />
-            </h3>
-            <p style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '22px', color: 'rgba(21,40,82,0.75)' }}>
-              <ERich k="pro.formularios.candidatar.desc" l="Formulário Candidatar — descrição">Inscrições para a turma 2027 abertas.</ERich>
-            </p>
-          </div>
-          <div className="p-8 lg:p-9 space-y-4">
-            <input placeholder="Nome completo" style={INPUT_STYLE} />
-            <div className="grid sm:grid-cols-2 gap-4">
-              <input placeholder="E-mail" style={INPUT_STYLE} />
-              <select defaultValue="" style={{ ...INPUT_STYLE, color: '#152852' }}>
-                <option value="" disabled>Perfil</option>
-                <option>Professor da rede pública</option><option>Afroempreendedor</option>
-              </select>
-            </div>
-            <input placeholder="Cidade e estado" style={INPUT_STYLE} />
-            <input placeholder="Escola ou negócio onde atua" style={INPUT_STYLE} />
-            <textarea placeholder="Por que você deveria ser bolsista?" rows={3} style={{ ...INPUT_STYLE, height: 'auto', padding: '12px 16px', resize: 'vertical' }} />
-            <HubButton size="md" variant="lime" className="w-full justify-center" iconKey="pro.formularios.candidatar.btn.icone" iconLabel="Formulário Candidatar — botão, ícone" styleKey="pro.formularios.candidatar.btn" styleLabel="Formulário Candidatar — botão" noLink>
-              <ET k="pro.formularios.candidatar.btn" v="Enviar candidatura" l="Formulário Candidatar — botão" />
-            </HubButton>
-          </div>
-        </form>
+        <FormApoiar />
+        <FormCandidatar />
       </div>
     </section>
   );

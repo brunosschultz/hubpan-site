@@ -11,26 +11,53 @@ const NOTIFY_TO = Deno.env.get('LEAD_NOTIFY_EMAIL') ?? 'bruno@bddb.com.br';
 // remetente @hubpan.com ou @bddb.com.br depois de verificar o domínio no Resend.
 const FROM = Deno.env.get('LEAD_NOTIFY_FROM') ?? 'HUB PAN <onboarding@resend.dev>';
 
+type LeadSource =
+  | 'contato' | 'newsletter'
+  | 'prointer_apoio' | 'prointer_inscricao'
+  | 'govia_demo'
+  | 'forum_empresas' | 'forum_participantes';
+
 interface LeadRecord {
-  source: 'contato' | 'newsletter';
+  source: LeadSource;
   nome: string | null;
   email: string;
+  telefone: string | null;
+  cargo: string | null;
+  perfil: string | null;
+  cidade: string | null;
   organizacao: string | null;
   assunto: string | null;
+  objetivo: string | null;
+  quantidade: string | null;
   mensagem: string | null;
   created_at: string;
 }
 
-const SOURCE_LABEL: Record<LeadRecord['source'], string> = { contato: 'Contato', newsletter: 'Newsletter' };
+const SOURCE_LABEL: Record<LeadSource, string> = {
+  contato: 'Contato',
+  newsletter: 'Newsletter',
+  prointer_apoio: 'PROINTER — Apoio',
+  prointer_inscricao: 'PROINTER — Inscrição',
+  govia_demo: 'GovIA — Demonstração',
+  forum_empresas: 'Fórum — Patrocínio',
+  forum_participantes: 'Fórum — Participação',
+};
+
+const FIELD_LABEL: Record<'telefone' | 'cargo' | 'perfil' | 'cidade' | 'organizacao' | 'assunto' | 'objetivo' | 'quantidade', string> = {
+  telefone: 'Telefone', cargo: 'Cargo', perfil: 'Perfil', cidade: 'Cidade',
+  organizacao: 'Organização', assunto: 'Assunto', objetivo: 'Objetivo', quantidade: 'Quantidade',
+};
 
 function buildBody(lead: LeadRecord): string {
+  const extraFields = (['telefone', 'cargo', 'perfil', 'cidade', 'organizacao', 'assunto', 'objetivo', 'quantidade'] as const)
+    .filter((f) => lead[f])
+    .map((f) => `${FIELD_LABEL[f]}: ${lead[f]}`);
   const lines = [
     `Novo lead — ${SOURCE_LABEL[lead.source]}`,
     '',
     ...(lead.nome ? [`Nome: ${lead.nome}`] : []),
     `E-mail: ${lead.email}`,
-    ...(lead.organizacao ? [`Organização: ${lead.organizacao}`] : []),
-    ...(lead.assunto ? [`Assunto: ${lead.assunto}`] : []),
+    ...extraFields,
     ...(lead.mensagem ? ['', 'Mensagem:', lead.mensagem] : []),
     '',
     'Veja e responda em /admin/leads.',

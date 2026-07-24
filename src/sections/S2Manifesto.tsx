@@ -1,7 +1,7 @@
 import { useReveal } from '../components/useReveal';
 import HubButton, { WHATSAPP_URL } from '../components/HubButton';
 import { Icon1, Icon2, Icon3, Icon4 } from '../components/ManifestoIcons';
-import { EIcon, EImg, ERich, ET, useEditColors } from '../editor/fields';
+import { EIcon, EImg, ERich, ET, OffsetDragHandle, OrderEditChip, ScaleDragHandle, useEditColors, useEditOffset, useEditOrder, useEditScale } from '../editor/fields';
 
 const circleData = [
   { id: 'c1', Icon: Icon1, top: '13.49%', left: '63.31%' },
@@ -18,6 +18,11 @@ export default function S2Manifesto() {
     { key: 's2.bg.c1', label: 'Cor principal (topo)', fallback: '#ffffff' },
     { key: 's2.bg.c2', label: 'Cor do degradê (base)', fallback: '#d2e718' },
   ]);
+  // Ordem (imagem↔conteúdo), posição fina e tamanho da foto — travados por
+  // dispositivo (Mobile/Tablet/Desktop independentes), ver fields.tsx.
+  const { inverted } = useEditOrder('s2.layout.order', 'Manifesto — ordem imagem/conteúdo');
+  const { dx, dy } = useEditOffset('s2.foto', 'Manifesto — posição da foto');
+  const { scale } = useEditScale('s2.foto', 'Manifesto — tamanho da foto');
 
   return (
     <section
@@ -44,8 +49,9 @@ export default function S2Manifesto() {
           <img src="/icons/s2-selo-texto.svg" alt="" className="absolute inset-0 w-full h-full spin-slow" />
           <img src="/icons/s2-selo-globo.svg" alt="" className="absolute inset-0 w-full h-full" />
         </div>
-        {/* Esquerda: imagem + círculos */}
-        <div className="relative w-full h-[400px] lg:h-[49.1667vw] flex items-end justify-center">
+        <OrderEditChip k="s2.layout.order" label="Manifesto — ordem imagem/conteúdo" style={{ top: 12, left: 12 }} />
+        {/* Esquerda: imagem + círculos — `order` controlável por dispositivo (ver useEditOrder acima) */}
+        <div className="relative w-full h-[400px] lg:h-[49.1667vw] flex items-end justify-center" style={{ order: inverted ? 2 : 1 }}>
           {/* "HUB PAN 2026" vertical */}
           <span
             className="hidden lg:block absolute left-0 top-[38%] -translate-y-1/2 origin-center whitespace-nowrap"
@@ -53,38 +59,58 @@ export default function S2Manifesto() {
           >
             HUB PAN 2026
           </span>
-          {/* Caixa da foto — proporção exata do Figma (695×845), alinhada na base */}
+          {/* Caixa da foto — proporção exata do Figma (695×845), alinhada na
+              base. `data-animate` (entrada fade+slide via GSAP, useReveal)
+              fica SÓ na caixa externa — o GSAP escreve `transform` direto
+              no DOM por fora do React, então aplicar a posição/tamanho
+              (dx/dy/scale) no MESMO nó seria sobrescrito assim que a
+              animação de entrada terminasse. Por isso um wrapper interno
+              separado carrega a posição fina e o tamanho, controláveis por
+              dispositivo (ver useEditOffset/useEditScale acima) — translate
+              ANTES de scale, desloca em px reais sem interferir no tamanho. */}
           <div className="relative" style={{ height: '89.5%', aspectRatio: '695 / 845' }} data-animate>
-            <EImg
-              k="s2.foto" v="/images/s2-manifesto-pessoa.webp"
-              l="Manifesto — foto principal"
-              spec={{ w: 1390, h: 1690, shape: 'retrato', note: 'Foto vertical. O rosto/assunto deve ficar na parte de cima da imagem.' }}
-              alt="Manifesto HUB PAN"
-              className="w-full h-full object-cover rounded-2xl"
-              style={{ objectPosition: 'center 15%' }}
-            />
-            {/* Círculos glass — ícones editáveis (picker Lucide ou SVG próprio) */}
-            {circleData.map(({ id, Icon, top, left }) => (
-              <div
-                key={id}
-                className="absolute flex items-center justify-center"
-                style={{
-                  width: 115, height: 115, borderRadius: '50%', top, left,
-                  backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
-                  background: 'rgba(255,255,255,0.20)', border: '1px solid rgba(210,231,24,0.2)',
-                }}
-                data-animate
-              >
-                <EIcon k={`s2.circulo.${id}.icone`} l={`Manifesto — ícone do círculo ${id.slice(1)}`} defaultSize={48} style={{ color: '#d2e718' }}>
-                  <Icon size={48} color="#d2e718" />
-                </EIcon>
-              </div>
-            ))}
+            <div
+              className="w-full h-full"
+              style={{
+                transform: [
+                  (dx || dy) ? `translate(${dx}px, ${dy}px)` : '',
+                  scale !== 100 ? `scale(${scale / 100})` : '',
+                ].filter(Boolean).join(' ') || undefined,
+              }}
+            >
+              <EImg
+                k="s2.foto" v="/images/s2-manifesto-pessoa.webp"
+                l="Manifesto — foto principal"
+                spec={{ w: 1390, h: 1690, shape: 'retrato', note: 'Foto vertical. O rosto/assunto deve ficar na parte de cima da imagem.' }}
+                alt="Manifesto HUB PAN"
+                className="w-full h-full object-cover rounded-2xl"
+                style={{ objectPosition: 'center 15%' }}
+              />
+              {/* Círculos glass — ícones editáveis (picker Lucide ou SVG próprio) */}
+              {circleData.map(({ id, Icon, top, left }) => (
+                <div
+                  key={id}
+                  className="absolute flex items-center justify-center"
+                  style={{
+                    width: 115, height: 115, borderRadius: '50%', top, left,
+                    backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
+                    background: 'rgba(255,255,255,0.20)', border: '1px solid rgba(210,231,24,0.2)',
+                  }}
+                  data-animate
+                >
+                  <EIcon k={`s2.circulo.${id}.icone`} l={`Manifesto — ícone do círculo ${id.slice(1)}`} defaultSize={48} style={{ color: '#d2e718' }}>
+                    <Icon size={48} color="#d2e718" />
+                  </EIcon>
+                </div>
+              ))}
+            </div>
           </div>
+          <OffsetDragHandle k="s2.foto" label="Manifesto — posição da foto" style={{ bottom: 8, right: 8 }} />
+          <ScaleDragHandle k="s2.foto" label="Manifesto — tamanho da foto" style={{ bottom: 8, right: 52 }} />
         </div>
 
-        {/* Direita: conteúdo */}
-        <div className="relative w-full gutter lg:pl-0 lg:pr-[160px] flex flex-col justify-center">
+        {/* Direita: conteúdo — `order` controlável por dispositivo (ver useEditOrder acima) */}
+        <div className="relative w-full gutter lg:pl-0 lg:pr-[160px] flex flex-col justify-center" style={{ order: inverted ? 1 : 2 }}>
           <h2 className="mb-8" style={{ fontFamily: 'Luxenta', fontWeight: 500, fontSize: 'clamp(40px,4.5vw,65px)', lineHeight: 1.06, color: '#152852' }} data-animate>
             <ERich k="s2.titulo" l="Manifesto — título">
               Manifesto<br />Fundacional

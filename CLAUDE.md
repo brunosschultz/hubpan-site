@@ -701,6 +701,265 @@ não repetir o erro):**
   no lead de verdade — bug real, encontrado e corrigido depois do primeiro
   teste do Bruno, confirmado funcionando num segundo teste.
 
+### Editor visual — modo global de edição por dispositivo (mobile/tablet/desktop)
+
+Primeira versão desse recurso (histórico, pra contexto): um painel de
+imagem com abas Desktop/Tablet/Mobile por campo + um "Visualizar em"
+só de leitura (`<iframe src="/preview/...">`). O Bruno testou e explicou
+que não era isso: ele queria o editor inteiro "se moldando" ao
+dispositivo escolhido, igual ao WordPress — clicar em QUALQUER campo
+(texto, tamanho de fonte, espaçamento entre linhas/letras, cor, imagem)
+e o valor ficar travado pra aquele dispositivo, sem UI nova por campo.
+Reescrito como um mecanismo GLOBAL, central, em vez de por-campo.
+
+**Decisão mantida da v1** (não reverter sem querer): o site é responsivo
+por FAIXA de largura (breakpoints do Tailwind), não por modelo exato de
+aparelho — um iPhone 14 (393px) e um iPhone 17 Pro Max (440px) caem na
+mesma faixa "mobile" pro CSS. O seletor usa 6 larguras curadas (375/430
+mobile, 768/1024 tablet, 1440/1920 desktop), alinhadas às faixas reais
+que o CSS já usa — não simula um aparelho específico.
+
+**Achado técnico mantido da v1**: um `<div>` de largura fixa encolhendo a
+área de edição NÃO dispara as classes responsivas do Tailwind — elas
+reagem à largura real da JANELA, não à largura de um container. Por isso
+a visualização por tamanho usa um `<iframe>` de verdade (documento
+próprio, viewport próprio).
+
+**O mecanismo central — `editingDevice` em `get`/`setValue`
+(`src/editor/store.tsx`)**: em vez de cada tipo de campo (texto, imagem,
+cor, botão) saber sobre dispositivo, o CORAÇÃO do editor passou a saber.
+`editingDevice` vem só da URL (`?device=mobile|tablet`, nunca de um botão
+solto) — a sessão normal (`/editar/<slug>`) é sempre `'desktop'`. Toda
+leitura tenta primeiro a chave "com gaveta" (`chave.mobile`), e se não
+achar cai pra chave normal (herda Desktop); toda escrita grava
+automaticamente na gaveta certa. Isso vale pra QUALQUER chave que já
+passa por `get`/`setValue` hoje — texto (`ET`/`ERich`, incluindo as
+chaves-satélite `.lh`/`.w`), imagem (`EImg`/`useEditImage`), cor
+(`useEditColor(s)`), ícone (`EIcon`) e estilo de botão
+(`useButtonStyle`) — **sem nenhuma mudança nesses componentes**: o
+tamanho de fonte por seleção, o espaçamento entre linhas/letras e a cor
+do texto (toolbar de formatação, `RichToolbar` em `fields.tsx`) já
+passavam por `get`/`setValue`, então já ficaram travados por dispositivo
+de graça. `scopedKey(key)` (exposto no contexto) existe só pra a UI
+conferir "isso tem override?" (`scopedKey(k) in overrides`) sem duplicar
+a regra de sufixo, que mora só dentro do store.
+
+**"Visualizar em" virou edição de verdade**: o dropdown da barra abre um
+overlay com `<iframe src="/editar/<slug>?device=<categoria>">` — uma
+sessão de EDITOR completa (própria toolbar, painéis, tudo clicável), não
+mais uma pré-visualização estática. A sessão de dentro do iframe lê
+`?device=` e todo clique nela grava automaticamente na gaveta certa. Pra
+evitar iframe-dentro-de-iframe, a sessão embutida esconde o próprio botão
+"Visualizar em" e o link "Pré-visualizar" (`editingDevice !== 'desktop'`
+em `EditorChrome`), mostrando no lugar um selo "Editando Mobile/Tablet".
+Fechar: X no cabeçalho do overlay, Esc, ou clicar fora do iframe.
+
+**Painel de imagem (`ImageBody`) simplificado**: sem mais abas manuais —
+lê `editingDevice` do contexto e mostra uma notinha "Editando pra Mobile"
+quando != desktop. `get(panel.key, ...)`/`setValue(panel.key, ...)` já
+resolvem a gaveta sozinhos; sem imagem própria pro dispositivo atual,
+mostra a de Desktop com aviso "usando a de Desktop" (não finge definida).
+
+**Site publicado — `<picture>`, sem JS — inalterado**: `EImg`
+(`src/editor/fields.tsx`) não mudou nem uma linha nessa rodada. Fora do
+editor (`editingDevice` sempre `'desktop'`, sem `?device=` na URL), o
+sufixo automático do `get` é vazio — comportamento idêntico a antes. Só
+usa `<picture>` quando existe variante tablet/mobile; sem nenhuma, `<img>`
+puro, byte-a-byte igual a sempre. `useEditImage` (background CSS) resolve
+a variante certa via `matchMedia` da largura REAL da janela — dentro do
+iframe do device mode isso já bate sozinho com o preset escolhido, sem
+precisar ler `editingDevice` pra isso.
+
+**Bug real da 1ª rodada, achado pelo Bruno testando** (não um problema de
+arquitetura — um erro de digitação): o `setValue` calculava certinho a
+chave-com-gaveta (`finalKey`, ex.: `titulo.mobile`) pro estado local e pro
+histórico, mas o `upsert` no Supabase usava a variável errada — o `key`
+original (sem sufixo) em vez de `finalKey`. Resultado: a edição em Mobile
+gravava direto por cima da linha do Desktop no banco; como as duas sessões
+(iframe e página normal) estão inscritas no mesmo canal `postgres_changes`
+da tabela, o Desktop recebia esse update em tempo real e mostrava a fonte
+menor também. Corrigido: `key: finalKey` no upsert.
+
+**Bug real da 2ª rodada #1 — a isolação "vazava" só no Tablet, não no
+Mobile**: `deviceCategoryForWidth` classificava a categoria a partir da
+LARGURA do preset (`width <= tabletMax`), e o preset "Tablet — paisagem"
+tem exatamente **1024px**, enquanto `tabletMax` era **1023** — por 1px, a
+conta caía em `'desktop'`. O iframe desse preset específico abria com
+`?device=desktop`, ou seja: editar nele estava editando o Desktop de
+verdade (por isso mudou o Desktop; o preset "Tablet — retrato", 768px,
+não tinha esse problema, daí Mobile parecer isolado e Tablet não).
+Corrigido eliminando a inferência: `DevicePreset` agora carrega uma
+`category` FIXA (`'mobile'|'tablet'|'desktop'`) por item, sem recalcular
+de `width` — `deviceCategoryForWidth`/`DEVICE_BREAKPOINTS` continuam
+existindo só pro uso original (`useDeviceBreakpoint`, largura REAL da
+janela, sem relação com presets curados).
+
+**Bug real da 2ª rodada #2 — a caixa de texto (`.w`) parecia vazar
+também**: mesma causa raiz do bug acima (o Bruno testou arrastar a
+largura estando no preset "Tablet — paisagem") — `.w` já passava pelo
+`get`/`setValue` centralizado desde a 1ª rodada, então com a categoria
+corrigida a largura arrastada em Tablet já fica isolada de Mobile/Desktop
+sem nenhuma mudança de código adicional.
+
+**3º pedido, repetido duas vezes pelo Bruno — a barra de formatação
+"extrapolar" o iframe de verdade**: na 1ª tentativa eu só dei scroll
+horizontal (mais seguro, mas não é o que ele pediu). Como ele insistiu,
+implementei a versão de verdade: `RichToolbar` (`fields.tsx`) e o painel
+lateral (`Panel`, `ui.tsx`) agora portam pra **janela de cima**
+(`editorPortalTarget()`, novo em `store.tsx` — usa `window.top.document.body`
+quando dentro do iframe; mesma origem sempre, sem restrição de segurança)
+em vez do `document.body` do próprio iframe — ganham a tela inteira pra se
+posicionar, não só os ~375px do preset simulado. Duas peças novas pra isso
+funcionar direito:
+- `frameOffset()`/`editorViewport()` (`store.tsx`): a posição da
+  `RichToolbar` segue um elemento específico (`anchor.getBoundingClientRect()`,
+  medido DENTRO do iframe) — pra desenhar certo na janela de cima, soma o
+  próprio retângulo do `<iframe>` (`window.frameElement.getBoundingClientRect()`)
+  a essa medida. O painel lateral não precisa disso (é `position:fixed`
+  ancorado no canto, resolve sozinho contra o viewport de onde quer que
+  esteja).
+- `toolbarHasFocus()` (`fields.tsx`, substituiu `blurParaToolbar`): o
+  mecanismo antigo checava `e.relatedTarget` no `blur` pra saber se o
+  clique foi na barra (evita fechar a edição ao clicar num botão) — isso
+  não é confiável quando a barra está em OUTRO documento (iframe → janela
+  de cima). Troquei por uma checagem sem essa dependência: no blur, adia
+  um `requestAnimationFrame` e olha o `activeElement` de verdade nos dois
+  documentos possíveis (o de baixo e, se for o caso, o de cima) — resolve
+  a ambiguidade sem depender do campo do evento que falha entre documentos.
+  A barra de status/toolbar principal (botões Publicar/Histórico/Sair)
+  continua presa ao próprio iframe — não é o que o Bruno reclamou, e
+  duplicá-la na janela de cima ia sobrepor com a barra da página normal.
+
+**Testado**: `tsc -b`/`npm run build` limpos, `/editar?device=mobile` e
+`/editar/prointer?device=tablet` sem login carregam a tela de acesso
+normal, sem erro no console. Revisei a cadeia `get`/`setValue`/upsert
+linha a linha depois do 1º bug pra garantir que não sobrou mais nenhum
+lugar usando a chave sem sufixo. **Não testei a UI logada** (clicar,
+editar em Mobile/Tablet dentro do iframe, conferir isolação real e a
+barra/painel aparecendo por cima do fundo escurecido) — não faço login no
+editor (nunca insiro senha); isso precisa do Bruno confirmar de novo.
+Roteiro sugerido: abrir `/editar`, "Visualizar em" → Tablet (as duas
+opções, retrato E paisagem) e Mobile, mudar texto/tamanho/espaçamento/cor
+de um título e trocar uma imagem em cada, fechar o overlay e conferir que
+o Desktop não mudou em nenhum dos casos; reabrir cada um e conferir que a
+mudança persistiu isolada.
+
+**Bug real da 3ª rodada — imagem de fundo do Hero "gigante" no Mobile**:
+o painel de upload sempre recortava (`processImage`) a foto no MESMO spec
+fixo pensado pro Desktop (`HERO_BG_SPEC`, 2560×1440 **paisagem**), não
+importava em qual dispositivo o Bruno estivesse editando — uma foto
+vertical enviada em Mobile era forçada dentro dessa moldura horizontal,
+ficando violentamente ampliada e cortada (`background-size:cover` já
+preenche 100%×100% de qualquer contêiner sozinho — o problema nunca foi a
+exibição, era o CROP salvo no upload). Corrigido com
+`heroBgSpecForDevice(desktopSpec, editingDevice)` (novo, `store.tsx`) —
+troca largura↔altura do spec de Desktop quando `editingDevice` não é
+`'desktop'`, então o crop já sai na orientação certa. Usado em
+`S1Hero.tsx` (`s1.bg`) e `PageHero.tsx` (`${bgKey}.bgImage`, todas as
+páginas internas). A posição do recorte (`center right`, pensado pro
+texto cobrir só a metade esquerda no Desktop) virou classe Tailwind
+responsiva (`bg-center lg:bg-right`) em vez de inline JS gated por
+`editingDevice` — importante: `editingDevice` só existe DENTRO do editor
+(vem da URL `?device=`), nunca é verdade pra um visitante real do site,
+então qualquer coisa que precise reagir à tela de quem está vendo de
+verdade tem que usar breakpoint de CSS, não esse estado.
+
+⚠️ **A imagem que o Bruno já tinha enviado pro Mobile continua com o
+recorte errado, gravada assim no Storage** — o corte é feito uma vez, no
+upload (canvas), e fica permanente no arquivo salvo; a correção só vale
+pra próximos uploads. Precisa reenviar a foto do Hero em Mobile depois
+que subir essa correção.
+
+### Painel Admin — Leads: 5 formulários novos (PROINTER ×2, GovIA, Fórum ×2) + filtro por origem
+
+O Bruno reportou que os formulários de PROINTER (Apoiar/Candidatar-se),
+GovIA (Solicitar demonstração) e Fórum Mundial de IA (Empresas/
+Palestrantes) não funcionavam — todos tinham `onSubmit={(e) => e.preventDefault()}`
+sem nenhum state, sem `value`/`onChange` nos campos: nunca foram ligados
+de verdade quando as páginas foram criadas (só Contato e Newsletter
+tinham sido conectados na Fase 2a original). Corrigido nesta rodada,
+seguindo o MESMO padrão (`leads` no Supabase) já em produção.
+
+**`src/components/useLeadForm.tsx`** (novo) — hook reutilizável que
+extrai só o "miolo" (state dos campos + validação mínima + insert no
+Supabase + estados enviando/erro/sucesso) dos 5 formulários novos, sem
+virar um componente genérico de formulário: cada página continua com seu
+próprio JSX/layout/cores exatamente como estava (cabeçalho colorido,
+`ET`/`ERich` editáveis, `HubButton`) — só troca `<input placeholder=X/>`
+descontrolado por `<input value={values.x} onChange={set('x')}/>` e o
+`onSubmit={(e)=>e.preventDefault()}` por `onSubmit={handleSubmit}`.
+Decisão deliberada: um componente `<LeadForm>` genérico (props pra cada
+variação de layout/cor/campo) ficaria mais complexo que só editar os 5
+JSX diretamente — o hook cobre a parte realmente repetida (lógica), o
+resto continua simples e fiel ao design de cada página. `LeadFormSuccess`
+(mesmo arquivo) é o painel de sucesso compartilhado (ícone `CheckCircle2`
+em círculo navy/lime), visual idêntico ao que o Contato já usava.
+
+**Tabela `leads` — 6 colunas novas** (`telefone`, `cargo`, `perfil`,
+`cidade`, `objetivo`, `quantidade` — todas `text`, nullable) pra cobrir os
+campos que PROINTER/GovIA/Fórum têm e Contato/Newsletter não tinham.
+Reaproveitei `organizacao`/`assunto`/`mensagem` já existentes pros campos
+equivalentes de cada formulário (`assunto` vira "nível de apoio" no
+PROINTER, "necessidade" no GovIA, "nível de patrocínio"/"como deseja
+participar" no Fórum — sempre a categoria/select principal; `objetivo` é
+o SEGUNDO select, quando o formulário tem dois). Constraint `source`
+expandida de `('contato','newsletter')` pra incluir `prointer_apoio`,
+`prointer_inscricao`, `govia_demo`, `forum_empresas`,
+`forum_participantes`. Migração aplicada direto via
+`supabase db query --linked -f` (idempotente — `add column if not
+exists` + `drop/add constraint`), testada com um insert real por
+formulário e depois apagada.
+
+**Mapeamento exato campo→coluna** (documentado aqui pra não precisar
+reabrir cada página se for mexer depois):
+- `prointer_apoio`: nome, email, perfil (select), assunto=nível de
+  apoio (select), mensagem (opcional).
+- `prointer_inscricao`: nome, email, perfil (select), cidade="cidade e
+  estado", organizacao="escola ou negócio", mensagem=motivo.
+- `govia_demo`: nome="nome e cargo", organizacao="município/estado/
+  esfera", email, telefone, assunto=necessidade (select), quantidade=
+  "quantos servidores" (texto livre, não é numérico no banco).
+- `forum_empresas`: nome, organizacao=empresa, cargo, email, assunto=
+  nível de patrocínio (select), objetivo=objetivo principal (select),
+  mensagem.
+- `forum_participantes`: nome, email, organizacao="organização e
+  cargo", assunto="como deseja participar" (select), objetivo=
+  "área de expertise" (select), mensagem=motivo.
+
+**`src/admin/leads.ts`** — `LeadSource` e `LEAD_SOURCE_LABEL` expandidos
+pras 5 fontes novas (rótulos: "PROINTER — Apoio", "PROINTER — Inscrição",
+"GovIA — Demonstração", "Fórum — Patrocínio", "Fórum — Participação").
+Novo `LEAD_FIELD_LABEL` (rótulo em português de cada coluna extra) e
+`LEAD_SOURCES` (lista ordenada, usada nas abas do painel).
+`buildLeadSummary`/`buildWeeklySummary` generalizados pra listar
+QUALQUER campo extra preenchido (antes só organizacao/assunto/mensagem
+hardcoded) — funciona pra fonte nova sem precisar editar essas funções
+de novo.
+
+**`src/admin/AdminLeads.tsx`** — filtro "estilo caixa de e-mail" pedido
+pelo Bruno: abas horizontais (`Todos` primeiro, default, + uma por
+fonte, sempre visíveis mesmo com 0 — não somem se não tiver lead ainda)
+com contador entre parênteses, usando os tokens do tema do admin
+(`t.primary`/`t.muted`, nunca cor hardcoded do site, regra permanente já
+documentada acima). O detalhe expansível de cada lead também generalizou
+pra mostrar qualquer campo extra preenchido (mesmo padrão do resumo).
+
+**`supabase/functions/notify-lead/index.ts`** — `LeadSource`/
+`SOURCE_LABEL`/corpo do e-mail atualizados pras 5 fontes novas + os 6
+campos extras (mesmo padrão "só mostra o que veio preenchido"). Reimplantada
+via `supabase functions deploy notify-lead --no-verify-jwt`.
+
+**Testado ponta a ponta, um insert real por formulário** (preenchendo
+campos via JS — setando o value nativo do input/select/textarea E
+disparando `input`/`change`, já que React sobrescreve o setter nativo de
+`value` e não reage a atribuição direta — depois `form.requestSubmit()`):
+os 5 formulários mostraram o painel de sucesso certinho, e uma query
+direta na tabela confirmou os 5 registros com exatamente os campos
+esperados em cada coluna (nenhum campo trocado/faltando). Registros de
+teste apagados depois. Não testei o e-mail de aviso nem o login do
+painel admin (nunca insiro senha) — a mecânica do trigger→Edge Function
+não mudou, só os campos/rótulos, mesmo padrão já validado na Fase 2a.
+
 ### Painel Admin — Auditoria de Velocidade (junto com SEO)
 
 A pedido do Bruno (velocidade de carregamento afeta ranqueamento e
@@ -1736,6 +1995,92 @@ no card da cidade (React 17+ delega `mouseenter`/`mouseleave` via
 funciona pra esse tipo de handler, diferente do `pointermove` usado nos
 testes do tilt). `tsc -b` e `npm run build` (10 rotas) limpos, sem
 erros de console em nenhum dos 2 arquivos.
+
+### Editor visual — layout por dispositivo: ordem e posição fina (genérico)
+
+Depois de corrigir a imagem de fundo do Hero mobile, o Bruno trouxe um
+caso novo: na 2ª seção da Home (Manifesto Fundacional), no Desktop a
+imagem fica à esquerda e o conteúdo à direita (grid 2 colunas); no
+Mobile empilha (imagem primeiro, conteúdo depois). Ele queria poder
+inverter isso — conteúdo primeiro, imagem por último (encostada na
+base) — só no Mobile, sem mexer no Desktop nem no Tablet. Deixei claro
+que não ia fazer algo específico pra essa seção — construí uma
+capacidade GERAL, reutilizável em qualquer seção parecida (ele topou
+"ordem + posição fina" nessa mesma rodada, em vez de só ordem agora).
+
+**Dois hooks novos, genéricos, em `src/editor/fields.tsx`**:
+- `useEditOrder(k, label)` — inverte o `order` CSS de 2 elementos
+  irmãos (funciona em `flex` E `grid`, cobre o padrão comum do site de
+  "flex-col no mobile, grid-cols-2 no desktop" sem precisar de 2
+  lógicas diferentes). Vem com `<OrderEditChip>` — botão flutuante
+  "Inverter ordem", só em modo edição.
+- `useEditOffset(k, label)` — desloca um elemento em X/Y
+  (`transform: translate`), arrastando uma alça dedicada
+  (`<OffsetDragHandle>`) — SEPARADA do elemento em si (não o elemento
+  inteiro), pra não conflitar com o clique-pra-editar que ele já tem
+  (ex.: `EImg` abre o painel de imagem ao clicar; arrastar vs. clicar no
+  mesmo alvo ficaria ambíguo). Mesmo padrão de handle dedicado já usado
+  pra largura de caixa de texto (`ERich`, `data-resize-handle`).
+
+Ambos usam as MESMAS chaves-satélite de sempre (`k` base = Desktop,
+`k.tablet`/`k.mobile` = variantes) e passam pelo `get`/`setValue`
+central já existente — herdam a isolação por dispositivo de graça, sem
+nenhuma lógica nova de "gaveta".
+
+**A pegadinha que já tinha pego a imagem de fundo do Hero, resolvida
+igual aqui**: `editingDevice` só existe DENTRO do editor (vem da URL
+`?device=`) — um visitante real do site NUNCA tem isso, então usar
+`editingDevice` pra decidir o que EXIBIR faria todo mundo ver sempre a
+versão Desktop, real dispositivo ou não. Por isso os dois hooks leem
+via uma função nova, `useDeviceScopedValue` (`fields.tsx`) — resolve
+pela largura REAL da tela (`useDeviceBreakpoint`, matchMedia), igual o
+`useEditImage` já faz pra imagem de fundo. `editingDevice`/`get`/
+`setValue` (com sufixo automático) continuam sendo usados só pro lado
+da EDIÇÃO (o clique no chip, o arrastar da alça) — a leitura pra
+EXIBIÇÃO é sempre por breakpoint real, dentro ou fora do editor.
+
+**Aplicado no Manifesto** (`src/sections/S2Manifesto.tsx`) como primeiro
+caso de uso real: `order` nas duas colunas (`s2.layout.order`) +
+`OffsetDragHandle` na foto (`s2.foto`, mesma chave que já existe pra
+imagem — `dx`/`dy` viram chaves-satélite dela). Zero mudança pras
+outras ~9 seções que ainda não usam isso.
+
+**Testado**: `tsc -b`/`npm run build` limpos. Conferido via
+`getComputedStyle` no navegador que, sem nenhum override salvo (estado
+atual, site publicado), a ordem calculada continua exatamente a mesma
+de antes (imagem `order:1`, conteúdo `order:2`) — zero regressão visual
+no estado padrão. **Não testei o chip/alça funcionando de verdade**
+(clicar em "Inverter ordem", arrastar a foto, conferir isolação por
+dispositivo) — não faço login no editor; precisa do Bruno confirmar.
+
+**Extensão — tamanho da imagem (`useEditScale`) + um conflito real
+achado antes de ir pro ar**: o Bruno pediu mais uma capacidade no mesmo
+molde (arrastar pra redimensionar, mesma gaveta por dispositivo).
+`useEditScale` (`fields.tsx`) segue o padrão de `useEditOffset`: chave-
+satélite `${k}.scale` (percentual, "100" = original), alça dedicada
+(`ScaleDragHandle`), arrasto horizontal convertido em % via uma
+constante de sensibilidade (`SCALE_DRAG_SENSITIVITY`, mesmo espírito das
+constantes de "força" do tilt do Hero).
+
+Ao aplicar na foto do Manifesto, achei um conflito real ANTES de mandar
+testar (pegou no `getComputedStyle`, não só na leitura do código): a
+caixa da foto tem `data-animate` (entrada fade+slide da seção via
+`useReveal`) — o GSAP escreve `transform` DIRETO no DOM por fora do
+React pra essa animação. Botar meu `translate(dx,dy) scale(s)` no MESMO
+nó fazia o GSAP sobrescrever tudo assim que a entrada terminasse — o
+ajuste de posição/tamanho do Bruno sumiria sozinho ao rolar a página.
+Corrigido separando em dois nós: a caixa externa mantém só `data-animate`
+(intocada, GSAP cuida dela sozinho); um `<div>` interno novo (sem
+`data-animate`) carrega o `transform` de posição/tamanho — os dois
+sistemas nunca mais disputam a mesma propriedade no mesmo elemento.
+**Regra geral daqui pra frente**: `useEditOffset`/`useEditScale` NUNCA
+devem aplicar o `transform` num nó que também tenha `data-animate` (ou
+qualquer outro alvo de tween GSAP) — sempre um wrapper interno dedicado.
+
+Testado via `getComputedStyle`: a caixa externa (`data-animate`) e o
+wrapper interno (meu transform) são nós DOM diferentes, confirmado -
+GSAP seleciona por `querySelectorAll('[data-animate]')`, então nunca
+alcança o wrapper interno. `tsc -b`/`npm run build` limpos.
 
 ---
 

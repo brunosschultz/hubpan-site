@@ -11,6 +11,7 @@ import HubButton, { WHATSAPP_URL } from '../../components/HubButton';
 import CreditCardMock from '../../components/CreditCardMock';
 import { useReveal } from '../../components/useReveal';
 import { useTilt } from '../../components/useTilt';
+import { useLeadForm, LeadFormSuccess } from '../../components/useLeadForm';
 import { EIcon, ERich, ET, useEditColor, useEditColors, useEditImage, BgEditChip } from '../../editor/fields';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -540,35 +541,56 @@ function SecDemo() {
           </div>
         </div>
 
-        <form className="rounded-[20px] p-8 lg:p-9" style={{ background: '#f5f5f5' }} onSubmit={(e) => e.preventDefault()} data-animate>
-          <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 22, lineHeight: 1.1, color: '#152852' }}>
-            <ET k="govia.demo.form.titulo" v="Solicitar demonstração" l="Demonstração — título do formulário" />
-          </h3>
-          <p className="mb-6" style={{ fontFamily: 'Inter', fontSize: 13.5, color: '#a7a4a4' }}>
-            <ET k="govia.demo.form.sub" v="Nossa equipe entra em contato em até 1 dia útil." l="Demonstração — subtítulo do formulário" />
-          </p>
-          <div className="space-y-4">
-            <input placeholder="Nome completo e cargo" style={INPUT_STYLE} />
-            <input placeholder="Município / Estado / Esfera" style={INPUT_STYLE} />
-            <div className="grid sm:grid-cols-2 gap-4">
-              <input placeholder="E-mail institucional" style={INPUT_STYLE} />
-              <input placeholder="Telefone" style={INPUT_STYLE} />
-            </div>
-            <select defaultValue="" style={{ ...INPUT_STYLE, color: '#152852' }}>
-              <option value="" disabled>Principal necessidade</option>
-              {NECESSIDADES.map((n) => <option key={n}>{n}</option>)}
-            </select>
-            <input placeholder="Quantos servidores seriam beneficiados?" style={INPUT_STYLE} />
-            <HubButton size="md" variant="blue" className="w-full justify-center" iconKey="govia.demo.form.botao.icone" iconLabel="Demonstração — botão do formulário, ícone" styleKey="govia.demo.form.botao" styleLabel="Demonstração — botão do formulário" noLink>
-              <ET k="govia.demo.form.botao" v="Agendar demonstração gratuita" l="Demonstração — botão do formulário" />
-            </HubButton>
-            <p className="text-center" style={{ fontFamily: 'Inter', fontSize: 12.5, color: '#a7a4a4' }}>
-              <ET k="govia.demo.form.nota" v="Sem compromisso · Resposta em até 1 dia útil · 100% online" l="Demonstração — nota do formulário" />
-            </p>
-          </div>
-        </form>
+        <DemoForm />
       </div>
     </section>
+  );
+}
+
+function DemoForm() {
+  const { values, set, handleSubmit, sending, sent, error } = useLeadForm(
+    'govia_demo',
+    { nome: '', organizacao: '', email: '', telefone: '', assunto: '', quantidade: '' },
+    ['nome', 'organizacao', 'email', 'assunto'],
+  );
+
+  if (sent) {
+    return (
+      <div className="rounded-[20px]" style={{ background: '#f5f5f5' }} data-animate>
+        <LeadFormSuccess titulo="Demonstração solicitada!" desc="Nossa equipe entra em contato em até 1 dia útil." />
+      </div>
+    );
+  }
+
+  return (
+    <form className="rounded-[20px] p-8 lg:p-9" style={{ background: '#f5f5f5' }} onSubmit={handleSubmit} data-animate>
+      <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 22, lineHeight: 1.1, color: '#152852' }}>
+        <ET k="govia.demo.form.titulo" v="Solicitar demonstração" l="Demonstração — título do formulário" />
+      </h3>
+      <p className="mb-6" style={{ fontFamily: 'Inter', fontSize: 13.5, color: '#a7a4a4' }}>
+        <ET k="govia.demo.form.sub" v="Nossa equipe entra em contato em até 1 dia útil." l="Demonstração — subtítulo do formulário" />
+      </p>
+      <div className="space-y-4">
+        <input required placeholder="Nome completo e cargo" value={values.nome} onChange={set('nome')} style={INPUT_STYLE} />
+        <input required placeholder="Município / Estado / Esfera" value={values.organizacao} onChange={set('organizacao')} style={INPUT_STYLE} />
+        <div className="grid sm:grid-cols-2 gap-4">
+          <input required type="email" placeholder="E-mail institucional" value={values.email} onChange={set('email')} style={INPUT_STYLE} />
+          <input placeholder="Telefone" value={values.telefone} onChange={set('telefone')} style={INPUT_STYLE} />
+        </div>
+        <select required value={values.assunto} onChange={set('assunto')} style={{ ...INPUT_STYLE, color: '#152852' }}>
+          <option value="" disabled>Principal necessidade</option>
+          {NECESSIDADES.map((n) => <option key={n}>{n}</option>)}
+        </select>
+        <input placeholder="Quantos servidores seriam beneficiados?" value={values.quantidade} onChange={set('quantidade')} style={INPUT_STYLE} />
+        {error && <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#c0392b' }}>{error}</p>}
+        <HubButton size="md" variant="blue" className={`w-full justify-center ${sending ? 'opacity-60 pointer-events-none' : ''}`} iconKey="govia.demo.form.botao.icone" iconLabel="Demonstração — botão do formulário, ícone" styleKey="govia.demo.form.botao" styleLabel="Demonstração — botão do formulário" noLink>
+          <ET k="govia.demo.form.botao" v={sending ? 'Enviando…' : 'Agendar demonstração gratuita'} l="Demonstração — botão do formulário" />
+        </HubButton>
+        <p className="text-center" style={{ fontFamily: 'Inter', fontSize: 12.5, color: '#a7a4a4' }}>
+          <ET k="govia.demo.form.nota" v="Sem compromisso · Resposta em até 1 dia útil · 100% online" l="Demonstração — nota do formulário" />
+        </p>
+      </div>
+    </form>
   );
 }
 

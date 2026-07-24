@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useReveal } from './useReveal';
 import { useSplitTitle } from './useSplitTitle';
 import { useEditColor, useEditImage, BgEditChip } from '../editor/fields';
-import type { ImageSpec } from '../editor/store';
+import { heroBgSpecForDevice, useEditorStore, type ImageSpec } from '../editor/store';
 
 const HERO_BG_SPEC: ImageSpec = { w: 2560, h: 1200, shape: 'paisagem', note: 'Tela cheia, fundo do Hero.' };
 
@@ -38,7 +38,9 @@ export default function PageHero({ id, bgKey, eyebrow, title, sub, actions, asid
   const ref = useReveal<HTMLElement>();
   const titleRef = useSplitTitle<HTMLHeadingElement>();
   const [bg, bgProps] = useEditColor(`${bgKey}.bg`, '#060919', 'Hero — fundo');
-  const [bgImage] = useEditImage(`${bgKey}.bgImage`, '', 'Hero — imagem de fundo (opcional)', HERO_BG_SPEC);
+  const { editingDevice } = useEditorStore();
+  const heroBgSpec = heroBgSpecForDevice(HERO_BG_SPEC, editingDevice);
+  const [bgImage] = useEditImage(`${bgKey}.bgImage`, '', 'Hero — imagem de fundo (opcional)', heroBgSpec);
 
   return (
     <section
@@ -56,7 +58,7 @@ export default function PageHero({ id, bgKey, eyebrow, title, sub, actions, asid
        * imagem, evita os dois `onClick` (cor e imagem) disputando o mesmo
        * elemento. Sempre visível em modo edição, não só quando já tem
        * imagem — é como o Bruno adiciona a primeira imagem. */}
-      <BgEditChip k={`${bgKey}.bgImage`} v="" l="Hero — imagem de fundo (opcional)" spec={HERO_BG_SPEC} style={{ bottom: 24, right: 24 }} />
+      <BgEditChip k={`${bgKey}.bgImage`} v="" l="Hero — imagem de fundo (opcional)" spec={heroBgSpec} style={{ bottom: 24, right: 24 }} />
       <div className="relative gutter pt-[180px] lg:pt-[240px] pb-16 lg:pb-20">
         <div className="flex flex-col lg:flex-row lg:items-center gap-12">
           <div className="max-w-[820px]">
