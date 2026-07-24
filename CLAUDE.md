@@ -2082,6 +2082,52 @@ wrapper interno (meu transform) são nós DOM diferentes, confirmado -
 GSAP seleciona por `querySelectorAll('[data-animate]')`, então nunca
 alcança o wrapper interno. `tsc -b`/`npm run build` limpos.
 
+### Bug crítico — edição por dispositivo não aparecia no site PUBLICADO
+
+O Bruno publicou de verdade (tamanho/espaçamento de fonte editado em
+Mobile) e testou no celular: no editor aparecia certo, mas no site
+publicado o Mobile mostrava a fonte grande do Desktop — o oposto do
+que devia. Bug arquitetural real, não só do Hero: afetava TODO campo
+editável por dispositivo (texto, cor, ícone, estilo de botão — tudo que
+passa por `get`), não só imagem/ordem/posição/tamanho (que já tinham
+sido corrigidos à parte com `useDeviceScopedValue`).
+
+**Causa raiz**: `get()` (`store.tsx`) decidia qual "gaveta" ler usando
+`editingDevice` — que só existe DENTRO do editor, vindo da URL
+(`?device=mobile`). Um visitante real do site NUNCA tem esse parâmetro
+na URL, então pra ele `editingDevice` era sempre `'desktop'` — `get()`
+nunca sequer OLHAVA pra `.mobile`/`.tablet`, em NENHUM campo. Mesma
+categoria de erro que já corrigi pra `backgroundPosition` do Hero e
+pro `useEditOrder`/`useEditOffset`/`useEditScale` (via
+`useDeviceScopedValue`) — só que dessa vez o bug estava no PRÓPRIO
+`get()` genérico usado por `ET`/`ERich`/`useEditColor(s)`/`EIcon`/
+`useButtonStyle`, então afetava tudo de uma vez.
+
+**Correção — centralizada, no `get()` em si** (mais robusta que replicar
+`useDeviceScopedValue` em cada campo): `EditorProvider` agora chama
+`useDeviceBreakpoint()` (movida de `fields.tsx` pra `store.tsx`, já que o
+próprio `get` precisa dela) e usa a largura REAL da janela
+(`readSuffix`) pra decidir o que LER — `editingDevice`/`dSuffix`
+continuam existindo, mas só pro `setValue`/`scopedKey` (decidir ONDE
+GRAVAR quando editando). Dentro do editor os dois sempre coincidem (a
+sessão de Mobile roda de fato num iframe de 375px de largura real), só
+divergem fora dele — e é exatamente aí que o bug acontecia.
+`useDeviceScopedValue` virou redundante com o `get()` corrigido — removida,
+`useEditOrder`/`useEditOffset`/`useEditScale` voltaram a usar `get()`
+puro.
+
+**Testado com dado real publicado** (não só teórico): consultei o banco
+via Supabase CLI e achei os overrides `.mobile` que o Bruno já tinha
+publicado de verdade (`s1.titulo.w.mobile: 318`, `s1.sub.lh.mobile: 25`,
+`s1.bg.mobile`, `s2.layout.order.mobile`, `s2.foto.{dx,dy,scale}.mobile`).
+Com o fix, carreguei a home em 390px de largura (fresh load, não resize
+na mesma aba — `matchMedia` só reavalia o estado inicial corretamente
+num mount novo) e confirmei via `getComputedStyle` que o título mostra
+exatamente `max-width: 318px` e o parágrafo `line-height: 25px` — os
+valores publicados pro Mobile, não os do Desktop. Testado também que o
+Desktop (1440px, fresh load) mostra seus PRÓPRIOS valores (648px/36px),
+sem vazamento em nenhuma direção. `tsc -b`/`npm run build` limpos.
+
 ---
 
 ## Fluxo de trabalho esperado

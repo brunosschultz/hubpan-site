@@ -38,6 +38,30 @@ export function deviceCategoryForWidth(width: number): DeviceCategory {
   return 'desktop';
 }
 
+/** Categoria de dispositivo da largura REAL da janela (não simulada, não
+ * `editingDevice`) — mora aqui (não em `fields.tsx`) porque o próprio `get`
+ * do `EditorProvider` precisa dela internamente (ver nota grande em `get`,
+ * abaixo). Usada também onde não dá pra resolver a imagem certa via CSS
+ * puro (fundo via `useEditImage`) e pelo painel do editor. */
+export function useDeviceBreakpoint(): DeviceCategory {
+  const [device, setDevice] = useState<DeviceCategory>(() =>
+    deviceCategoryForWidth(typeof window !== 'undefined' ? window.innerWidth : 1440)
+  );
+  useEffect(() => {
+    const mqMobile = window.matchMedia(`(max-width: ${DEVICE_BREAKPOINTS.mobileMax}px)`);
+    const mqTablet = window.matchMedia(`(min-width: ${DEVICE_BREAKPOINTS.mobileMax + 1}px) and (max-width: ${DEVICE_BREAKPOINTS.tabletMax}px)`);
+    const update = () => setDevice(mqMobile.matches ? 'mobile' : mqTablet.matches ? 'tablet' : 'desktop');
+    update();
+    mqMobile.addEventListener('change', update);
+    mqTablet.addEventListener('change', update);
+    return () => {
+      mqMobile.removeEventListener('change', update);
+      mqTablet.removeEventListener('change', update);
+    };
+  }, []);
+  return device;
+}
+
 /** Presets de largura pro seletor "visualizar em" do editor — larguras
  * reais (não nomes de aparelho: o site é responsivo por FAIXA de largura,
  * um iPhone 14 e um iPhone 17 caem na mesma faixa "mobile" pro CSS, não
@@ -224,13 +248,28 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   const [publishing, setPublishing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
 
-  /* dispositivo desta sessão — só a URL decide (ver `EditorCtx.editingDevice`) */
+  /* dispositivo desta sessão de EDIÇÃO — só a URL decide (ver
+   * `EditorCtx.editingDevice`), usado só pra decidir ONDE GRAVAR
+   * (`setValue`/`scopedKey`). NUNCA usar isso pra decidir o que MOSTRAR —
+   * ver a nota grande em `get`, logo abaixo, sobre o bug real que isso
+   * causou (edição em Mobile funcionava só dentro do editor; publicado, o
+   * visitante real via a versão Desktop sempre, porque a URL dele nunca
+   * tem `?device=`). */
   const editingDevice: DeviceCategory = useMemo(() => {
     const p = new URLSearchParams(location.search).get('device');
     return p === 'mobile' || p === 'tablet' ? p : 'desktop';
   }, [location.search]);
   const dSuffix = editingDevice === 'desktop' ? '' : `.${editingDevice}`;
   const scopedKey = useCallback((key: string) => (dSuffix ? `${key}${dSuffix}` : key), [dSuffix]);
+
+  /* dispositivo de EXIBIÇÃO — largura REAL da janela (`useDeviceBreakpoint`,
+   * matchMedia), usado por `get` pra decidir O QUE MOSTRAR. Dentro do
+   * editor os dois sempre coincidem (a sessão de Mobile roda de fato num
+   * iframe de 375px) — fora dele (site publicado), `editingDevice` é
+   * sempre 'desktop' (a URL de um visitante real nunca tem `?device=`),
+   * então só este aqui reflete a tela de quem está vendo de verdade. */
+  const displayDevice = useDeviceBreakpoint();
+  const readSuffix = displayDevice === 'desktop' ? '' : `.${displayDevice}`;
 
   const rowsRef = useRef(rows);
   useEffect(() => { rowsRef.current = rows; }, [rows]);
@@ -293,18 +332,28 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     return channel === 'draft' ? r?.draft : r?.published;
   }, [connected, rows, channel]);
 
-  /** Toda leitura passa pela "gaveta" do dispositivo desta sessão primeiro
+  /** Toda leitura passa pela "gaveta" do dispositivo de EXIBIÇÃO primeiro
    * (`${key}.mobile`) — sem valor lá, cai pra chave base (Desktop), que é
-   * sempre o valor "herdado" até alguém definir um específico. Fora do
-   * editor (ou dentro dele em Desktop), `dSuffix` é vazio e isso equivale
-   * ao comportamento de sempre — nenhuma mudança de rota fora do editor. */
+   * sempre o valor "herdado" até alguém definir um específico.
+   *
+   * Usa `readSuffix` (largura REAL da janela), NÃO `dSuffix`
+   * (`editingDevice`, vindo da URL) — bug real reportado pelo Bruno: com
+   * `dSuffix` aqui, a edição em Mobile aparecia certa DENTRO do editor
+   * (onde a URL tem `?device=mobile`) mas sumia no site publicado — um
+   * visitante real nunca tem esse `?device=` na URL, então a leitura caía
+   * sempre em `editingDevice: 'desktop'` e ignorava tudo que foi salvo pra
+   * Mobile/Tablet. `readSuffix` resolve pela tela de verdade de quem está
+   * vendo, dentro ou fora do editor (dentro do editor os dois SEMPRE
+   * coincidem, já que a sessão de Mobile roda de fato num iframe de
+   * 375px — corrigir aqui não muda nada do jeito que editar já funciona,
+   * só conserta o que estava quebrado no site publicado). */
   const get = useCallback((key: string, fallback: string) => {
-    if (dSuffix) {
-      const scoped = readRaw(`${key}${dSuffix}`);
+    if (readSuffix) {
+      const scoped = readRaw(`${key}${readSuffix}`);
       if (scoped != null) return scoped;
     }
     return readRaw(key) ?? fallback;
-  }, [readRaw, dSuffix]);
+  }, [readRaw, readSuffix]);
 
   const setValue = useCallback<EditorCtx['setValue']>((key, value, meta) => {
     if (channel !== 'draft') return; // edição só faz sentido em /editar (ou /preview, mas lá não há UI de edição)

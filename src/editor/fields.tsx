@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent as RPointerEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { ALargeSmall, ArrowLeftRight, ArrowUpDown, Baseline, Bold, Check, Eraser, Italic, Maximize2, Minus, Move, Plus, Underline } from 'lucide-react';
-import { useEditorStore, deviceCategoryForWidth, editorPortalTarget, editorViewport, frameOffset, DEVICE_BREAKPOINTS, type ImageSpec, type DeviceCategory } from './store';
+import { useEditorStore, editorPortalTarget, editorViewport, frameOffset, useDeviceBreakpoint, DEVICE_BREAKPOINTS, type ImageSpec } from './store';
 import { LUCIDE_CHOICES } from './editorIcons';
 import { glass, PALETTE } from './theme';
 
@@ -733,51 +733,11 @@ export function ERich({ k, l, children, baseW, className, style }: ERichProps) {
 
 /* ---------- Imagem (<img>) ---------- */
 
-/** Categoria de dispositivo da largura REAL da janela (não simulada) —
- * usada só onde não dá pra resolver a imagem certa via CSS puro (fundo via
- * `useEditImage`, e o painel do editor pra escolher a aba inicial). Pra
- * `<EImg>` (a maioria dos casos) a troca é 100% CSS via `<picture>`, sem
- * JS — ver `EImg` abaixo. */
-export function useDeviceBreakpoint(): DeviceCategory {
-  const [device, setDevice] = useState<DeviceCategory>(() =>
-    deviceCategoryForWidth(typeof window !== 'undefined' ? window.innerWidth : 1440)
-  );
-  useEffect(() => {
-    const mqMobile = window.matchMedia(`(max-width: ${DEVICE_BREAKPOINTS.mobileMax}px)`);
-    const mqTablet = window.matchMedia(`(min-width: ${DEVICE_BREAKPOINTS.mobileMax + 1}px) and (max-width: ${DEVICE_BREAKPOINTS.tabletMax}px)`);
-    const update = () => setDevice(mqMobile.matches ? 'mobile' : mqTablet.matches ? 'tablet' : 'desktop');
-    update();
-    mqMobile.addEventListener('change', update);
-    mqTablet.addEventListener('change', update);
-    return () => {
-      mqMobile.removeEventListener('change', update);
-      mqTablet.removeEventListener('change', update);
-    };
-  }, []);
-  return device;
-}
+/* `useDeviceBreakpoint` mora em `store.tsx` agora (importada no topo deste
+ * arquivo) — o `get` do `EditorProvider` passou a precisar dela
+ * internamente, ver a nota lá. */
 
 /* ---------- Layout por dispositivo: ordem e posição fina ---------- */
-
-/** Resolve o valor de uma chave-satélite por dispositivo PRA EXIBIÇÃO —
- * decide pela largura REAL da tela de quem está vendo (`useDeviceBreakpoint`),
- * nunca por `editingDevice` (que só existe DENTRO do editor, vindo da URL
- * `?device=`; um visitante real do site nunca tem isso). Mesmo padrão que já
- * resolve a imagem de fundo por dispositivo em `useEditImage`, generalizado
- * pra qualquer valor textual (ordem, deslocamento, etc.). `get()` já resolve
- * a chave `.tablet`/`.mobile` sozinha mesmo estando "errada" pro
- * `editingDevice` atual (a leitura cai pra chave literal quando a
- * combinada não existe) — ver `get` em `store.tsx`. Sem override pro
- * dispositivo atual, HERDA o valor base (Desktop). */
-function useDeviceScopedValue(baseKey: string, fallback: string): string {
-  const { get } = useEditorStore();
-  const bp = useDeviceBreakpoint();
-  const mobile = get(`${baseKey}.mobile`, '');
-  const tablet = get(`${baseKey}.tablet`, '');
-  if (bp === 'mobile' && mobile) return mobile;
-  if (bp === 'tablet' && tablet) return tablet;
-  return get(baseKey, fallback);
-}
 
 /** Inverte a ordem visual (CSS `order`) de 2 elementos irmãos — mesma
  * gaveta por dispositivo de tudo mais no editor: inverter no Mobile não
@@ -786,7 +746,7 @@ function useDeviceScopedValue(baseKey: string, fallback: string): string {
  * "flex-col no mobile, grid-cols-2 no desktop" sem precisar de 2 lógicas. */
 export function useEditOrder(k: string, label: string): { inverted: boolean; toggle: () => void } {
   const { get, setValue, editMode } = useEditorStore();
-  const inverted = useDeviceScopedValue(k, '0') === '1';
+  const inverted = get(k, '0') === '1';
   const toggle = () => {
     if (!editMode) return;
     const current = get(k, '0') === '1';
@@ -825,8 +785,8 @@ export function OrderEditChip({ k, label, style }: { k: string; label: string; s
  * imagem ao clicar) — arrastar vs. clicar ficaria ambíguo no mesmo alvo. */
 export function useEditOffset(k: string, label: string): { dx: number; dy: number; dragProps: Record<string, unknown> } {
   const { get, setValue, editMode } = useEditorStore();
-  const dxBase = +useDeviceScopedValue(`${k}.dx`, '0') || 0;
-  const dyBase = +useDeviceScopedValue(`${k}.dy`, '0') || 0;
+  const dxBase = +get(`${k}.dx`, '0') || 0;
+  const dyBase = +get(`${k}.dy`, '0') || 0;
   const [drag, setDrag] = useState<{ x: number; y: number } | null>(null);
   const dx = drag ? drag.x : dxBase;
   const dy = drag ? drag.y : dyBase;
@@ -890,7 +850,7 @@ export function useEditScale(k: string, label: string, opts?: { min?: number; ma
   const { get, setValue, editMode } = useEditorStore();
   const min = opts?.min ?? 50;
   const max = opts?.max ?? 200;
-  const scaleBase = +useDeviceScopedValue(`${k}.scale`, '100') || 100;
+  const scaleBase = +get(`${k}.scale`, '100') || 100;
   const [drag, setDrag] = useState<number | null>(null);
   const scale = drag ?? scaleBase;
 
