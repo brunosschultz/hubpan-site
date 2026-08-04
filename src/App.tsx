@@ -67,6 +67,7 @@ function AppShell() {
           path="/"
           title="HUB PAN — Ecossistema Global de Inovação nas Américas"
           description="O HUB PAN é o ecossistema global de inovação que une governos, empresas e educadores das Américas e África em IA, impacto social e cooperação."
+          image="/images/og-home.webp"
         />
         <Home />
       </>} />
@@ -88,6 +89,7 @@ function AppShell() {
                 path="/prointer"
                 title="PROINTER — Professores da Rede Pública e Afroempreendedores"
                 description="Programa que leva professores da rede pública e afroempreendedores para Harvard Square, MIT e as Nações Unidas — passagem, hospedagem e curadoria completas."
+                image="/images/og-prointer.webp"
               />
               <Prointer />
             </>} />

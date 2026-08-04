@@ -46,7 +46,7 @@ export default function S5Jornada() {
           </div>
 
           <p className="hidden lg:block self-center" style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: '#a7a4a4' }} data-animate>
-            <ERich k="s5.desc" l="Jornada — texto de apoio" baseW={186}>
+            <ERich k="s5.desc" l="Jornada — texto de apoio" baseW={253}>
               Uma trajetória construída cidade a cidade, relação por relação, entrega por entrega.
             </ERich>
           </p>

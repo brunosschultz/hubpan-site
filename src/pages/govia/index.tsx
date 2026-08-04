@@ -50,6 +50,13 @@ const EIXOS: { slug: string; Icon: typeof BrainCircuit; titulo: string; desc: st
   },
 ];
 
+/* Títulos de eixo que quebram em duas linhas no padrão — o texto plano continua
+   em EIXOS (usado como chave/rótulo), só a renderização recebe o <br />. */
+const EIXO_TITULO_NODE: Record<string, React.ReactNode> = {
+  conteudo: <>Conteúdo<br />especializado</>,
+  observatorio: <>Observatório<br />de IA</>,
+};
+
 const OBS_DADOS = [
   'Uso de IA por área de governo (saúde, educação, fazenda, obras, comunicação)',
   'Ferramentas mais adotadas e barreiras de implementação relatadas',
@@ -100,11 +107,11 @@ const ECO_COLORS = {
 };
 
 const FAQ = [
-  { slug: 'o-que-e', q: 'O que é o GovIA?', a: 'O GovIA é uma plataforma de assinatura institucional de inteligência artificial desenvolvida especificamente para municípios, estados e consórcios públicos brasileiros. Ele resolve duas barreiras simultâneas: o acesso a ferramentas de IA (que normalmente exigem cartão de crédito, inexistente na maioria dos governos municipais) e a formação dos servidores para usar essas ferramentas de forma eficiente e responsável.' },
-  { slug: 'contratacao-sem-cartao', q: 'Como um município contrata o GovIA sem cartão de crédito?', a: 'O GovIA aceita contratação via nota de empenho, dispensa de licitação e outros mecanismos compatíveis com a gestão pública municipal e estadual. O processo é feito com suporte da equipe HUB PAN, sem necessidade de cartão de crédito corporativo ou infraestrutura de pagamento digital que a maioria das prefeituras não possui.' },
-  { slug: 'diferenciais', q: 'O GovIA se diferencia de outras plataformas de IA para governos?', a: 'Sim. As principais diferenças são: (1) modelo de contratação compatível com o setor público sem cartão de crédito; (2) curadoria de ferramentas específica para o contexto governamental, com critérios de segurança e adequação; (3) formação integrada para servidores — não apenas acesso a ferramentas; (4) o Observatório de IA, ativo exclusivo com dados inéditos sobre uso de IA na administração pública brasileira, disponível apenas para assinantes.' },
-  { slug: 'observatorio', q: 'O que é o Observatório de IA do GovIA?', a: 'O Observatório de IA é uma pesquisa sistemática e contínua sobre o uso de inteligência artificial na administração pública brasileira. Iniciando por Minas Gerais, com comparativo previsto com a região metropolitana de Boston em 2027, o Observatório gera dados inéditos sobre quais ferramentas os governos estão usando, quais barreiras enfrentam e qual o nível de letramento digital dos servidores — dados exclusivos para assinantes do GovIA.' },
-  { slug: 'quais-governos', q: 'Quais governos podem assinar o GovIA?', a: 'O GovIA atende prefeituras e secretarias municipais, governos estaduais, consórcios públicos, autarquias e fundações públicas. O plano Municipal é indicado para prefeituras com até 100.000 habitantes; o plano Estadual ou Consórcio atende estruturas maiores; e o plano Enterprise é customizado para grandes estados, ministérios e estruturas especiais.' },
+  { slug: 'o-que-e', q: 'O que é o eGovIA?', a: 'O eGovIA é uma plataforma de assinatura institucional de inteligência artificial desenvolvida especificamente para municípios, estados e consórcios públicos brasileiros. Ele resolve duas barreiras simultâneas: o acesso a ferramentas de IA (que normalmente exigem cartão de crédito, inexistente na maioria dos governos municipais) e a formação dos servidores para usar essas ferramentas de forma eficiente e responsável.' },
+  { slug: 'contratacao-sem-cartao', q: 'Como um município contrata o eGovIA sem cartão de crédito?', a: 'O eGovIA aceita contratação via nota de empenho, dispensa de licitação e outros mecanismos compatíveis com a gestão pública municipal e estadual. O processo é feito com suporte da equipe HUB PAN, sem necessidade de cartão de crédito corporativo ou infraestrutura de pagamento digital que a maioria das prefeituras não possui.' },
+  { slug: 'diferenciais', q: 'O eGovIA se diferencia de outras plataformas de IA para governos?', a: 'Sim. As principais diferenças são: (1) modelo de contratação compatível com o setor público sem cartão de crédito; (2) curadoria de ferramentas específica para o contexto governamental, com critérios de segurança e adequação; (3) formação integrada para servidores — não apenas acesso a ferramentas; (4) o Observatório de IA, ativo exclusivo com dados inéditos sobre uso de IA na administração pública brasileira, disponível apenas para assinantes.' },
+  { slug: 'observatorio', q: 'O que é o Observatório de IA do eGovIA?', a: 'O Observatório de IA é uma pesquisa sistemática e contínua sobre o uso de inteligência artificial na administração pública brasileira. Iniciando por Minas Gerais, com comparativo previsto com a região metropolitana de Boston em 2027, o Observatório gera dados inéditos sobre quais ferramentas os governos estão usando, quais barreiras enfrentam e qual o nível de letramento digital dos servidores — dados exclusivos para assinantes do eGovIA.' },
+  { slug: 'quais-governos', q: 'Quais governos podem assinar o eGovIA?', a: 'O eGovIA atende prefeituras e secretarias municipais, governos estaduais, consórcios públicos, autarquias e fundações públicas. O plano Municipal é indicado para prefeituras com até 100.000 habitantes; o plano Estadual ou Consórcio atende estruturas maiores; e o plano Enterprise é customizado para grandes estados, ministérios e estruturas especiais.' },
 ];
 
 const INPUT_STYLE: React.CSSProperties = {
@@ -195,7 +202,7 @@ function SecProblema() {
           </p>
           <p className="mb-9" style={{ fontFamily: 'Inter', fontSize: 16.5, lineHeight: '28px', color: '#797979', maxWidth: 560 }} data-animate>
             <ERich k="govia.problema.texto2" l="Problema central — parágrafo 2" baseW={560}>
-              O GovIA resolve as duas dores — acesso e formação — em um único contrato institucional, sem complexidade técnica e com suporte especializado no setor público.
+              O eGovIA resolve as duas dores — acesso e formação — em um único contrato institucional, sem complexidade técnica e com suporte especializado no setor público.
             </ERich>
           </p>
           <div className="flex flex-wrap gap-4" data-animate>
@@ -315,7 +322,7 @@ function SecEixos() {
                       <ET k={`govia.eixo.${slug}.badge`} v={badgeTxt} l={`Eixo "${e.titulo}" — badge`} />
                     </p>
                     <h3 style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4.2vw,58px)', lineHeight: 1.02, letterSpacing: '-0.8px', color: t.title }}>
-                      <ERich k={`govia.eixo.${slug}.titulo`} l={`Eixo "${e.titulo}" — título`}>{e.titulo}</ERich>
+                      <ERich k={`govia.eixo.${slug}.titulo`} l={`Eixo "${e.titulo}" — título`} baseW={slug === 'formacao' ? 321 : undefined}>{EIXO_TITULO_NODE[slug] ?? e.titulo}</ERich>
                     </h3>
                   </div>
                   <div>
@@ -508,7 +515,7 @@ function SecDemo() {
             <ET k="govia.demo.eyebrow" v="DEMONSTRAÇÃO GRATUITA" l="Demonstração — selo" />
           </p>
           <h2 className="mb-5" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(28px,3.4vw,42px)', letterSpacing: '-0.5px', lineHeight: 1.05, color: '#152852' }} data-animate>
-            <ERich k="govia.demo.titulo" l="Demonstração — título">Veja o GovIA em ação no seu município.</ERich>
+            <ERich k="govia.demo.titulo" l="Demonstração — título">Veja o eGovIA em ação no seu município.</ERich>
           </h2>
           <p className="mb-4" style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: '#797979' }} data-animate>
             <ERich k="govia.demo.texto1" l="Demonstração — parágrafo 1">
@@ -681,7 +688,7 @@ function SecFAQ() {
             <ET k="govia.faq.eyebrow" v="PERGUNTAS FREQUENTES" l="FAQ — selo" />
           </p>
           <h2 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#152852' }} data-animate>
-            <ERich k="govia.faq.titulo" l="FAQ — título">O que gestores públicos mais perguntam sobre o GovIA.</ERich>
+            <ERich k="govia.faq.titulo" l="FAQ — título">O que gestores públicos mais perguntam sobre o eGovIA.</ERich>
           </h2>
           <p style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: '#797979' }} data-animate>
             <ERich k="govia.faq.sub" l="FAQ — texto de apoio">Respostas diretas para prefeituras, estados e consórcios que querem entender como o GovIA funciona na prática.</ERich>
@@ -707,8 +714,8 @@ function GovIAHero() {
         id="govia-hero"
         img={heroImg}
         imgAlt="Prédio institucional"
-        eyebrow={<ET k="govia.hero.eyebrow" v="PLATAFORMA DE IA PARA O SETOR PÚBLICO · ASSINATURA INSTITUCIONAL · OBSERVATÓRIO" l="Hero — eyebrow" />}
-        title={<ERich k="govia.hero.titulo" l="Hero — título">GovIA</ERich>}
+        eyebrow={<ET k="govia.hero.eyebrow" v="PLATAFORMA DE IA PARA O SETOR PÚBLICO" l="Hero — eyebrow" />}
+        title={<ERich k="govia.hero.titulo" l="Hero — título">eGovIA</ERich>}
         sub={<ERich k="govia.hero.sub" l="Hero — subtítulo">A primeira plataforma de inteligência artificial desenvolvida especificamente para municípios, estados e consórcios públicos brasileiros. Acesso a ferramentas, formação de servidores, conteúdo especializado e o Observatório de IA — tudo em uma assinatura institucional sem cartão de crédito.</ERich>}
         actions={<>
           <HubButton size="lg" variant="lime" onClick={() => ScrollSmoother.get()?.scrollTo('#govia-form', true)} iconKey="govia.hero.cta.demo.icone" iconLabel="Hero — botão Solicitar demonstração, ícone" styleKey="govia.hero.cta.demo" styleLabel="Hero — botão Solicitar demonstração"><ET k="govia.hero.cta.demo" v="Solicitar demonstração" l="Hero — botão Solicitar demonstração" /></HubButton>

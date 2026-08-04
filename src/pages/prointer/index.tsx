@@ -104,7 +104,7 @@ function SecProposito() {
         <div className="lg:h-screen flex flex-col justify-center">
           <p className="eyebrow text-muted mb-6" data-animate><ET k="pro.proposito.eyebrow" v="O QUE É O PROINTER" l="Proposito — selo da seção" /></p>
           <h2 className="mb-6" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#152852' }} data-animate>
-            <ERich k="pro.proposito.titulo" l="Proposito — título">Mais do que intercâmbio. Uma plataforma de impacto transgeracional.</ERich>
+            <ERich k="pro.proposito.titulo" l="Proposito — título">Mais do que intercâmbio.<br />Uma plataforma de impacto <span style={{ color: 'rgb(45, 78, 191)' }}>transgeracional.</span></ERich>
           </h2>
           <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 16.5, lineHeight: '28px', color: '#797979', maxWidth: 560 }} data-animate>
             <ERich k="pro.proposito.p1" l="Proposito — parágrafo 1" baseW={560}>O PROINTER é o mecanismo pelo qual o HUB PAN abre portas normalmente fechadas para professores da rede pública, afroempreendedores e lideranças que raramente acessam Harvard Square, MIT ou as Nações Unidas.</ERich>
@@ -218,10 +218,10 @@ function CitacaoCard() {
         </EIcon>
       </span>
       <p style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(22px,2vw,26px)', lineHeight: 1.3, color: '#152852' }}>
-        <ERich k="pro.publicos.citacao.quote" l="Públicos — citação">"Mas a professora não vai para Nova York."</ERich>
+        <ERich k="pro.publicos.citacao.quote" l="Públicos — citação"><span style={{ fontSize: 60 }}><br />"Mas a professora não vai para Nova York."<br /></span></ERich>
       </p>
       <p className="mt-4" style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '23px', color: 'rgba(21,40,82,0.75)' }}>
-        <ERich k="pro.publicos.citacao.texto" l="Públicos — texto de apoio da citação">Essa frase, ouvida no interior de Minas Gerais, é a razão pela qual o PROINTER existe. O HUB PAN pega essa professora e coloca ela lá dentro.</ERich>
+        <ERich k="pro.publicos.citacao.texto" l="Públicos — texto de apoio da citação"><span style={{ fontSize: 16 }}>Essa frase, ouvida no interior de Minas Gerais, é a razão pela qual o PROINTER existe. O HUB PAN pega essa professora e coloca ela lá dentro.</span></ERich>
       </p>
     </div>
   );
@@ -560,7 +560,7 @@ export default function Prointer() {
           id="prointer-hero"
           img={heroImg}
           imgAlt="Panorama de Cambridge, Massachusetts"
-          eyebrow={<ET k="pro.hero.eyebrow" v="PROGRAMA DE INTERCÂMBIO E IMPACTO · ESG · ODS 4 · ODS 10 · ODS 17" l="Hero — eyebrow" />}
+          eyebrow={<ET k="pro.hero.eyebrow" v="PROGRAMA DE INTERCÂMBIO E IMPACTO" l="Hero — eyebrow" />}
           title={<ERich k="pro.hero.titulo" l="PROINTER — título do hero (H1)">PROINTER</ERich>}
           sub={
             <ERich k="pro.hero.sub" l="PROINTER — texto de apoio do hero">

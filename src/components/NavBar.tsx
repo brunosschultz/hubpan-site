@@ -15,7 +15,7 @@ const LINKS: { label: string; to: string }[] = [
   { label: 'Início', to: '/' },
   { label: 'O HUB PAN', to: '/o-hub-pan' },
   { label: 'PROINTER', to: '/prointer' },
-  { label: 'GovIA', to: '/govia' },
+  { label: 'eGovIA', to: '/govia' },
   { label: 'Fórum Mundial IA', to: '/forum-mundial-ia' },
   { label: 'Insights', to: '/insights' },
 ];

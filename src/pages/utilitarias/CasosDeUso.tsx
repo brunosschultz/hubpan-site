@@ -21,7 +21,7 @@ const PLATAFORMA_SLUGS: Record<string, string> = {
 const CASOS = [
   {
     id: 'professora-mg',
-    plataforma: 'PROINTER', img: 's7-persona-2', tag: 'PROINTER · Educação', selo: 'Missão 2027', tipo: 'História de impacto',
+    plataforma: 'PROINTER', img: 's7-persona-2', tag: 'PROINTER · Educação', selo: '2027', tipo: 'História de impacto',
     titulo: '"Quando voltei de Harvard, minha escola inteira mudou de perspectiva"',
     desc: 'Professora de matemática da rede municipal de Minas Gerais, selecionada como bolsista PROINTER pela performance em programa de extensão Premier Niveau. Após a missão em Nova York, Boston e Cambridge, implementou projeto de inovação pedagógica reconhecido pela Secretaria de Educação do estado.',
     stats: [{ v: '320', l: 'Alunos impactados' }, { v: '3', l: 'Projetos derivados' }, { v: 'ODS 4', l: 'Alinhamento' }],
@@ -29,7 +29,7 @@ const CASOS = [
   },
   {
     id: 'prefeitura-mg',
-    plataforma: 'GovIA', img: 's3-accordion-govia', tag: 'GovIA · Administração Pública', selo: 'Piloto MG · 2026', tipo: 'Caso de uso',
+    plataforma: 'GovIA', img: 's3-accordion-govia', tag: 'GOVIA', selo: 'Piloto MG · 2026', tipo: 'Caso de uso',
     titulo: 'Prefeitura de município mineiro adota IA para comunicação e atendimento ao cidadão',
     desc: 'Município com 45.000 habitantes no interior de Minas Gerais assinou o plano Municipal do GovIA e capacitou 18 servidores em 6 semanas. Resultado: redução de 40% no tempo de produção de comunicados oficiais e implementação de chatbot de atendimento para dúvidas sobre IPTU.',
     stats: [{ v: '18', l: 'Servidores capacitados' }, { v: '40%', l: 'Redução de tempo' }, { v: '6 sem', l: 'Para implementar' }],
@@ -37,7 +37,7 @@ const CASOS = [
   },
   {
     id: 'startup-onu',
-    plataforma: 'Fórum Pan-Americano', img: 'inst-nyc-onu', tag: 'Fórum Pan-Americano · ONU', selo: 'Expo NY 2025', tipo: 'Caso de uso',
+    plataforma: 'Fórum Pan-Americano', img: 'inst-nyc-onu', tag: 'ONU', selo: 'Expo NY 2025', tipo: 'Caso de uso',
     titulo: 'Startup de separação de resíduos apresenta projeto na ONU e firma parceiro nos EUA',
     desc: 'Empresa participante da Expo New York 2025 apresentou projeto de inovação de impacto em gestão de resíduos na sede das Nações Unidas. Resultado: contato com investidor americano, início de negociação de partnership e reconhecimento do projeto como boas práticas em ODS 11 (cidades sustentáveis).',
     stats: [{ v: 'ONU', l: 'Palco do pitch' }, { v: '1', l: 'Investidor contatado' }, { v: 'ODS 11', l: 'Alinhamento' }],
@@ -45,7 +45,7 @@ const CASOS = [
   },
   {
     id: 'afroempreendedor-mipad',
-    plataforma: 'PROINTER', img: 'inst-cambridge-harvard', tag: 'PROINTER · Afroempreendedorismo', selo: 'Missão 2027', tipo: 'História de impacto',
+    plataforma: 'PROINTER', img: 'inst-cambridge-harvard', tag: 'MIPAD', selo: 'Missão 2027', tipo: 'História de impacto',
     titulo: 'Afroempreendedor acessa rede MIPAD em Cambridge e abre mercado internacional',
     desc: 'Empreendedor negro com negócio de tecnologia educacional participou do PROINTER e foi conectado à rede MIPAD ONU em Cambridge. Após a missão, iniciou conversas com parceiro africano e assinou primeiro contrato internacional de distribuição de sua plataforma educacional.',
     stats: [{ v: 'MIPAD', l: 'Rede acessada' }, { v: '1', l: 'Contrato fechado' }, { v: 'ODS 10', l: 'Alinhamento' }],

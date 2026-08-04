@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import {
-  Landmark, GraduationCap, Building2, Scale, BrainCircuit, Globe2, ShieldCheck, HeartHandshake, FileCheck2, MapPin, Rocket,
+  Landmark, GraduationCap, Building2, Scale, BrainCircuit, Globe2, ShieldCheck, HeartHandshake, FileCheck2, MapPin, Rocket, ArrowUpRight,
 } from 'lucide-react';
 import FAQAccordion from '../../components/FAQAccordion';
 import CTABanner from '../../components/CTABanner';
@@ -17,13 +17,13 @@ gsap.registerPlugin(ScrollTrigger);
 
 /* ═══════════ Dados ═══════════ */
 
-const STATS: { id: string; value: number | string; prefix?: string; label: string; lime?: boolean }[] = [
-  { id: 'edicoes-realizadas', value: 15, label: 'Edições realizadas' },
-  { id: 'anos-trajetoria', value: 10, label: 'Anos de trajetória' },
-  { id: 'edicoes-ny', value: 4, label: 'Edições em Nova York' },
-  { id: 'territorios-estrategicos', value: 6, label: 'Territórios estratégicos' },
-  { id: 'projetos-abrigados', value: 100, prefix: '+', label: 'Projetos abrigados' },
-  { id: 'presenca-institucional', value: 'ONU', label: 'Presença institucional', lime: true },
+const STATS: { id: string; value: number | string; prefix?: string; label: string; labelColor: string; lime?: boolean }[] = [
+  { id: 'edicoes-realizadas', value: 15, label: 'Edições realizadas', labelColor: '#ebebeb' },
+  { id: 'anos-trajetoria', value: 10, label: 'Anos de trajetória', labelColor: '#ebebeb' },
+  { id: 'edicoes-ny', value: 4, label: 'Edições em Nova York', labelColor: '#f5f5f5' },
+  { id: 'territorios-estrategicos', value: 6, label: 'Territórios estratégicos', labelColor: '#f5f5f5' },
+  { id: 'projetos-abrigados', value: 100, prefix: '+', label: 'Projetos abrigados', labelColor: '#f5f5f5' },
+  { id: 'presenca-institucional', value: 'ONU', label: 'Presença institucional', labelColor: '#f5f5f5', lime: true },
 ];
 
 const FUNDADORAS = [
@@ -37,7 +37,7 @@ const FUNDADORAS = [
   {
     id: 'premier-niveau',
     Icon: GraduationCap, tag: 'EDUCAÇÃO · EXCELÊNCIA', nome: 'Premier Niveau®',
-    bg: '#fff', text: '#152852', sub: '#797979', iconBg: '#f5f5f5', iconColor: '#2d4ebf', tagColor: '#a7a4a4',
+    bg: '#ebebeb', text: '#152852', sub: '#797979', iconBg: '#f5f5f5', iconColor: '#2d4ebf', tagColor: '#a7a4a4',
     desc: 'A frente educacional de alto padrão do ecossistema. Extensão universitária, pós-graduação lato sensu, educação executiva e formação com diferenciais acadêmicos reais.',
     bullets: ['Marca registrada no INPI', 'Programas de extensão e pós-graduação', 'Rede de formadores e especialistas', 'Base que originou o HUB PAN Academy'],
   },
@@ -151,7 +151,7 @@ function HeroInst() {
     'inst.hero.bg', '/images/inst-hero-onu.webp', 'Hero institucional — imagem de fundo',
     { w: 2400, h: 1600, shape: 'paisagem', note: 'Fica atrás de um degradê escuro com texto branco por cima — prefira fotos com boa área escura à esquerda.' }
   );
-  const [stripBg, stripBgProps] = useEditColor('inst.stats.bg', '#060919', 'Faixa de números — fundo');
+  const [stripBg, stripBgProps] = useEditColor('inst.stats.bg', '#2d4ebf', 'Faixa de números — fundo');
   return (
     <section ref={ref} id="inst-hero" className="relative w-full">
       <div className="relative w-full h-[80vh] min-h-[560px] flex items-center overflow-hidden">
@@ -171,14 +171,14 @@ function HeroInst() {
           </p>
           {/* Quebras manuais de melhor encaixe — padrão para os H1 das páginas internas */}
           <h1 ref={titleRef} className="mb-7 text-white" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 3vw + 18px, 62px)', lineHeight: 1, letterSpacing: '-1.2px' }} data-split-reveal>
-            <ERich k="inst.hero.titulo" l="Hero institucional — título">
+            <ERich k="inst.hero.titulo" l="Hero institucional — título" baseW={729}>
               Uma narrativa global<br />
               construída sobre uma<br />
               <span style={{ color: '#d2e718' }}>década de entregas reais.</span>
             </ERich>
           </h1>
           <p className="mb-9" style={{ fontFamily: 'Inter', fontSize: 17, lineHeight: '29px', color: '#d6d6d6', maxWidth: 660 }} data-animate>
-            <ERich k="inst.hero.desc" l="Hero institucional — texto de apoio" baseW={660}>
+            <ERich k="inst.hero.desc" l="Hero institucional — texto de apoio" baseW={559}>
               O HUB PAN não nasce do zero. Nasce da convergência de tudo que o ecossistema Brasil Master, Premier Niveau e eGov Tecnologia construiu e validou em quase dez anos de trabalho real.
             </ERich>
           </p>
@@ -201,7 +201,7 @@ function HeroInst() {
                     {typeof s.value === 'number' ? <Counter value={s.value} prefix={s.prefix} /> : s.value}
                   </ERich>
                 </p>
-                <p className="mt-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10.5, letterSpacing: '1.6px', textTransform: 'uppercase', color: '#a7a4a4' }}>
+                <p className="mt-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10.5, letterSpacing: '1.6px', textTransform: 'uppercase', color: s.labelColor }}>
                   <ET k={`inst.stats.${s.id}.label`} v={s.label} l={`Faixa de números — rótulo "${s.label}"`} />
                 </p>
               </div>
@@ -276,7 +276,7 @@ function SecManifesto() {
               </p>
             </div>
             <div data-animate>
-              <HubButton size="lg" variant="navy" iconKey="inst.manifesto.btn.icone" iconLabel="Manifesto — botão, ícone" to="/contato" styleKey="inst.manifesto.btn" styleLabel="Manifesto — botão"><ET k="inst.manifesto.btn" v="Fale com nossa equipe" l="Manifesto — botão" /></HubButton>
+              <HubButton size="lg" variant="navy" icon={<EIcon k="inst.manifesto.btn.icone" l="Manifesto — botão, ícone" defaultSize={26}><ArrowUpRight size={26} strokeWidth={2} /></EIcon>} to="/contato" styleKey="inst.manifesto.btn" styleLabel="Manifesto — botão"><ET k="inst.manifesto.btn" v="Fale com nossa equipe" l="Manifesto — botão" /></HubButton>
             </div>
           </div>
         </div>
@@ -385,7 +385,7 @@ const TILE_COLORS = {
   navy: { bg: '#152852', text: '#fff', sub: 'rgba(255,255,255,0.78)', tagBorder: 'rgba(255,255,255,0.3)', tagText: '#fff', iconBg: 'rgba(255,255,255,0.1)', iconColor: '#d2e718' },
   blue: { bg: '#2d4ebf', text: '#fff', sub: 'rgba(255,255,255,0.82)', tagBorder: 'rgba(255,255,255,0.35)', tagText: '#fff', iconBg: 'rgba(255,255,255,0.12)', iconColor: '#d2e718' },
   lime: { bg: '#d2e718', text: '#152852', sub: 'rgba(21,40,82,0.85)', tagBorder: 'rgba(21,40,82,0.35)', tagText: '#152852', iconBg: 'rgba(21,40,82,0.08)', iconColor: '#152852' },
-  white: { bg: '#fff', text: '#152852', sub: '#797979', tagBorder: 'rgba(21,40,82,0.2)', tagText: '#152852', iconBg: '#f5f5f5', iconColor: '#2d4ebf' },
+  white: { bg: '#ffffff', text: '#152852', sub: '#797979', tagBorder: 'rgba(21,40,82,0.2)', tagText: '#152852', iconBg: '#f5f5f5', iconColor: '#2d4ebf' },
 } as const;
 
 function TerritorioTile({ t, className = '' }: { t: Tile; className?: string }) {
@@ -515,7 +515,7 @@ function TerritorioTile({ t, className = '' }: { t: Tile; className?: string }) 
 function SecPresenca() {
   const ref = useReveal<HTMLElement>();
   const [cambridge, africa, bh, sp, boston, ny] = TERRITORIOS;
-  const [bg, bgProps] = useEditColor('inst.presenca.bg', '#f5f5f5', 'Fundo da seção Presença Global');
+  const [bg, bgProps] = useEditColor('inst.presenca.bg', '#ebebeb', 'Fundo da seção Presença Global');
   return (
     <section ref={ref} id="inst-presenca" className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
       <div className="mb-14 max-w-[700px]">

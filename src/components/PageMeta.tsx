@@ -52,7 +52,11 @@ export default function PageMeta({ slug, title, description, path, image }: Page
   useEffect(() => {
     document.title = effectiveTitle;
     const url = `${SITE_URL}${path}`;
-    const img = effectiveImage;
+    /* og:image precisa ser URL ABSOLUTA — redes sociais não resolvem caminho
+     * relativo. Aceita tanto uma URL completa (ex.: imagem enviada pelo painel,
+     * que já vem absoluta do Storage) quanto um caminho local do projeto
+     * (`/images/...`), que é prefixado aqui com o domínio. */
+    const img = effectiveImage.startsWith('/') ? `${SITE_URL}${effectiveImage}` : effectiveImage;
 
     const meta = (attr: 'name' | 'property', key: string, content: string) => {
       const el = upsertTag(`meta[${attr}="${key}"]`, () => {

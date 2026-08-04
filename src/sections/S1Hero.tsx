@@ -1,6 +1,5 @@
 import { useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import HubButton from '../components/HubButton';
 import { useSplitTitle } from '../components/useSplitTitle';
 import { BgEditChip, EImg, ERich, ET, useEditImage } from '../editor/fields';
@@ -178,11 +177,11 @@ export default function S1Hero() {
           alcançarem o BG e os glass cards; os filhos reativam os próprios cliques */}
       <div className="absolute inset-0 z-10 flex flex-col justify-center gutter pt-[120px] pointer-events-none">
         <p data-hero-text className="text-[13px] font-medium uppercase mb-6 pointer-events-auto self-start" style={{ letterSpacing: '5.85px', color: 'rgba(255,255,255,0.5)' }}>
-          <ET k="s1.eyebrow" v="Plataforma Internacional" l="Hero — selo superior" />
+          <ET k="s1.eyebrow" v="PLATAFORMA INTERNACIONAL" l="Hero — selo superior" />
         </p>
         <h1 ref={titleRef} data-hero-text className="mb-8 pointer-events-auto self-start" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 4vw + 20px, 65px)', lineHeight: 1, letterSpacing: '-1.95px', color: '#f5f4f4' }}>
-          <ERich k="s1.titulo" l="Hero — título" baseW={720}>
-            Unimos as Américas e África ao <span style={{ color: '#fff' }}>ecossistema</span> <span style={{ color: '#d2e718' }}>global de inovação.</span>
+          <ERich k="s1.titulo" l="Hero — título" baseW={648}>
+            <span style={{ fontSize: 65 }}>Unimos as Américas e África ao <span style={{ color: 'rgb(255, 255, 255)' }}>ecossistema</span><br /><span style={{ color: 'rgb(210, 231, 24)' }}>global de inovação.</span></span>
           </ERich>
         </h1>
         <p data-hero-text className="mb-12 pointer-events-auto self-start" style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: 18, lineHeight: '36px', letterSpacing: '-0.18px', color: '#d6d6d6' }}>
@@ -192,7 +191,7 @@ export default function S1Hero() {
         </p>
         <div data-hero-text className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start pointer-events-auto self-start">
           <HubButton size="lg" variant="blue" iconKey="s1.btn1.icone" iconLabel="Hero — botão azul, ícone" styleKey="s1.btn1" styleLabel="Hero — botão azul" to="/o-hub-pan"><ET k="s1.btn1" v="Conheça o Ecossistema" l="Hero — botão azul" /></HubButton>
-          <HubButton size="lg" variant="lime" iconKey="s1.btn2.icone" iconLabel="Hero — botão lima, ícone" styleKey="s1.btn2" styleLabel="Hero — botão lima" onClick={() => ScrollSmoother.get()?.scrollTo('#home-plataformas', true)}><ET k="s1.btn2" v="Explorar Plataformas" l="Hero — botão lima" /></HubButton>
+          <HubButton size="lg" variant="lime" iconKey="s1.btn2.icone" iconLabel="Hero — botão lima, ícone" styleKey="s1.btn2" styleLabel="Hero — botão lima" to="/#home-plataformas"><ET k="s1.btn2" v="Explorar Plataformas" l="Hero — botão lima" /></HubButton>
         </div>
       </div>
 

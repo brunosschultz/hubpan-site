@@ -2128,6 +2128,81 @@ valores publicados pro Mobile, não os do Desktop. Testado também que o
 Desktop (1440px, fresh load) mostra seus PRÓPRIOS valores (648px/36px),
 sem vazamento em nenhuma direção. `tsc -b`/`npm run build` limpos.
 
+### Consolidação: overrides do painel → valores padrão do código (baseline)
+
+**Por que existiu.** O cliente mandou uma revisão editorial grande (ver
+"Revisão editorial do cliente", abaixo) e o Bruno levantou a preocupação
+certa: "não quero perder o que já editei pelo painel". Investigando, o
+risco real era o INVERSO do que ele imaginava — o banco sempre vence o
+código, então nada que eu edite no código apaga o trabalho dele; o
+problema é que uma alteração de texto no código **simplesmente não
+aparece** quando aquela chave já tem override. Com 89 overrides
+publicados (75 de conteúdo), boa parte da revisão do cliente cairia
+nesse buraco silencioso.
+
+**Decisão.** Fazer um "baseline": trazer os overrides pro código como
+valor padrão, apagá-los do banco, e a partir daí ter **código = o que
+se vê**. Feito ANTES de qualquer mudança de conteúdo, justamente pra o
+site ficar visualmente idêntico e dar pra verificar. Momento escolhido
+de propósito: site publicado mas ainda não lançado — mais barato agora
+do que com o cliente editando ativamente.
+
+**O que foi migrado (68 chaves) e o que FICOU no banco (28).** A regra
+é ter ou não equivalente no código:
+- **Migrável**: texto base, cor (`useEditColor` fallback), imagem (`v`
+  do `EImg`/`useEditImage`), link (`to` do `HubButton`), largura de
+  caixa (`baseW` do `ERich`).
+- **NÃO migrável, fica no banco pra sempre**: tudo com sufixo de
+  dispositivo (`.mobile`/`.tablet`), entrelinhas (`.lh`) e os ajustes de
+  layout (`.dx`/`.dy`/`.scale`/`.order`) — **o código tem um único slot
+  por campo**; "diferente no mobile" só existe na camada de override, por
+  design (ver `get`/`readSuffix` em store.tsx). Criar um segundo conjunto
+  de props por dispositivo no código não reduziria risco nenhum (o
+  override continuaria vencendo), só duplicaria trabalho. Também ficam as
+  `seo.*.keyword`, que não têm equivalente no código porque não são
+  renderizadas — servem só pro painel pontuar SEO.
+
+⚠️ **Consequência que importa pra rodada de conteúdo**: 5 das 28 chaves
+preservadas guardam TEXTO com dimensionamento embutido
+(`s1.titulo.mobile`, `s1.titulo.tablet`, `s1.eyebrow.mobile`,
+`s1.sub.mobile`, `s2.titulo.mobile`). Ao reescrever qualquer um desses
+textos no código, é **obrigatório** atualizar a variante de dispositivo
+junto — trocando a cópia e PRESERVANDO o `font-size` inline que o Bruno
+ajustou. Senão o desktop muda e o mobile continua com o texto velho.
+
+**Armadilha técnica encontrada no caminho**: o `v` de um `<ET>` NÃO
+aceita HTML — só vira `dangerouslySetInnerHTML` quando existe override;
+o fallback entra como texto puro, então HTML no `v` apareceria escapado
+na tela. Por isso os 6 rótulos coloridos da faixa de números
+(`inst.stats.*.label`, que no banco eram `<span style="color:...">`)
+viraram um campo `labelColor` no array `STATS`, com a cor aplicada no
+`<p>` — resultado renderizado idêntico.
+
+**Backup**: `supabase/backups/content_overrides-2026-08-03.json` (as 96
+linhas originais, commitado). Restaurar = reinserir de lá.
+
+**Imagens**: as 5 que o Bruno subiu pelo painel foram baixadas do Storage
+pro `public/images/` (servem local agora, uma requisição externa a menos
+por visita). `s2-manifesto-pessoa.webp` e `prointer-hero-cambridge.webp`
+foram SOBRESCRITAS pelas versões dele (originais recuperáveis no commit
+32c3d0e); as outras entraram como arquivos novos, pra não sobrescrever
+imagens compartilhadas com outras seções.
+
+**Correção de brinde**: `PageMeta` passou a transformar caminho relativo
+em URL absoluta pro `og:image` — redes sociais não resolvem caminho
+relativo, então a imagem social local só funciona por causa disso.
+
+**Verificação (o método vale pra repetir)**: como o override vence o
+código, o site COM overrides ainda no banco É o estado original. Capturei
+`getComputedStyle` de um conjunto de seletores em desktop (1440) e mobile
+(390), apaguei os overrides, recarreguei e comparei os mesmos seletores —
+todos idênticos: Home (título 648px/65px, ordem `[0,2,1]` e foto
+`matrix(1.3,0,0,1.3,3,32)` no mobile), eGovIA (5 FAQs + hero + demo),
+O HUB PAN (faixa `#2d4ebf`, rótulos `rgb(235,235,235)`/`rgb(245,245,245)`),
+PROINTER (citação 60px com 2 `<br>`), Contato e Casos de Uso. Build das
+10 rotas e console limpos. Sempre recarregar a página após redimensionar
+— `matchMedia` do `useDeviceBreakpoint` só reavalia direito num mount novo.
+
 ---
 
 ## Fluxo de trabalho esperado

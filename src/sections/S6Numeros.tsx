@@ -58,7 +58,7 @@ export default function S6Numeros() {
                   </span>
                   {c.edicoes && (
                     <span className="mb-4 ml-2 pointer-events-auto" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 20, letterSpacing: '3px', textTransform: 'uppercase', color: '#fff' }}>
-                      <ET k={`s6.card.${c.id}.sufixo`} v="Edições" l={`Números — sufixo do card "${c.desc}"`} />
+                      <ET k={`s6.card.${c.id}.sufixo`} v="." l={`Números — sufixo do card "${c.desc}"`} />
                     </span>
                   )}
                 </div>

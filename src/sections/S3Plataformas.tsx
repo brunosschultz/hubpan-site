@@ -30,7 +30,7 @@ const ACC: AccItem[] = [
   },
   {
     id: 'govia', icon: '/icons/s3-icon-gv.svg', iconSize: 68,
-    label: 'ASSINATURA · GOVERNOS', title: 'GovIA',
+    label: 'ASSINATURA · GOVERNOS', title: 'eGovIA',
     desc: 'Plataforma de assinatura de IA para municípios e consórcios públicos. Ferramentas, formação e Observatório de IA.',
     image: '/images/s3-accordion-govia.webp', buttonText: 'Conheça a GovIA',
   },

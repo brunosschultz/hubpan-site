@@ -200,8 +200,8 @@ export default function Contato() {
   const caminhosRef = useReveal<HTMLElement>();
   const [heroBg, heroBgProps] = useEditColor('contato.hero.bg', '#060919', 'Hero — fundo');
   const [heroBgImage] = useEditImage('contato.hero.bgImage', '', 'Hero — imagem de fundo (opcional)', HERO_BG_SPEC);
-  const [enderecosBg, enderecosBgProps] = useEditColor('contato.enderecos.bg', '#f5f5f5', 'Endereços — fundo da seção');
-  const [caminhosBg, caminhosBgProps] = useEditColor('contato.caminhos.bg', '#ffffff', 'Caminhos — fundo da seção');
+  const [enderecosBg, enderecosBgProps] = useEditColor('contato.enderecos.bg', '#ffffff','Endereços — fundo da seção');
+  const [caminhosBg, caminhosBgProps] = useEditColor('contato.caminhos.bg', '#f5f5f5','Caminhos — fundo da seção');
 
   return (
     <>
@@ -227,7 +227,7 @@ export default function Contato() {
             <ERich k="contato.hero.titulo" l="Contato — título do hero">Vamos conversar.</ERich>
           </h1>
           <p style={{ fontFamily: 'Inter', fontSize: 17, lineHeight: '29px', color: '#d6d6d6', maxWidth: 560 }} data-animate>
-            <ERich k="contato.hero.sub" l="Contato — descrição do hero" baseW={560}>Seja qual for seu perfil — há um caminho específico para você entrar no ecossistema.</ERich>
+            <ERich k="contato.hero.sub" l="Contato — descrição do hero" baseW={443}>Seja qual for seu perfil — há um caminho específico para você entrar no ecossistema.</ERich>
           </p>
         </div>
       </section>

@@ -1,0 +1,674 @@
+[
+  {
+    "draft_value": "MIPAD",
+    "key": "casos.caso.afroempreendedor-mipad.tag",
+    "published_value": "MIPAD",
+    "updated_at": "2026-07-20 11:37:53.752137+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "GOVIA",
+    "key": "casos.caso.prefeitura-mg.tag",
+    "published_value": "GOVIA",
+    "updated_at": "2026-07-20 11:37:53.752137+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "2027",
+    "key": "casos.caso.professora-mg.selo",
+    "published_value": "2027",
+    "updated_at": "2026-07-20 11:37:53.752137+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "ONU",
+    "key": "casos.caso.startup-onu.tag",
+    "published_value": "ONU",
+    "updated_at": "2026-07-20 11:37:53.752137+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "#f5f5f5",
+    "key": "contato.caminhos.bg",
+    "published_value": "#f5f5f5",
+    "updated_at": "2026-07-20 11:37:53.752137+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": null,
+    "key": "contato.endereco.paulista.bg",
+    "published_value": null,
+    "updated_at": "2026-07-20 11:42:16.339+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "#ffffff",
+    "key": "contato.enderecos.bg",
+    "published_value": "#ffffff",
+    "updated_at": "2026-07-20 11:37:53.752137+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "443",
+    "key": "contato.hero.sub.w",
+    "published_value": "443",
+    "updated_at": "2026-07-20 11:42:59.099083+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "Veja o eGovIA em ação no seu município.",
+    "key": "govia.demo.titulo",
+    "published_value": "Veja o eGovIA em ação no seu município.",
+    "updated_at": "2026-07-22 14:06:55.097005+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "Conteúdo<br>especializado",
+    "key": "govia.eixo.conteudo.titulo",
+    "published_value": "Conteúdo<br>especializado",
+    "updated_at": "2026-07-20 04:16:00.04835+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "321",
+    "key": "govia.eixo.formacao.titulo.w",
+    "published_value": "321",
+    "updated_at": "2026-07-21 20:12:47.002199+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "Observatório<br>de IA",
+    "key": "govia.eixo.observatorio.titulo",
+    "published_value": "Observatório<br>de IA",
+    "updated_at": "2026-07-20 04:16:00.04835+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "O eGovIA aceita contratação via nota de empenho, dispensa de licitação e outros mecanismos compatíveis com a gestão pública municipal e estadual. O processo é feito com suporte da equipe HUB PAN, sem necessidade de cartão de crédito corporativo ou infraestrutura de pagamento digital que a maioria das prefeituras não possui.",
+    "key": "govia.faq.contratacao-sem-cartao.a",
+    "published_value": "O eGovIA aceita contratação via nota de empenho, dispensa de licitação e outros mecanismos compatíveis com a gestão pública municipal e estadual. O processo é feito com suporte da equipe HUB PAN, sem necessidade de cartão de crédito corporativo ou infraestrutura de pagamento digital que a maioria das prefeituras não possui.",
+    "updated_at": "2026-07-22 14:06:55.097005+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "Como um município contrata o eGovIA sem cartão de crédito?",
+    "key": "govia.faq.contratacao-sem-cartao.q",
+    "published_value": "Como um município contrata o eGovIA sem cartão de crédito?",
+    "updated_at": "2026-07-22 14:06:55.097005+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "O eGovIA se diferencia de outras plataformas de IA para governos?",
+    "key": "govia.faq.diferenciais.q",
+    "published_value": "O eGovIA se diferencia de outras plataformas de IA para governos?",
+    "updated_at": "2026-07-22 14:06:55.097005+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "O eGovIA é uma plataforma de assinatura institucional de inteligência artificial desenvolvida especificamente para municípios, estados e consórcios públicos brasileiros. Ele resolve duas barreiras simultâneas: o acesso a ferramentas de IA (que normalmente exigem cartão de crédito, inexistente na maioria dos governos municipais) e a formação dos servidores para usar essas ferramentas de forma eficiente e responsável.",
+    "key": "govia.faq.o-que-e.a",
+    "published_value": "O eGovIA é uma plataforma de assinatura institucional de inteligência artificial desenvolvida especificamente para municípios, estados e consórcios públicos brasileiros. Ele resolve duas barreiras simultâneas: o acesso a ferramentas de IA (que normalmente exigem cartão de crédito, inexistente na maioria dos governos municipais) e a formação dos servidores para usar essas ferramentas de forma eficiente e responsável.",
+    "updated_at": "2026-07-22 14:06:55.097005+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "O que é o eGovIA?",
+    "key": "govia.faq.o-que-e.q",
+    "published_value": "O que é o eGovIA?",
+    "updated_at": "2026-07-22 14:06:55.097005+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "O Observatório de IA é uma pesquisa sistemática e contínua sobre o uso de inteligência artificial na administração pública brasileira. Iniciando por Minas Gerais, com comparativo previsto com a região metropolitana de Boston em 2027, o Observatório gera dados inéditos sobre quais ferramentas os governos estão usando, quais barreiras enfrentam e qual o nível de letramento digital dos servidores — dados exclusivos para assinantes do eGovIA.",
+    "key": "govia.faq.observatorio.a",
+    "published_value": "O Observatório de IA é uma pesquisa sistemática e contínua sobre o uso de inteligência artificial na administração pública brasileira. Iniciando por Minas Gerais, com comparativo previsto com a região metropolitana de Boston em 2027, o Observatório gera dados inéditos sobre quais ferramentas os governos estão usando, quais barreiras enfrentam e qual o nível de letramento digital dos servidores — dados exclusivos para assinantes do eGovIA.",
+    "updated_at": "2026-07-22 14:06:55.097005+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "O que é o Observatório de IA do eGovIA?",
+    "key": "govia.faq.observatorio.q",
+    "published_value": "O que é o Observatório de IA do eGovIA?",
+    "updated_at": "2026-07-22 14:06:55.097005+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "O eGovIA atende prefeituras e secretarias municipais, governos estaduais, consórcios públicos, autarquias e fundações públicas. O plano Municipal é indicado para prefeituras com até 100.000 habitantes; o plano Estadual ou Consórcio atende estruturas maiores; e o plano Enterprise é customizado para grandes estados, ministérios e estruturas especiais.",
+    "key": "govia.faq.quais-governos.a",
+    "published_value": "O eGovIA atende prefeituras e secretarias municipais, governos estaduais, consórcios públicos, autarquias e fundações públicas. O plano Municipal é indicado para prefeituras com até 100.000 habitantes; o plano Estadual ou Consórcio atende estruturas maiores; e o plano Enterprise é customizado para grandes estados, ministérios e estruturas especiais.",
+    "updated_at": "2026-07-22 14:06:55.097005+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "Quais governos podem assinar o eGovIA?",
+    "key": "govia.faq.quais-governos.q",
+    "published_value": "Quais governos podem assinar o eGovIA?",
+    "updated_at": "2026-07-22 14:06:55.097005+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "O que gestores públicos mais perguntam sobre o eGovIA.",
+    "key": "govia.faq.titulo",
+    "published_value": "O que gestores públicos mais perguntam sobre o eGovIA.",
+    "updated_at": "2026-07-22 14:06:55.097005+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "PLATAFORMA DE IA PARA O SETOR PÚBLICo",
+    "key": "govia.hero.eyebrow",
+    "published_value": "PLATAFORMA DE IA PARA O SETOR PÚBLICo",
+    "updated_at": "2026-07-20 04:16:00.04835+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "eGovIA",
+    "key": "govia.hero.titulo",
+    "published_value": "eGovIA",
+    "updated_at": "2026-07-22 14:06:55.097005+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "O eGovIA resolve as duas dores — acesso e formação — em um único contrato institucional, sem complexidade técnica e com suporte especializado no setor público.",
+    "key": "govia.problema.texto2",
+    "published_value": "O eGovIA resolve as duas dores — acesso e formação — em um único contrato institucional, sem complexidade técnica e com suporte especializado no setor público.",
+    "updated_at": "2026-07-22 14:06:55.097005+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": null,
+    "key": "imprensa.bg",
+    "published_value": null,
+    "updated_at": "2026-07-20 04:21:56.617+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": null,
+    "key": "imprensa.sidebar.contato.bg",
+    "published_value": null,
+    "updated_at": "2026-07-20 04:21:48.063+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "https://mankfcffiymqddeqftfq.supabase.co/storage/v1/object/public/editor-images/insights.card.educacao_inclusiva.img-1784547606186.webp",
+    "key": "insights.card.educacao-inclusiva.img",
+    "published_value": "https://mankfcffiymqddeqftfq.supabase.co/storage/v1/object/public/editor-images/insights.card.educacao_inclusiva.img-1784547606186.webp",
+    "updated_at": "2026-07-20 11:40:19.113883+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "#ebebeb",
+    "key": "inst.fundador.premier-niveau.bg",
+    "published_value": "#ebebeb",
+    "updated_at": "2026-07-22 14:00:06.258499+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "559",
+    "key": "inst.hero.desc.w",
+    "published_value": "559",
+    "updated_at": "2026-07-20 04:14:16.651003+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "729",
+    "key": "inst.hero.titulo.w",
+    "published_value": "729",
+    "updated_at": "2026-07-20 04:14:16.651003+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "lucide:arrow-up-right:26:2:",
+    "key": "inst.manifesto.btn.icone",
+    "published_value": "lucide:arrow-up-right:26:2:",
+    "updated_at": "2026-07-21 15:04:59.481074+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "#ebebeb",
+    "key": "inst.presenca.bg",
+    "published_value": "#ebebeb",
+    "updated_at": "2026-07-20 22:48:41.929+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "<span style=\"color:rgb(235, 235, 235)\">Anos de trajetória</span>",
+    "key": "inst.stats.anos-trajetoria.label",
+    "published_value": "<span style=\"color:rgb(235, 235, 235)\">Anos de trajetória</span>",
+    "updated_at": "2026-07-20 11:37:53.752137+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "#2d4ebf",
+    "key": "inst.stats.bg",
+    "published_value": "#2d4ebf",
+    "updated_at": "2026-07-20 11:37:53.752137+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "<span style=\"color:rgb(245, 245, 245)\">Edições em Nova York</span>",
+    "key": "inst.stats.edicoes-ny.label",
+    "published_value": "<span style=\"color:rgb(245, 245, 245)\">Edições em Nova York</span>",
+    "updated_at": "2026-07-20 11:37:53.752137+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "<span style=\"color:rgb(235, 235, 235)\">Edições realizadas</span>",
+    "key": "inst.stats.edicoes-realizadas.label",
+    "published_value": "<span style=\"color:rgb(235, 235, 235)\">Edições realizadas</span>",
+    "updated_at": "2026-07-20 11:37:53.752137+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "<span style=\"color:rgb(245, 245, 245)\">Presença institucional</span>",
+    "key": "inst.stats.presenca-institucional.label",
+    "published_value": "<span style=\"color:rgb(245, 245, 245)\">Presença institucional</span>",
+    "updated_at": "2026-07-20 11:37:53.752137+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "<span style=\"color:rgb(245, 245, 245)\">Projetos abrigados</span>",
+    "key": "inst.stats.projetos-abrigados.label",
+    "published_value": "<span style=\"color:rgb(245, 245, 245)\">Projetos abrigados</span>",
+    "updated_at": "2026-07-20 11:37:53.752137+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "<span style=\"color:rgb(245, 245, 245)\">Territórios estratégicos</span>",
+    "key": "inst.stats.territorios-estrategicos.label",
+    "published_value": "<span style=\"color:rgb(245, 245, 245)\">Territórios estratégicos</span>",
+    "updated_at": "2026-07-20 11:37:53.752137+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "#ffffff",
+    "key": "inst.territorio.boston.bg",
+    "published_value": "#ffffff",
+    "updated_at": "2026-07-21 15:04:59.481074+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "eGovIA",
+    "key": "nav.link.govia",
+    "published_value": "eGovIA",
+    "updated_at": "2026-07-21 21:41:50.850826+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "PROGRAMA DE INTERCÂMBIO E IMPACTO",
+    "key": "pro.hero.eyebrow",
+    "published_value": "PROGRAMA DE INTERCÂMBIO E IMPACTO",
+    "updated_at": "2026-07-20 04:14:16.651003+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "https://mankfcffiymqddeqftfq.supabase.co/storage/v1/object/public/editor-images/pro.hero.img-1784586550614.webp",
+    "key": "pro.hero.img",
+    "published_value": "https://mankfcffiymqddeqftfq.supabase.co/storage/v1/object/public/editor-images/pro.hero.img-1784586550614.webp",
+    "updated_at": "2026-07-20 22:29:32.239195+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": null,
+    "key": "pro.hero.strip.bg",
+    "published_value": null,
+    "updated_at": "2026-07-20 11:38:08.656+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "Mais do que intercâmbio.<br>Uma plataforma de impacto <span style=\"color:rgb(45, 78, 191)\">transgeracional.</span>",
+    "key": "pro.proposito.titulo",
+    "published_value": "Mais do que intercâmbio.<br>Uma plataforma de impacto <span style=\"color:rgb(45, 78, 191)\">transgeracional.</span>",
+    "updated_at": "2026-07-20 04:14:16.651003+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "<span style=\"font-size:60px\"><br>\"Mas a professora não vai para Nova York.\"<br></span>",
+    "key": "pro.publicos.citacao.quote",
+    "published_value": "<span style=\"font-size:60px\"><br>\"Mas a professora não vai para Nova York.\"<br></span>",
+    "updated_at": "2026-07-20 22:24:14.018937+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "60",
+    "key": "pro.publicos.citacao.quote.lh",
+    "published_value": "60",
+    "updated_at": "2026-07-20 22:24:14.018937+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "<span style=\"font-size:16px\">Essa frase, ouvida no interior de Minas Gerais, é a razão pela qual o PROINTER existe. O HUB PAN pega essa professora e coloca ela lá dentro.</span>",
+    "key": "pro.publicos.citacao.texto",
+    "published_value": "<span style=\"font-size:16px\">Essa frase, ouvida no interior de Minas Gerais, é a razão pela qual o PROINTER existe. O HUB PAN pega essa professora e coloca ela lá dentro.</span>",
+    "updated_at": "2026-07-20 22:14:22.747726+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "27",
+    "key": "pro.publicos.citacao.texto.lh",
+    "published_value": "27",
+    "updated_at": "2026-07-20 22:14:22.747726+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "https://mankfcffiymqddeqftfq.supabase.co/storage/v1/object/public/editor-images/s1.bg.mobile-1784856587606.webp",
+    "key": "s1.bg.mobile",
+    "published_value": "https://mankfcffiymqddeqftfq.supabase.co/storage/v1/object/public/editor-images/s1.bg.mobile-1784856587606.webp",
+    "updated_at": "2026-07-24 01:56:00.522428+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": null,
+    "key": "s1.btn1.bg",
+    "published_value": null,
+    "updated_at": "2026-07-21 15:05:28.14+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "/o-hub-pan",
+    "key": "s1.btn1.href",
+    "published_value": "/o-hub-pan",
+    "updated_at": "2026-07-21 21:24:58.758+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": null,
+    "key": "s1.btn1.target",
+    "published_value": null,
+    "updated_at": "2026-07-21 15:45:39.892+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "/#home-plataformas",
+    "key": "s1.btn2.href",
+    "published_value": "/#home-plataformas",
+    "updated_at": "2026-07-21 15:46:03.331+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": null,
+    "key": "s1.btn2.target",
+    "published_value": null,
+    "updated_at": "2026-07-21 15:46:06.241203+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "PLATAFORMA INTERNACIONAL",
+    "key": "s1.eyebrow",
+    "published_value": "PLATAFORMA INTERNACIONAL",
+    "updated_at": "2026-07-21 21:41:50.850826+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "<span style=\"font-size:12px\"><span style=\"letter-spacing:2.4px\">PLATAFORMA INTERNACIONAL</span><span style=\"letter-spacing:2.9px\"></span><span style=\"letter-spacing:3.4px\"></span><span style=\"letter-spacing:3.9px\"></span><span style=\"letter-spacing:4.4px\"></span><span style=\"letter-spacing:4.9px\"></span><span style=\"letter-spacing:5.4px\"></span></span>",
+    "key": "s1.eyebrow.mobile",
+    "published_value": "<span style=\"font-size:12px\"><span style=\"letter-spacing:2.4px\">PLATAFORMA INTERNACIONAL</span><span style=\"letter-spacing:2.9px\"></span><span style=\"letter-spacing:3.4px\"></span><span style=\"letter-spacing:3.9px\"></span><span style=\"letter-spacing:4.4px\"></span><span style=\"letter-spacing:4.9px\"></span><span style=\"letter-spacing:5.4px\"></span></span>",
+    "updated_at": "2026-07-24 15:17:02.69983+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "25",
+    "key": "s1.sub.lh.mobile",
+    "published_value": "25",
+    "updated_at": "2026-07-24 01:56:00.522428+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "<span style=\"font-size:14px\">Uma infraestrutura global que conecta talentos, governos, empresas, universidades e territórios a ecossistemas de inovação, educação, inteligência artificial, impacto e cooperação.</span>",
+    "key": "s1.sub.mobile",
+    "published_value": "<span style=\"font-size:14px\">Uma infraestrutura global que conecta talentos, governos, empresas, universidades e territórios a ecossistemas de inovação, educação, inteligência artificial, impacto e cooperação.</span>",
+    "updated_at": "2026-07-24 15:17:02.69983+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "<span style=\"font-size:65px\">Unimos as Américas e África ao <span style=\"color:rgb(255, 255, 255)\">ecossistema</span><br><span style=\"color:rgb(210, 231, 24)\">global de inovação.</span></span>",
+    "key": "s1.titulo",
+    "published_value": "<span style=\"font-size:65px\">Unimos as Américas e África ao <span style=\"color:rgb(255, 255, 255)\">ecossistema</span><br><span style=\"color:rgb(210, 231, 24)\">global de inovação.</span></span>",
+    "updated_at": "2026-07-24 01:56:00.522428+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "65",
+    "key": "s1.titulo.lh",
+    "published_value": "65",
+    "updated_at": "2026-07-23 22:36:18.038+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "40",
+    "key": "s1.titulo.lh.mobile",
+    "published_value": "40",
+    "updated_at": "2026-07-24 01:56:00.522428+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "50",
+    "key": "s1.titulo.lh.tablet",
+    "published_value": "50",
+    "updated_at": "2026-07-24 01:56:00.522428+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "<span style=\"font-size:46px\">Unimos as Américas e África ao <span style=\"color:rgb(255, 255, 255)\">ecossistema</span><br><span style=\"color:rgb(210, 231, 24)\">global de inovação.</span></span>",
+    "key": "s1.titulo.mobile",
+    "published_value": "<span style=\"font-size:46px\">Unimos as Américas e África ao <span style=\"color:rgb(255, 255, 255)\">ecossistema</span><br><span style=\"color:rgb(210, 231, 24)\">global de inovação.</span></span>",
+    "updated_at": "2026-07-24 15:17:02.69983+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "<span style=\"font-size:50px\">Unimos as Américas e África ao <span style=\"color:rgb(255, 255, 255)\">ecossistema</span><br><span style=\"color:rgb(210, 231, 24)\">global de inovação.</span></span>",
+    "key": "s1.titulo.tablet",
+    "published_value": "<span style=\"font-size:50px\">Unimos as Américas e África ao <span style=\"color:rgb(255, 255, 255)\">ecossistema</span><br><span style=\"color:rgb(210, 231, 24)\">global de inovação.</span></span>",
+    "updated_at": "2026-07-24 01:56:00.522428+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "648",
+    "key": "s1.titulo.w",
+    "published_value": "648",
+    "updated_at": "2026-07-24 01:56:00.522428+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "350",
+    "key": "s1.titulo.w.mobile",
+    "published_value": "350",
+    "updated_at": "2026-07-24 15:17:02.69983+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "373",
+    "key": "s1.titulo.w.tablet",
+    "published_value": "373",
+    "updated_at": "2026-07-24 01:56:00.522428+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "/",
+    "key": "s2.btn2.href",
+    "published_value": "/",
+    "updated_at": "2026-07-21 15:15:33.63457+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "https://mankfcffiymqddeqftfq.supabase.co/storage/v1/object/public/editor-images/s2.foto-1784671336355.webp",
+    "key": "s2.foto",
+    "published_value": "https://mankfcffiymqddeqftfq.supabase.co/storage/v1/object/public/editor-images/s2.foto-1784671336355.webp",
+    "updated_at": "2026-07-21 22:02:21.480422+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "3",
+    "key": "s2.foto.dx.mobile",
+    "published_value": "3",
+    "updated_at": "2026-07-24 01:56:00.522428+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "32",
+    "key": "s2.foto.dy.mobile",
+    "published_value": "32",
+    "updated_at": "2026-07-24 01:56:00.522428+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "130",
+    "key": "s2.foto.scale.mobile",
+    "published_value": "130",
+    "updated_at": "2026-07-24 15:17:02.69983+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "1",
+    "key": "s2.layout.order.mobile",
+    "published_value": "1",
+    "updated_at": "2026-07-24 01:56:00.522428+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "<span style=\"font-size:50px\">Manifesto<br>Fundacional</span>",
+    "key": "s2.titulo.mobile",
+    "published_value": "<span style=\"font-size:50px\">Manifesto<br>Fundacional</span>",
+    "updated_at": "2026-07-24 02:07:16.613827+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "rgba(210, 231, 24, 1)",
+    "key": "s3.acc.forum.btn.circleBg",
+    "published_value": "rgba(210, 231, 24, 1)",
+    "updated_at": "2026-07-21 20:12:47.002199+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "eGovIA",
+    "key": "s3.acc.govia.titulo",
+    "published_value": "eGovIA",
+    "updated_at": "2026-07-21 21:41:50.850826+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "/prointer",
+    "key": "s3.acc.prointer.btn.href",
+    "published_value": "/prointer",
+    "updated_at": "2026-07-21 15:51:53.028355+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "253",
+    "key": "s5.desc.w",
+    "published_value": "253",
+    "updated_at": "2026-07-21 20:51:22.050789+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": ".",
+    "key": "s6.card.forum.sufixo",
+    "published_value": ".",
+    "updated_at": "2026-07-21 21:41:50.850826+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": ".",
+    "key": "s6.card.ny.sufixo",
+    "published_value": ".",
+    "updated_at": "2026-07-21 21:41:50.850826+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "casos de uso do hub pan",
+    "key": "seo.casos-de-uso.keyword",
+    "published_value": "casos de uso do hub pan",
+    "updated_at": "2026-07-20 16:22:44.812921+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "fale com o hub pan",
+    "key": "seo.contato.keyword",
+    "published_value": "fale com o hub pan",
+    "updated_at": "2026-07-20 16:22:03.439052+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "fórum mundial de inteligência artificial",
+    "key": "seo.forum-mundial-ia.keyword",
+    "published_value": "fórum mundial de inteligência artificial",
+    "updated_at": "2026-07-20 16:21:31.548497+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "glossário hub pan",
+    "key": "seo.glossario.keyword",
+    "published_value": "glossário hub pan",
+    "updated_at": "2026-07-20 16:22:16.430037+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "Assinatura institucional de IA para municípios, estados e consórcios públicos — sem cartão de crédito. Ferramentas, formação e Observatório de IA.",
+    "key": "seo.govia.description",
+    "published_value": "Assinatura institucional de IA para municípios, estados e consórcios públicos — sem cartão de crédito. Ferramentas, formação e Observatório de IA.",
+    "updated_at": "2026-07-20 15:34:23.693078+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "assinatura institucional de ia para municípios",
+    "key": "seo.govia.keyword",
+    "published_value": "assinatura institucional de ia para municípios",
+    "updated_at": "2026-07-20 16:21:17.535926+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "https://mankfcffiymqddeqftfq.supabase.co/storage/v1/object/public/editor-images/seo.home.image-1784671417137.webp",
+    "key": "seo.home.image",
+    "published_value": "https://mankfcffiymqddeqftfq.supabase.co/storage/v1/object/public/editor-images/seo.home.image-1784671417137.webp",
+    "updated_at": "2026-07-21 22:03:40.672152+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "ecossistema global de inovação",
+    "key": "seo.home.keyword",
+    "published_value": "ecossistema global de inovação",
+    "updated_at": "2026-07-20 16:08:04.299555+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "press kit oficial do hub pan",
+    "key": "seo.imprensa.keyword",
+    "published_value": "press kit oficial do hub pan",
+    "updated_at": "2026-07-20 16:22:27.931272+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "observatório de ia",
+    "key": "seo.insights.keyword",
+    "published_value": "observatório de ia",
+    "updated_at": "2026-07-20 16:21:45.779788+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "o que é o hub pan",
+    "key": "seo.o-hub-pan.keyword",
+    "published_value": "o que é o hub pan",
+    "updated_at": "2026-07-20 16:23:07.415+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "Programa que leva professores da rede pública e afroempreendedores para Harvard Square, MIT e as Nações Unidas — passagem, hospedagem e curadoria completas.",
+    "key": "seo.prointer.description",
+    "published_value": "Programa que leva professores da rede pública e afroempreendedores para Harvard Square, MIT e as Nações Unidas — passagem, hospedagem e curadoria completas.",
+    "updated_at": "2026-07-20 15:33:07.419791+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "https://mankfcffiymqddeqftfq.supabase.co/storage/v1/object/public/editor-images/seo.prointer.image-1784561611582.webp",
+    "key": "seo.prointer.image",
+    "published_value": "https://mankfcffiymqddeqftfq.supabase.co/storage/v1/object/public/editor-images/seo.prointer.image-1784561611582.webp",
+    "updated_at": "2026-07-20 15:33:37.559007+00",
+    "updated_by": "bruno@bddb.com.br"
+  },
+  {
+    "draft_value": "Intercâmbio para professores da rede pública e afroempreendedores",
+    "key": "seo.prointer.keyword",
+    "published_value": "Intercâmbio para professores da rede pública e afroempreendedores",
+    "updated_at": "2026-07-20 16:20:57.230117+00",
+    "updated_by": "bruno@bddb.com.br"
+  }
+]
