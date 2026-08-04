@@ -24,7 +24,7 @@ export default function S10Parceiros() {
           </p>
           <h2 style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(30px,3.6vw,50px)', lineHeight: '60px', color: '#152852' }} data-animate>
             <ERich k="s10.titulo" l="Parceiros — título da seção" baseW={950}>
-              Organizações, movimentos e instituições que constroem o ecossistema HUB PAN.
+              Organizações, movimentos e instituições que constroem o HUB PAN.
             </ERich>
           </h2>
         </div>

@@ -175,33 +175,53 @@ export default function S1Hero() {
 
       {/* Conteúdo — pointer-events none no wrapper deixa cliques em áreas vazias
           alcançarem o BG e os glass cards; os filhos reativam os próprios cliques */}
-      <div className="absolute inset-0 z-10 flex flex-col justify-center gutter pt-[120px] pointer-events-none">
+      {/* O conteúdo é centralizado na vertical (justify-center), então o
+          `pt-[120px]` só reserva metade do que parece: numa tela baixa
+          (notebook 1024×768, tablet deitado) o rótulo subia até y≈180 e
+          passava por baixo do logo do menu, que termina em y=197 — a
+          sobreposição que o cliente viu. Aumentar o padding pra todo mundo
+          empurraria o hero pra baixo em monitor alto sem necessidade, então a
+          correção é escopada por ALTURA de tela: abaixo de 860px de altura o
+          conteúdo ancora no topo com folga fixa, acima disso nada muda. */}
+      <div className="absolute inset-0 z-10 flex flex-col justify-center gutter pt-[120px] [@media(min-width:1024px)_and_(max-height:860px)]:justify-start [@media(min-width:1024px)_and_(max-height:860px)]:pt-[210px] pointer-events-none">
         <p data-hero-text className="text-[13px] font-medium uppercase mb-6 pointer-events-auto self-start" style={{ letterSpacing: '5.85px', color: 'rgba(255,255,255,0.5)' }}>
           <ET k="s1.eyebrow" v="PLATAFORMA INTERNACIONAL" l="Hero — selo superior" />
         </p>
         <h1 ref={titleRef} data-hero-text className="mb-8 pointer-events-auto self-start" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 4vw + 20px, 65px)', lineHeight: 1, letterSpacing: '-1.95px', color: '#f5f4f4' }}>
-          <ERich k="s1.titulo" l="Hero — título" baseW={648}>
-            <span style={{ fontSize: 65 }}>Unimos as Américas e África ao <span style={{ color: 'rgb(255, 255, 255)' }}>ecossistema</span><br /><span style={{ color: 'rgb(210, 231, 24)' }}>global de inovação.</span></span>
+          <ERich k="s1.titulo" l="Hero — título" baseW={760}>
+            <span style={{ fontSize: 65 }}>Conectamos as Américas e África aos <span style={{ color: 'rgb(255, 255, 255)' }}>ecossistemas</span><br /><span style={{ color: 'rgb(210, 231, 24)' }}>globais de inovação.</span></span>
           </ERich>
         </h1>
         <p data-hero-text className="mb-12 pointer-events-auto self-start" style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: 18, lineHeight: '36px', letterSpacing: '-0.18px', color: '#d6d6d6' }}>
           <ERich k="s1.sub" l="Hero — parágrafo de apoio" baseW={593}>
-            Uma infraestrutura global que conecta talentos, governos, empresas, universidades e territórios a ecossistemas de inovação, educação, inteligência artificial, impacto e cooperação.
+            Infraestrutura global que conecta talentos, organizações, governos e territórios das Américas e da África aos principais ecossistemas globais de inovação, educação, inteligência artificial e cooperação internacional.
           </ERich>
         </p>
         <div data-hero-text className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start pointer-events-auto self-start">
-          <HubButton size="lg" variant="blue" iconKey="s1.btn1.icone" iconLabel="Hero — botão azul, ícone" styleKey="s1.btn1" styleLabel="Hero — botão azul" to="/o-hub-pan"><ET k="s1.btn1" v="Conheça o Ecossistema" l="Hero — botão azul" /></HubButton>
+          <HubButton size="lg" variant="blue" iconKey="s1.btn1.icone" iconLabel="Hero — botão azul, ícone" styleKey="s1.btn1" styleLabel="Hero — botão azul" to="/o-hub-pan"><ET k="s1.btn1" v="Conheça o HUB PAN" l="Hero — botão azul" /></HubButton>
           <HubButton size="lg" variant="lime" iconKey="s1.btn2.icone" iconLabel="Hero — botão lima, ícone" styleKey="s1.btn2" styleLabel="Hero — botão lima" to="/#home-plataformas"><ET k="s1.btn2" v="Explorar Plataformas" l="Hero — botão lima" /></HubButton>
         </div>
       </div>
 
-      {/* 4 Glass cards — posições % do Figma (só ≥lg) */}
-      <div className="hidden lg:block absolute inset-0 z-[6] pointer-events-none">
-        <GlassCard variant="accent" accent="#00e4ff" className="pointer-events-auto" style={{ right: '37.4%', top: '47.4%' }}>
+      {/* 4 Glass cards — posições em % do frame 1920 do Figma. Como a coluna
+          de texto tem largura FIXA (título 760px, parágrafo 593px) e os cards
+          são posicionados por PORCENTAGEM, quanto mais estreita a tela, mais
+          os cards andam pra dentro do texto: em 1440 os dois de dentro caíam
+          por cima do título, e em 1024/1280 os quatro caíam (sobreposição real
+          relatada pelo cliente). Cada card tem a largura de tela a partir da
+          qual ele passa a caber ao lado do texto — conta `(1 − r)·L − 233 ≥
+          L/12 + largura do texto + folga`, com `r` sendo o próprio percentual
+          de `right` de cada um, e confirmada medindo no navegador: 1440px pros
+          dois de fora (17% e 12,7%), 1700px pro de 31,9% e 1870px pro de
+          37,4%, que é o mais "pra dentro". Abaixo desses cortes o card some e
+          o hero fica só com o texto — limpo, nada por cima. Em 1920 (o frame
+          do Figma) os quatro aparecem, exatamente como desenhado. */}
+      <div className="absolute inset-0 z-[6] pointer-events-none">
+        <GlassCard variant="accent" accent="#00e4ff" className="pointer-events-auto hidden min-[1870px]:block" style={{ right: '37.4%', top: '47.4%' }}>
           <span style={num}><ET k="s1.g1.num" v="10" l="Hero — card flutuante 1, número" /></span>
           <ET k="s1.g1.lbl" v={'Anos de\ntrajetória'} l="Hero — card flutuante 1, rótulo" multiline style={lbl} />
         </GlassCard>
-        <GlassCard variant="pill" className="pointer-events-auto" style={{ right: '17%', top: '56%' }}>
+        <GlassCard variant="pill" className="pointer-events-auto hidden min-[1440px]:block" style={{ right: '17%', top: '56%' }}>
           <EImg
             k="s1.g2.logo" v="/images/s1-hero-logo-onu.png"
             l="Hero — card flutuante 2, logo"
@@ -211,11 +231,11 @@ export default function S1Hero() {
           />
           <ET k="s1.g2.lbl" v={'Presença\ninstitucional'} l="Hero — card flutuante 2, rótulo" multiline style={lbl} />
         </GlassCard>
-        <GlassCard variant="pill" className="pointer-events-auto" style={{ right: '31.9%', top: '73%' }}>
+        <GlassCard variant="pill" className="pointer-events-auto hidden min-[1700px]:block" style={{ right: '31.9%', top: '73%' }}>
           <span style={num}><ET k="s1.g3.num" v="4" l="Hero — card flutuante 3, número" /></span>
           <ET k="s1.g3.lbl" v={'Edições em\nNova York'} l="Hero — card flutuante 3, rótulo" multiline style={lbl} />
         </GlassCard>
-        <GlassCard variant="accent" accent="#d2e718" className="pointer-events-auto" style={{ right: '12.7%', top: '81%' }}>
+        <GlassCard variant="accent" accent="#d2e718" className="pointer-events-auto hidden min-[1440px]:block" style={{ right: '12.7%', top: '81%' }}>
           <span style={num}><ET k="s1.g4.num" v="15" l="Hero — card flutuante 4, número" /></span>
           <ET k="s1.g4.lbl" v={'Edições\nrealizadas'} l="Hero — card flutuante 4, rótulo" multiline style={lbl} />
         </GlassCard>

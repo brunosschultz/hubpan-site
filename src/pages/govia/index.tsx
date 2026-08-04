@@ -4,7 +4,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import {
-  BrainCircuit, GraduationCap, Newspaper, Telescope, Check, Clock, CreditCard, ShieldOff, Puzzle,
+  BrainCircuit, Scale, Bot, Library, Landmark, Telescope, Check, Clock, CreditCard, ShieldOff, Puzzle,
 } from 'lucide-react';
 import Hero80, { STRIP_THEMES } from '../../components/Hero80';
 import HubButton, { WHATSAPP_URL } from '../../components/HubButton';
@@ -20,41 +20,50 @@ gsap.registerPlugin(ScrollTrigger);
 /* Sem bloco de stats no wireframe original — números abaixo são fatos reais citados
    no próprio texto da página (planos, demo, observatório), não estimativas novas. */
 const STATS = [
-  { value: 0, editKey: 'govia.hero.stat1.valor', editLabel: 'Hero — stat 1 (valor)', label: <ET k="govia.hero.stat1.label" v="Cartão de crédito exigido" l="Hero — stat 1 (rótulo)" /> },
-  { value: 4, editKey: 'govia.hero.stat2.valor', editLabel: 'Hero — stat 2 (valor)', label: <ET k="govia.hero.stat2.label" v="Eixos em um único contrato" l="Hero — stat 2 (rótulo)" /> },
+  { value: 4, editKey: 'govia.hero.stat1.valor', editLabel: 'Hero — stat 1 (valor)', label: <ET k="govia.hero.stat1.label" v="Marcos legais aplicados" l="Hero — stat 1 (rótulo)" /> },
+  { value: 5, editKey: 'govia.hero.stat2.valor', editLabel: 'Hero — stat 2 (valor)', label: <ET k="govia.hero.stat2.label" v="Pilares de governança" l="Hero — stat 2 (rótulo)" /> },
   { value: 'MG', editKey: 'govia.hero.stat3.valor', editLabel: 'Hero — stat 3 (valor)', label: <ET k="govia.hero.stat3.label" v="Observatório em campo" l="Hero — stat 3 (rótulo)" />, accent: true },
   { value: 30, suffix: 'min', editKey: 'govia.hero.stat4.valor', editLabel: 'Hero — stat 4 (valor)', label: <ET k="govia.hero.stat4.label" v="Demonstração gratuita" l="Hero — stat 4 (rótulo)" /> },
   { value: 1, editKey: 'govia.hero.stat5.valor', editLabel: 'Hero — stat 5 (valor)', label: <ET k="govia.hero.stat5.label" v="Dia útil de resposta" l="Hero — stat 5 (rótulo)" /> },
+  { value: 0, editKey: 'govia.hero.stat6.valor', editLabel: 'Hero — stat 6 (valor)', label: <ET k="govia.hero.stat6.label" v="Cartão de crédito exigido" l="Hero — stat 6 (rótulo)" /> },
 ];
 
 const EIXOS: { slug: string; Icon: typeof BrainCircuit; titulo: string; desc: string; itens: string[] }[] = [
   {
-    slug: 'ferramentas', Icon: BrainCircuit, titulo: 'Ferramentas de IA curadas',
-    desc: 'Acesso curado a ferramentas de IA relevantes para o setor público — triadas quanto a segurança, utilidade e adequação governamental. Sem cartão de crédito, sem burocracia de contratação individual.',
-    itens: ['Ferramentas para comunicação pública', 'IA para análise de dados e relatórios', 'Assistentes para atendimento ao cidadão', 'Automação de processos administrativos'],
+    slug: 'governanca', Icon: Scale, titulo: 'Governança em Inteligência Artificial',
+    desc: 'O eGovIA apoia governos na implementação de IA em conformidade com a Lei nº 14.133/2021, a LGPD, a Lei de Acesso à Informação, o Marco Civil da Internet, normativas estaduais e municipais e boas práticas de governança.',
+    itens: ['Conformidade com a Lei nº 14.133/2021', 'Adequação à LGPD e à Lei de Acesso à Informação', 'Observância do Marco Civil da Internet', 'Normativas estaduais e municipais aplicadas'],
   },
   {
-    slug: 'formacao', Icon: GraduationCap, titulo: 'Formação e capacitação',
-    desc: 'Trilhas de aprendizagem desenhadas para servidores públicos — do básico ao avançado. Sem jargão técnico, com foco em aplicações reais no cotidiano da administração pública.',
-    itens: ['Trilhas por área de atuação (saúde, educação, fazenda)', 'Certificações pelo HUB PAN Academy', 'Formação de multiplicadores internos', 'Acesso ao AVA HUB PAN via subdomínio dedicado'],
+    slug: 'agentes', Icon: Bot, titulo: 'Agentes Inteligentes Personalizados',
+    desc: 'Cada governo tem necessidades específicas. Agentes especializados por secretaria, personalizados por área de atuação e adaptados à realidade institucional de cada ente público.',
+    itens: ['Agentes por secretaria (saúde, educação, fazenda)', 'Personalização por área de atuação', 'Adaptação à realidade de cada ente público', 'Ajuste contínuo conforme a demanda do governo'],
   },
   {
-    slug: 'conteudo', Icon: Newspaper, titulo: 'Conteúdo especializado',
-    desc: 'Produção contínua de conteúdo sobre IA no contexto da administração pública — artigos, alertas regulatórios, casos de uso e tendências internacionais. Conectado ao HUB PAN Insights.',
-    itens: ['Newsletter semanal de IA para gestores públicos', 'Análises de legislação e regulação de IA', 'Cases de uso de IA em outros municípios', 'Acesso ao Fórum Mundial de IA como membro'],
+    slug: 'biblioteca', Icon: Library, titulo: 'Biblioteca Inteligente',
+    desc: 'Biblioteca referenciada por Unidade da Federação. Cada estado conta com conteúdos próprios, reunindo o arcabouço normativo e técnico que orienta a administração pública local.',
+    itens: ['Legislação estadual e municipal de referência', 'Tribunais, órgãos de controle e jurisprudência', 'Orientações técnicas e documentos referenciais', 'Conteúdo organizado por Unidade da Federação'],
   },
   {
-    slug: 'observatorio', Icon: Telescope, titulo: 'Observatório de IA',
-    desc: 'Acesso exclusivo aos dados do Observatório HUB PAN — mapeamento do uso de IA na administração pública, benchmarks estaduais e nacionais e comparativos internacionais. Ativo único no mercado.',
-    itens: ['Dados de mapeamento em Minas Gerais (em andamento)', 'Comparativo com região de Boston (previsto 2027)', 'Relatórios trimestrais de tendências', 'Dados para políticas públicas de IA'],
+    slug: 'observatorio', Icon: Telescope, titulo: 'Observatório da Inteligência Artificial',
+    desc: 'Pesquisa permanente, curadoria de conteúdo, atualização normativa, monitoramento tecnológico e produção de inteligência aplicada. É o Observatório que mantém os agentes permanentemente atualizados.',
+    itens: ['Pesquisa permanente e curadoria de conteúdo', 'Atualização normativa contínua', 'Monitoramento tecnológico do setor', 'Produção de inteligência aplicada ao governo'],
+  },
+  {
+    slug: 'valor', Icon: Landmark, titulo: 'Valor para os governos',
+    desc: 'O município não contrata apenas IA. Passa a contar com governança, compliance, atualização contínua, curadoria especializada, pesquisa permanente e inteligência institucional.',
+    itens: ['Governança e compliance desde o início', 'Atualização contínua e curadoria especializada', 'Pesquisa permanente aplicada à gestão', 'Inteligência institucional para decidir melhor'],
   },
 ];
 
-/* Títulos de eixo que quebram em duas linhas no padrão — o texto plano continua
+/* Títulos de pilar que quebram em duas linhas no padrão — o texto plano continua
    em EIXOS (usado como chave/rótulo), só a renderização recebe o <br />. */
 const EIXO_TITULO_NODE: Record<string, React.ReactNode> = {
-  conteudo: <>Conteúdo<br />especializado</>,
-  observatorio: <>Observatório<br />de IA</>,
+  governanca: <>Governança em<br />Inteligência Artificial</>,
+  agentes: <>Agentes Inteligentes<br />Personalizados</>,
+  biblioteca: <>Biblioteca<br />Inteligente</>,
+  observatorio: <>Observatório da<br />Inteligência Artificial</>,
+  valor: <>Valor para<br />os governos</>,
 };
 
 const OBS_DADOS = [
@@ -67,7 +76,7 @@ const OBS_DADOS = [
 const PLANOS = [
   {
     id: 'basico', tag: undefined, nome: 'Básico', sub: 'Municipal', desc: 'Para prefeituras com até 100.000 habitantes',
-    inclui: ['Acesso a 5 ferramentas curadas', 'Trilha básica para até 20 servidores', 'Newsletter semanal GovIA', 'Relatório trimestral do Observatório'],
+    inclui: ['Acesso a 5 ferramentas curadas', 'Trilha básica para até 20 servidores', 'Newsletter semanal eGovIA', 'Relatório trimestral do Observatório'],
     incluiLabel: 'INCLUI',
     variant: 'outline-dark' as const, bg: '#fff', border: true,
   },
@@ -91,7 +100,7 @@ const DEMO_BENEFICIOS = [
   { slug: 'observatorio', tag: 'OB', Icon: Telescope, titulo: 'Acesso ao Observatório de IA incluído', desc: 'Dados inéditos sobre IA no setor público no Brasil' },
 ];
 
-const NECESSIDADES = ['Acesso a ferramentas de IA', 'Formação de servidores', 'Dados e benchmarks do Observatório', 'Diagnóstico do uso de IA na minha gestão', 'Quero entender tudo que o GovIA oferece'];
+const NECESSIDADES = ['Acesso a ferramentas de IA', 'Formação de servidores', 'Dados e benchmarks do Observatório', 'Diagnóstico do uso de IA na minha gestão', 'Quero entender tudo que o eGovIA oferece'];
 
 const ECOSSISTEMA = [
   { tag: '2027', t: 'Fórum Mundial de IA — Cambridge', to: '/forum-mundial-ia', color: 'lime' as const },
@@ -188,7 +197,7 @@ function SecProblema() {
       <div className="gutter grid lg:grid-cols-[1fr_1fr] gap-12 lg:gap-10 py-20 lg:py-0 lg:min-h-screen items-center">
         <div className="lg:py-24">
           <p className="eyebrow text-muted mb-8" data-animate>
-            <ET k="govia.problema.eyebrow" v="O PROBLEMA CENTRAL" l="Problema central — selo" />
+            <ET k="govia.problema.eyebrow" v="BARREIRA DE CONTRATAÇÃO" l="Problema central — selo" />
           </p>
           <h2 className="mb-9" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(38px,5.5vw,68px)', letterSpacing: '-1px', lineHeight: 1.02, color: '#152852' }} data-animate>
             <ERich k="govia.problema.titulo" l="Problema central — título">
@@ -229,14 +238,14 @@ const PANEL_THEME = {
   blue: { bg: '#2d4ebf', title: '#fff', desc: 'rgba(255,255,255,0.82)', iconBg: 'rgba(255,255,255,0.14)', iconColor: '#d2e718', bigNum: 'rgba(255,255,255,0.08)' },
   white: { bg: '#ffffff', title: '#152852', desc: '#797979', iconBg: '#f5f5f5', iconColor: '#2d4ebf', bigNum: 'rgba(21,40,82,0.045)' },
 } as const;
-/* 1º eixo usa a mesma cor de fundo do cabeçalho (navy900) pra não ter salto de cor na virada */
-const PANEL_ORDER: (keyof typeof PANEL_THEME)[] = ['navy900', 'blue', 'white', 'navy'];
+/* 1º pilar usa a mesma cor de fundo do cabeçalho (navy900) pra não ter salto de cor na virada */
+const PANEL_ORDER: (keyof typeof PANEL_THEME)[] = ['navy900', 'blue', 'white', 'navy', 'white'];
 
 /**
- * Seção "O que está incluso" inteira (título + 4 eixos) cabe em 100vh: a
+ * Seção "Os cinco pilares" inteira (título + 5 pilares) cabe em 100vh: a
  * seção fixa a tela (pin) enquanto o scroll vertical do usuário empurra o
- * trilho de eixos pro lado — mesmo mecanismo de trilho deslizante original.
- * Ao passar do último eixo, o pin libera e o scroll normal continua.
+ * trilho de pilares pro lado — mesmo mecanismo de trilho deslizante original.
+ * Ao passar do último pilar, o pin libera e o scroll normal continua.
  */
 function SecEixos() {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -284,16 +293,16 @@ function SecEixos() {
       <div className="relative gutter pt-16 lg:pt-20 pb-4 shrink-0">
         <div className="max-w-[680px]">
           <p className="eyebrow mb-4" style={{ color: 'rgba(255,255,255,0.69)' }}>
-            <ET k="govia.eixos.eyebrow" v="O QUE ESTÁ INCLUSO" l="Eixos — selo" />
+            <ET k="govia.eixos.eyebrow" v="OS CINCO PILARES" l="Pilares — selo" />
           </p>
           <h2 className="mb-3" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(26px,3vw,40px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#fff' }}>
-            <ERich k="govia.eixos.titulo" l="Eixos — título">
-              Quatro eixos. <span style={{ color: '#d2e718' }}>Um contrato.</span>
+            <ERich k="govia.eixos.titulo" l="Pilares — título">
+              Cinco pilares. <span style={{ color: '#d2e718' }}>Uma governança.</span>
             </ERich>
           </h2>
           <p style={{ fontFamily: 'Inter', fontSize: 14.5, lineHeight: '23px', color: '#d6d6d6', maxWidth: 560 }}>
-            <ERich k="govia.eixos.sub" l="Eixos — texto de apoio" baseW={560}>
-              Role pra conhecer cada frente — acesso, formação, conteúdo e dados em uma estrutura só.
+            <ERich k="govia.eixos.sub" l="Pilares — texto de apoio" baseW={560}>
+              Role pra conhecer cada pilar — governança, agentes, biblioteca, observatório e valor institucional para o governo.
             </ERich>
           </p>
         </div>
@@ -305,7 +314,7 @@ function SecEixos() {
             {EIXOS.map((e, i) => {
               const t = PANEL_THEME[PANEL_ORDER[i % PANEL_ORDER.length]];
               const { Icon, slug } = e;
-              const badgeTxt = `EIXO ${String(i + 1).padStart(2, '0')} DE ${EIXOS.length}`;
+              const badgeTxt = `PILAR ${String(i + 1).padStart(2, '0')} DE ${EIXOS.length}`;
               return (
                 <div key={e.titulo} className="relative h-full flex items-center shrink-0 overflow-hidden" style={{ width: '100vw', background: t.bg }}>
                 <span className="absolute select-none pointer-events-none" style={{ right: '3vw', top: '50%', transform: 'translateY(-50%)', fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'min(38vw, 380px)', lineHeight: 1, color: t.bigNum }}>
@@ -314,27 +323,27 @@ function SecEixos() {
                 <div className="relative gutter grid lg:grid-cols-[0.9fr_1.1fr] gap-8 items-center w-full">
                   <div>
                     <span className="flex items-center justify-center rounded-full mb-5" style={{ width: 60, height: 60, background: t.iconBg }}>
-                      <EIcon k={`govia.eixo.${slug}.icone`} l={`Eixo "${e.titulo}" — ícone`} defaultSize={27}>
+                      <EIcon k={`govia.eixo.${slug}.icone`} l={`Pilar "${e.titulo}" — ícone`} defaultSize={27}>
                         <Icon size={27} strokeWidth={2} color={t.iconColor} />
                       </EIcon>
                     </span>
                     <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 11.5, letterSpacing: '2px', textTransform: 'uppercase', color: t.iconColor }}>
-                      <ET k={`govia.eixo.${slug}.badge`} v={badgeTxt} l={`Eixo "${e.titulo}" — badge`} />
+                      <ET k={`govia.eixo.${slug}.badge`} v={badgeTxt} l={`Pilar "${e.titulo}" — badge`} />
                     </p>
                     <h3 style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4.2vw,58px)', lineHeight: 1.02, letterSpacing: '-0.8px', color: t.title }}>
-                      <ERich k={`govia.eixo.${slug}.titulo`} l={`Eixo "${e.titulo}" — título`} baseW={slug === 'formacao' ? 321 : undefined}>{EIXO_TITULO_NODE[slug] ?? e.titulo}</ERich>
+                      <ERich k={`govia.eixo.${slug}.titulo`} l={`Pilar "${e.titulo}" — título`}>{EIXO_TITULO_NODE[slug] ?? e.titulo}</ERich>
                     </h3>
                   </div>
                   <div>
                     <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 'clamp(14px,1.1vw,16px)', lineHeight: '25px', color: t.desc, maxWidth: 520 }}>
-                      <ERich k={`govia.eixo.${slug}.desc`} l={`Eixo "${e.titulo}" — descrição`} baseW={520}>{e.desc}</ERich>
+                      <ERich k={`govia.eixo.${slug}.desc`} l={`Pilar "${e.titulo}" — descrição`} baseW={520}>{e.desc}</ERich>
                     </p>
                     <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2.5">
                       {e.itens.map((it, ii) => (
                         <li key={it} className="flex items-start gap-3">
                           <span className="mt-[8px] w-[5px] h-[5px] rounded-full shrink-0" style={{ background: t.iconColor }} />
                           <span style={{ fontFamily: 'Inter', fontSize: 13, lineHeight: '20px', color: t.desc }}>
-                            <ET k={`govia.eixo.${slug}.item.${ii}`} v={it} l={`Eixo "${e.titulo}" — item ${ii + 1}`} />
+                            <ET k={`govia.eixo.${slug}.item.${ii}`} v={it} l={`Pilar "${e.titulo}" — item ${ii + 1}`} />
                           </span>
                         </li>
                       ))}
@@ -519,12 +528,12 @@ function SecDemo() {
           </h2>
           <p className="mb-4" style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: '#797979' }} data-animate>
             <ERich k="govia.demo.texto1" l="Demonstração — parágrafo 1">
-              Em 30 minutos, nossa equipe apresenta o GovIA com foco nas dores específicas da sua gestão — ferramentas, formação e dados do Observatório aplicados ao seu contexto.
+              Em 30 minutos, nossa equipe apresenta o eGovIA com foco nas dores específicas da sua gestão — ferramentas, formação e dados do Observatório aplicados ao seu contexto.
             </ERich>
           </p>
           <p className="mb-9" style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: '#797979' }} data-animate>
             <ERich k="govia.demo.texto2" l="Demonstração — parágrafo 2">
-              Sem compromisso de contratação. Sem cartão de crédito. Apenas uma conversa técnica para você entender o que o GovIA pode fazer pela sua gestão.
+              Sem compromisso de contratação. Sem cartão de crédito. Apenas uma conversa técnica para você entender o que o eGovIA pode fazer pela sua gestão.
             </ERich>
           </p>
           <div className="space-y-5">
@@ -606,7 +615,7 @@ function SecEcossistema() {
   return (
     <section id="govia-ecossistema" className="py-16 gutter" {...bgProps} style={{ background: bg }}>
       <p className="mb-6" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12, letterSpacing: '1.6px', textTransform: 'uppercase', color: '#a7a4a4' }}>
-        <ET k="govia.eco.eyebrow" v="TAMBÉM NO ECOSSISTEMA HUB PAN" l="Ecossistema — selo" />
+        <ET k="govia.eco.eyebrow" v="TAMBÉM NO HUB PAN" l="Ecossistema — selo" />
       </p>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {ECOSSISTEMA.map((e) => {
@@ -691,7 +700,7 @@ function SecFAQ() {
             <ERich k="govia.faq.titulo" l="FAQ — título">O que gestores públicos mais perguntam sobre o eGovIA.</ERich>
           </h2>
           <p style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: '#797979' }} data-animate>
-            <ERich k="govia.faq.sub" l="FAQ — texto de apoio">Respostas diretas para prefeituras, estados e consórcios que querem entender como o GovIA funciona na prática.</ERich>
+            <ERich k="govia.faq.sub" l="FAQ — texto de apoio">Respostas diretas para prefeituras, estados e consórcios que querem entender como o eGovIA funciona na prática.</ERich>
           </p>
         </div>
         <div data-animate>
@@ -715,8 +724,8 @@ function GovIAHero() {
         img={heroImg}
         imgAlt="Prédio institucional"
         eyebrow={<ET k="govia.hero.eyebrow" v="PLATAFORMA DE IA PARA O SETOR PÚBLICO" l="Hero — eyebrow" />}
-        title={<ERich k="govia.hero.titulo" l="Hero — título">eGovIA</ERich>}
-        sub={<ERich k="govia.hero.sub" l="Hero — subtítulo">A primeira plataforma de inteligência artificial desenvolvida especificamente para municípios, estados e consórcios públicos brasileiros. Acesso a ferramentas, formação de servidores, conteúdo especializado e o Observatório de IA — tudo em uma assinatura institucional sem cartão de crédito.</ERich>}
+        title={<ERich k="govia.hero.titulo" l="Hero — título">eGovIA®</ERich>}
+        sub={<ERich k="govia.hero.sub" l="Hero — subtítulo">Governança em inteligência artificial para a administração pública: implementação em conformidade com a Lei nº 14.133/2021, a LGPD, a Lei de Acesso à Informação e o Marco Civil da Internet, com agentes personalizados por secretaria, biblioteca referenciada por Unidade da Federação e o Observatório de IA — em uma assinatura institucional que dispensa cartão de crédito.</ERich>}
         actions={<>
           <HubButton size="lg" variant="lime" onClick={() => ScrollSmoother.get()?.scrollTo('#govia-form', true)} iconKey="govia.hero.cta.demo.icone" iconLabel="Hero — botão Solicitar demonstração, ícone" styleKey="govia.hero.cta.demo" styleLabel="Hero — botão Solicitar demonstração"><ET k="govia.hero.cta.demo" v="Solicitar demonstração" l="Hero — botão Solicitar demonstração" /></HubButton>
           <HubButton size="lg" variant="blue" onClick={() => ScrollSmoother.get()?.scrollTo('#govia-planos', true)} iconKey="govia.hero.cta.planos.icone" iconLabel="Hero — botão Ver planos, ícone" styleKey="govia.hero.cta.planos" styleLabel="Hero — botão Ver planos"><ET k="govia.hero.cta.planos" v="Ver planos" l="Hero — botão Ver planos" /></HubButton>
@@ -735,9 +744,9 @@ export default function GovIA() {
   return (
     <>
       <GovIAHero />
-      <SecProblema />
       <SecEixos />
       <SecObservatorio />
+      <SecProblema />
       <SecPlanos />
       <SecDemo />
       <SecEcossistema />

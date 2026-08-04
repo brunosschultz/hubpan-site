@@ -12,7 +12,7 @@ const RELEASES = [
     id: 'lancamento-portal',
     data: 'Jun 2026',
     titulo: 'HUB PAN lança portal global e firma parceria com MIPAD ONU',
-    desc: 'O ecossistema Brasil Master, Premier Niveau e eGov Tecnologia se unifica sob a marca HUB PAN com lançamento de portal em São Paulo e assinatura de parceria estratégica com o MIPAD — Most Influential People of African Descent, organismo vinculado às Nações Unidas.',
+    desc: 'As operações Brasil Master, Premier Niveau® e eGov Tecnologia se unificam sob a marca HUB PAN com lançamento de portal em São Paulo e assinatura de parceria estratégica com o MIPAD — Most Influential People of African Descent, organismo vinculado às Nações Unidas.',
     pdf: true,
   },
   {
@@ -25,14 +25,14 @@ const RELEASES = [
   {
     id: 'expo-boston',
     data: 'Mai 2026',
-    titulo: '1ª Expo Boston consolida presença do Fórum Pan-Americano da Inovação nos EUA',
-    desc: 'A primeira edição da Expo Boston foi realizada em maio de 2026, consolidando a presença do HUB PAN no ecossistema de inovação de Massachusetts e preparando o terreno para o Fórum Mundial de IA em 2027.',
+    titulo: '1ª Expo Boston® consolida presença do Fórum Pan-Americano da Inovação nos EUA',
+    desc: 'A primeira edição da Expo Boston® foi realizada em maio de 2026, consolidando a presença do HUB PAN no ecossistema de inovação de Massachusetts e preparando o terreno para o Fórum Mundial de IA em 2027.',
     pdf: false,
   },
   {
     id: 'govia-mg',
     data: 'Jun 2026',
-    titulo: 'HUB PAN lança GovIA e inicia mapeamento de uso de IA em municípios de Minas Gerais',
+    titulo: 'HUB PAN lança eGovIA e inicia mapeamento de uso de IA em municípios de Minas Gerais',
     desc: 'O Observatório de IA do HUB PAN inicia pesquisa inédita sobre o uso de inteligência artificial na administração pública em Minas Gerais — primeiro mapeamento sistemático do setor no Brasil, com metodologia própria e comparativo previsto com a região metropolitana de Boston.',
     pdf: false, preliminar: true,
   },
@@ -140,7 +140,7 @@ export default function Imprensa() {
             </div>
 
             {/* Números do ecossistema */}
-            <p className="eyebrow text-muted mb-6" data-animate><ET k="imprensa.numeros.eyebrow" v="NÚMEROS DO ECOSSISTEMA" l="Imprensa — selo da seção Números" /></p>
+            <p className="eyebrow text-muted mb-6" data-animate><ET k="imprensa.numeros.eyebrow" v="NÚMEROS DO HUB PAN" l="Imprensa — selo da seção Números" /></p>
             <h2 className="mb-8" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(28px,3vw,38px)', letterSpacing: '-0.5px', lineHeight: 1.1, color: '#152852' }} data-animate>
               <ERich k="imprensa.numeros.titulo" l="Imprensa — título da seção Números">Dados institucionais validados.</ERich>
             </h2>
@@ -181,7 +181,7 @@ export default function Imprensa() {
             <div className="rounded-[20px] p-7" {...cardBgProps} style={{ background: cardBg }} data-animate>
               <h3 className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 18, color: '#152852' }}><ET k="imprensa.sidebar.presskit.titulo" v="Press Kit" l="Imprensa — título do card Press Kit" /></h3>
               <p className="mb-5" style={{ fontFamily: 'Inter', fontSize: 13.5, lineHeight: '22px', color: '#797979' }}>
-                <ERich k="imprensa.sidebar.presskit.desc" l="Imprensa — descrição do card Press Kit">Logos, fotos institucionais, descrição da organização, biographies das lideranças e dados do ecossistema.</ERich>
+                <ERich k="imprensa.sidebar.presskit.desc" l="Imprensa — descrição do card Press Kit">Logos, fotos institucionais, descrição da organização, biographies das lideranças e dados do HUB PAN.</ERich>
               </p>
               <p className="mb-3" style={{ fontFamily: 'Inter', fontSize: 13, color: '#2d4ebf' }}><ET k="imprensa.sidebar.presskit.nota" v="Logos HUB PAN · vetor" l="Imprensa — nota do card Press Kit" /></p>
               <HubButton size="sm" variant="navy" iconKey="imprensa.sidebar.presskit.btn.icone" iconLabel="Imprensa — botão do card Press Kit, ícone" styleKey="imprensa.sidebar.presskit.btn" styleLabel="Imprensa — botão do card Press Kit" as="a" href={WHATSAPP_URL}><ET k="imprensa.sidebar.presskit.btn" v="Baixar press kit completo" l="Imprensa — botão do card Press Kit" /></HubButton>

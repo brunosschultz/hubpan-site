@@ -16,6 +16,7 @@ const LINKS: { label: string; to: string }[] = [
   { label: 'O HUB PAN', to: '/o-hub-pan' },
   { label: 'PROINTER', to: '/prointer' },
   { label: 'eGovIA', to: '/govia' },
+  { label: 'EXPOs', to: '/expos' },
   { label: 'Fórum Mundial IA', to: '/forum-mundial-ia' },
   { label: 'Insights', to: '/insights' },
 ];
@@ -96,7 +97,7 @@ export default function NavBar() {
 
       {/* Nav principal — top 83px */}
       <nav className="absolute top-[70px] lg:top-[83px] left-0 right-0 z-20 flex items-center gutter">
-        <Link to="/" className="flex-shrink-0 mr-8 xl:mr-[127px]">
+        <Link to="/" className="flex-shrink-0 mr-8 min-[1800px]:mr-[127px]">
           <EImg
             k="nav.logo" v="/images/logo-hubpan.png"
             l="Logo do site (menu)"
@@ -106,8 +107,17 @@ export default function NavBar() {
           />
         </Link>
 
-        {/* Links desktop */}
-        <div className="hidden lg:flex items-center gap-8 xl:gap-[73px]">
+        {/* Links desktop — o menu completo (logo + 7 links + 2 botões) precisa
+            de ~1425px de conteúdo com o espaçamento cheio do Figma, e a sanga
+            (.gutter) come 1/6 da largura da tela. Com isso ele só CABE de
+            verdade a partir de ~1750px: em 1024/1280/1440 estourava a tela
+            (bug real relatado pelo cliente — "ACESSAR PORTAL" cortado). Duas
+            correções juntas: o menu desktop só entra em xl (1280px, abaixo
+            disso é hambúrguer) e o espaçamento entre links vira fluido —
+            cresce com a tela até o valor original de 73px, nunca além do que
+            cabe. A conta do clamp: sobra pros gaps = (5/6 da tela − logo −
+            botões − texto dos links) ÷ 6 intervalos. */}
+        <div className="hidden xl:flex items-center gap-[clamp(18px,calc(13.8vw-156px),73px)]">
           {LINKS.map((l) => (
             <Link
               key={l.to}
@@ -122,13 +132,13 @@ export default function NavBar() {
         </div>
 
         {/* Botões desktop */}
-        <div className="hidden lg:flex gap-3 ml-auto items-center">
+        <div className="hidden xl:flex gap-3 ml-auto pl-10 items-center">
           <HubButton size="xs" variant="cyan" iconKey="nav.btn1.icone" iconLabel="Menu — botão Acessar Portal, ícone" styleKey="nav.btn1" styleLabel="Menu — botão Acessar Portal" as="a" href={WHATSAPP_URL}><ET k="nav.btn1" v="ACESSAR PORTAL" l="Menu — botão Acessar Portal" /></HubButton>
           <HubButton size="xs" variant="navy" withIcon={false} to="/contato" styleKey="nav.btn2" styleLabel="Menu — botão Conecte-se"><ET k="nav.btn2" v="CONECTE-SE" l="Menu — botão Conecte-se" /></HubButton>
         </div>
 
         {/* Hamburger mobile */}
-        <button className="lg:hidden ml-auto text-white p-2" onClick={() => setOpen(true)} aria-label="Abrir menu">
+        <button className="xl:hidden ml-auto text-white p-2" onClick={() => setOpen(true)} aria-label="Abrir menu">
           <Menu size={26} />
         </button>
       </nav>
@@ -154,7 +164,7 @@ export default function NavBar() {
             WebkitBackdropFilter: 'blur(20px)',
           }}
         >
-          <Link to="/" className="flex-shrink-0 mr-8 xl:mr-[127px]" style={{ pointerEvents: 'auto' }}>
+          <Link to="/" className="flex-shrink-0 mr-8 min-[1800px]:mr-[127px]" style={{ pointerEvents: 'auto' }}>
             <EImg
               k="nav.logo" v="/images/logo-hubpan.png"
               l="Logo do site (menu)"
@@ -164,7 +174,9 @@ export default function NavBar() {
             />
           </Link>
 
-          <div className="hidden lg:flex items-center gap-8 xl:gap-[73px]" style={{ pointerEvents: 'auto' }}>
+          {/* Mesmas regras da nav principal acima (xl + gap fluido) — a barra
+              compacta tem os mesmos itens, então estouraria igual. */}
+          <div className="hidden xl:flex items-center gap-[clamp(18px,calc(13.8vw-156px),73px)]" style={{ pointerEvents: 'auto' }}>
             {LINKS.map((l) => (
               <Link
                 key={l.to}
@@ -178,12 +190,12 @@ export default function NavBar() {
             ))}
           </div>
 
-          <div className="hidden lg:flex gap-3 ml-auto items-center" style={{ pointerEvents: 'auto' }}>
+          <div className="hidden xl:flex gap-3 ml-auto pl-10 items-center" style={{ pointerEvents: 'auto' }}>
             <HubButton size="xs" variant="cyan" iconKey="nav.btn1.icone" iconLabel="Menu — botão Acessar Portal, ícone" styleKey="nav.btn1" styleLabel="Menu — botão Acessar Portal" as="a" href={WHATSAPP_URL}><ET k="nav.btn1" v="ACESSAR PORTAL" l="Menu — botão Acessar Portal" /></HubButton>
             <HubButton size="xs" variant="navy" withIcon={false} to="/contato" styleKey="nav.btn2" styleLabel="Menu — botão Conecte-se"><ET k="nav.btn2" v="CONECTE-SE" l="Menu — botão Conecte-se" /></HubButton>
           </div>
 
-          <button className="lg:hidden ml-auto text-white p-2" onClick={() => setOpen(true)} aria-label="Abrir menu" style={{ pointerEvents: 'auto' }}>
+          <button className="xl:hidden ml-auto text-white p-2" onClick={() => setOpen(true)} aria-label="Abrir menu" style={{ pointerEvents: 'auto' }}>
             <Menu size={26} />
           </button>
         </div>,
@@ -193,8 +205,11 @@ export default function NavBar() {
       {/* Menu mobile (Sheet) — via portal: fica FORA do #smooth-content, senão o
           transform do ScrollSmoother quebra o position:fixed (vira relativo ao
           ancestral transformado em vez do viewport). */}
+      {/* xl:hidden (não lg) no painel abaixo — tem que casar com o breakpoint
+          do botão hambúrguer, senão entre 1024 e 1279 o botão aparece mas o
+          painel que ele abre fica escondido. */}
       {open && createPortal(
-        <div className="fixed inset-0 z-50 lg:hidden">
+        <div className="fixed inset-0 z-50 xl:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} />
           <div className="absolute top-0 right-0 bottom-0 w-[300px] max-w-[85vw] bg-navy flex flex-col p-8">
             <div className="flex items-center justify-between mb-10">

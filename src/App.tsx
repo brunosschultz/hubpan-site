@@ -27,6 +27,7 @@ const AdminApp = lazy(() => import('./admin/AdminApp'))
 const Institucional = lazy(() => import('./pages/institucional'))
 const Prointer = lazy(() => import('./pages/prointer'))
 const GovIA = lazy(() => import('./pages/govia'))
+const Expos = lazy(() => import('./pages/expos'))
 const ForumMundialIA = lazy(() => import('./pages/forum'))
 const Insights = lazy(() => import('./pages/insights'))
 const Contato = lazy(() => import('./pages/contato'))
@@ -65,8 +66,8 @@ function AppShell() {
         <PageMeta
           slug=""
           path="/"
-          title="HUB PAN — Ecossistema Global de Inovação nas Américas"
-          description="O HUB PAN é o ecossistema global de inovação que une governos, empresas e educadores das Américas e África em IA, impacto social e cooperação."
+          title="HUB PAN — Infraestrutura Global que Conecta Ecossistemas"
+          description="O HUB PAN é a infraestrutura global de convergência que conecta ecossistemas, governos, empresas e universidades das Américas e da África em inovação e IA."
           image="/images/og-home.webp"
         />
         <Home />
@@ -78,8 +79,8 @@ function AppShell() {
               <PageMeta
                 slug="o-hub-pan"
                 path="/o-hub-pan"
-                title="O Que É o HUB PAN? Ecossistema de Inovação"
-                description="O que é o HUB PAN? Conheça a história e as marcas fundadoras do ecossistema — de Belo Horizonte a Harvard Square, com mais de 100 projetos abrigados."
+                title="O Que É o HUB PAN? Infraestrutura de Convergência"
+                description="O que é o HUB PAN? Conheça a história e as marcas fundadoras — de Belo Horizonte a Harvard Square, com mais de 100 projetos abrigados desde 2017."
               />
               <Institucional />
             </>} />
@@ -97,10 +98,19 @@ function AppShell() {
               <PageMeta
                 slug="govia"
                 path="/govia"
-                title="GovIA — Assinatura Institucional de IA para Municípios"
-                description="Assinatura institucional de IA para municípios, estados e consórcios públicos — sem cartão de crédito. Ferramentas, formação e Observatório de IA."
+                title="eGovIA — Governança de IA para a Administração Pública"
+                description="Governança de inteligência artificial para municípios, estados e consórcios públicos: conformidade legal, agentes por secretaria e Observatório de IA."
               />
               <GovIA />
+            </>} />
+            <Route path="/expos" element={<>
+              <PageMeta
+                slug="expos"
+                path="/expos"
+                title="EXPOs — EXPO BH, EXPO NYC e EXPO BOSTON | HUB PAN"
+                description="A história das EXPOs do Fórum Pan-Americano da Inovação: da fundação em Belo Horizonte, em 2017, à sede da ONU em Nova York e a Boston, até o HUB PAN."
+              />
+              <Expos />
             </>} />
             <Route path="/forum-mundial-ia" element={<>
               <PageMeta
@@ -124,8 +134,8 @@ function AppShell() {
               <PageMeta
                 slug="contato"
                 path="/contato"
-                title="Contato — Fale com o HUB PAN e o Ecossistema"
-                description="Fale com o HUB PAN: seja qual for seu perfil — governo, empresa, educador ou parceiro — encontre o caminho certo pra entrar no ecossistema."
+                title="Contato — Fale com o HUB PAN e Conecte-se"
+                description="Fale com o HUB PAN: seja qual for seu perfil — governo, empresa, educador ou parceiro — encontre o caminho certo pra se conectar à infraestrutura."
               />
               <Contato />
             </>} />
@@ -134,7 +144,7 @@ function AppShell() {
                 slug="glossario"
                 path="/glossario"
                 title="Glossário HUB PAN — Conceitos de Inovação, IA e Impacto"
-                description="Glossário HUB PAN: definições claras dos conceitos centrais do ecossistema — pra qualquer pessoa entender o que fazemos e por quê."
+                description="Glossário HUB PAN: definições claras dos conceitos centrais de inovação, IA, governança e impacto — pra qualquer pessoa entender o que fazemos e por quê."
               />
               <Glossario />
             </>} />

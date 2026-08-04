@@ -4,7 +4,7 @@ import { EImg, ERich, ET, useEditColor } from '../editor/fields';
 
 const TAGS = [
   ['NAÇÕES UNIDAS - NY', 'HARVARD SQUARE - CAMBRIDGE', 'MIPAD ONU'],
-  ['EXPO BOSTON', 'EXPO NEW YORK', 'AV. PAULISTA - SP'],
+  ['EXPO BOSTON®', 'EXPO NEW YORK', 'AV. PAULISTA - SP'],
 ];
 
 /* Assets já vêm alinhados/dimensionados internamente (canvas uniforme 140×140,

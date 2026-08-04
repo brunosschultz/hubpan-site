@@ -10,7 +10,7 @@ interface Persona {
 // por padrão, foto sempre alinhada no mesmo lugar; no hover a caixa sobe, fica
 // lima, e o botão aparece embaixo, centrado na linha onde a foto termina.
 const PERSONAS: Persona[] = [
-  { id: 'governo', img: 's7-persona-1', label: 'Sou Governo', btn: 'Conhecer GovIA' },
+  { id: 'governo', img: 's7-persona-1', label: 'Sou Governo', btn: 'Conhecer eGovIA' },
   { id: 'empresa', img: 's7-persona-2', label: 'Sou Empresa', btn: 'Saiba mais' },
   { id: 'educador', img: 's7-persona-3', label: 'Sou Educador', btn: 'Saiba mais' },
   { id: 'investidor', img: 's7-persona-4', label: 'Sou Investidor', btn: 'Saiba mais' },
@@ -42,7 +42,7 @@ export default function S7ParaQuem() {
       </h2>
       <p className="mb-16" style={{ fontFamily: 'Inter', fontSize: 16, color: '#a7a4a4' }} data-animate>
         <ERich k="s7.desc" l="Para Quem — texto de apoio" baseW={875}>
-          O ecossistema conecta perfis diferentes ao que cada um precisa. Escolha o seu ponto de entrada.
+          O HUB PAN conecta perfis diferentes ao que cada um precisa. Escolha o seu ponto de entrada.
         </ERich>
       </p>
 

@@ -2231,3 +2231,71 @@ PROINTER (citação 60px com 2 `<br>`), Contato e Casos de Uso. Build das
    pelo próprio Bruno em 2026-07-21, pra poder testar mudanças com agilidade em
    localhost e pra nunca mandar nada de teste pro ar sem querer depois que o site
    estiver em produção de verdade.
+
+### Auditoria de responsividade — sobreposições reais em telas de 1024 a 1640
+
+O cliente reportou (em reunião) sobreposições e desalinhamentos "no monitor
+dele e no celular". Montei um detector no navegador em vez de sair olhando
+screenshot: força visibilidade de `[data-animate]`/`[data-hero-text]` (senão
+os elementos abaixo da dobra medem na posição errada, ainda com o transform
+de entrada do GSAP), ignora conteúdo de acordeão colapsado e elementos
+recortados por um ancestral `overflow:hidden` (senão dá falso positivo), e
+reporta scroll horizontal, elementos vazando do viewport e sobreposição
+entre blocos de texto folha. **Roda as 11 rotas dentro de `<iframe>` do
+tamanho alvo, num único comando** — media query responde à largura do
+iframe, então dá pra varrer largura×página sem redimensionar a janela toda
+hora (mesma técnica do modo de edição por dispositivo).
+
+Achados reais, todos corrigidos nesta rodada:
+
+- **Menu desktop estourava a tela de 1024 a ~1740px** (o mais grave — é
+  exatamente o que o cliente viu). O menu ganhou o item "EXPOs" (7 links) e
+  o espaçamento do Figma é `73px` fixo entre eles + `127px` depois do logo:
+  isso pede ~1425px de conteúdo, e a sanga (`.gutter`) come 1/6 da largura.
+  Em 1440 faltavam 224px, em 1280 faltavam 357px — "ACESSAR PORTAL" saía
+  cortado pela borda direita. Duas correções: (1) o menu desktop passou de
+  `lg` (1024) pra `xl` (1280) — abaixo disso é hambúrguer; (2) o
+  espaçamento virou fluido, `gap-[clamp(18px,calc(13.8vw-156px),73px)]`,
+  chegando nos 73px originais só quando a tela realmente comporta. O
+  `mr-[127px]` do logo foi pra `min-[1800px]`. **Pegadinha:** o painel do
+  menu mobile era `lg:hidden` — mudar só o botão pra `xl:hidden` deixaria o
+  hambúrguer abrindo um painel invisível entre 1024 e 1279. Os dois
+  breakpoints têm que casar sempre.
+- **Rótulo do hero passando por baixo do logo do menu.** O logo termina em
+  y=197 (desktop) / y=158 (mobile) e o hero começava em 190/150. Nas
+  páginas internas (`Hero80.tsx` + a cópia em `institucional/index.tsx`) o
+  respiro do topo virou `pt-[190px] lg:pt-[230px]`. Junto disso, a caixa do
+  hero deixou de ter altura TRAVADA (`h-[80vh]`) e virou `min-h-[max(80vh,560px)]`:
+  com altura fixa + `items-center`, numa tela baixa (notebook 768px de
+  altura, tablet deitado) o conteúdo transbordava pros dois lados e anulava
+  o respiro do topo — como `min-height` a caixa cresce e o respiro vale
+  sempre. Na Home o hero usa `justify-center`, então aumentar o padding
+  empurraria o conteúdo pra baixo em monitor alto à toa: lá a correção é
+  escopada por ALTURA de tela
+  (`[@media(min-width:1024px)_and_(max-height:860px)]:justify-start` +
+  `pt-[210px]`), só entra em tela baixa.
+- **Glass cards do hero da Home caindo por cima do título/parágrafo.** As
+  posições são % do frame 1920 do Figma, mas a coluna de texto tem largura
+  FIXA (título 760px, parágrafo 593px) — quanto mais estreita a tela, mais
+  os cards andam pra dentro do texto. Cada card ganhou a largura mínima a
+  partir da qual ele cabe ao lado do texto, pela conta
+  `(1 − r)·L − 233 ≥ L/12 + largura do texto + folga` (r = o `right` do
+  próprio card), confirmada medindo: **1440** pros dois de fora (17% e
+  12,7%), **1700** pro de 31,9% e **1870** pro de 37,4%. Abaixo disso o
+  card some e o hero fica só com o texto. Em 1920 os quatro aparecem, como
+  desenhado.
+- **Accordion de Plataformas (`S3Plataformas.tsx`)**: coluna de texto com
+  largura fixa de 331px dentro de um card que, FECHADO, mede ~(container −
+  gaps)/4 — 202px em 1024, 255 em 1280, 289 em 1440. Vazava em toda tela
+  abaixo de ~1626px. Virou `lg:w-[clamp(190px,19vw,331px)]`: acompanha o
+  card fechado sempre por dentro e, como não muda entre fechado e aberto, o
+  texto continua sem refluir ao abrir (que era a intenção da largura fixa).
+
+**Resultado**: 11 rotas × 390 / 768 / 1024 / 1280 / 1440 / 2560 sem nenhum
+achado; 1920 e 1800 conferidos à parte. `tsc -b` e `npm run build` (11
+rotas pré-renderizadas) limpos.
+
+**Regra que fica**: sempre que entrar um item novo no menu principal, ou
+mudar a largura de uma coluna de texto de hero, refazer essa varredura —
+esses dois pontos são os que mais quebram em tela média, e nenhum deles
+aparece testando só em 1920.

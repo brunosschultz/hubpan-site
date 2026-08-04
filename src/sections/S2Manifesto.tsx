@@ -10,6 +10,26 @@ const circleData = [
   { id: 'c4', Icon: Icon4, top: '60.59%', left: '59.14%' },
 ];
 
+/* Tamanho dos círculos glass e dos ícones dentro deles.
+ *
+ * No Figma a foto tem 695×845 e o círculo 115px — ou seja, o círculo é
+ * 16,55% da LARGURA da foto, não um valor absoluto. Como aqui a foto é
+ * fluida (`49.1667vw` de altura no desktop, `400px` fixos no mobile), um
+ * `115px` cravado ficava proporcionalmente CERTO só em 1920: em 1440 já
+ * ficava grande demais e no mobile (foto com ~294px de largura) os
+ * círculos ocupavam 39% da foto, cobrindo o rosto — foi o que o Bruno
+ * mandou no print.
+ *
+ * A conta: largura da foto = 89,5% da altura do container × 695/845 =
+ * 0,736 × altura. No desktop isso dá 36,2vw, e 16,55% disso é ~6vw (em
+ * 1920 = 115px, o valor original do Figma). Abaixo de lg a foto para de
+ * ser fluida (container `h-[400px]`), então a largura trava em ~294px e o
+ * círculo tem que travar junto em ~48px — que é exatamente o piso do
+ * clamp. Um único valor cobre os dois regimes.
+ * O ícone segue a mesma lógica: 48/115 = 41,7% do círculo. */
+const CIRCLE_SIZE = 'clamp(48px, 6vw, 115px)';
+const CIRCLE_ICON_SIZE = 'clamp(20px, 2.5vw, 48px)';
+
 const pStyle: React.CSSProperties = { fontFamily: 'Inter', fontSize: 18, lineHeight: '30px', color: '#000' };
 
 export default function S2Manifesto() {
@@ -52,12 +72,13 @@ export default function S2Manifesto() {
         <OrderEditChip k="s2.layout.order" label="Manifesto — ordem imagem/conteúdo" style={{ top: 12, left: 12 }} />
         {/* Esquerda: imagem + círculos — `order` controlável por dispositivo (ver useEditOrder acima) */}
         <div className="relative w-full h-[400px] lg:h-[49.1667vw] flex items-end justify-center" style={{ order: inverted ? 2 : 1 }}>
-          {/* "HUB PAN 2026" vertical */}
+          {/* "HUB PAN" vertical — sem o ano: o manifesto é fundacional, não
+              uma campanha anual (revisão editorial do cliente) */}
           <span
             className="hidden lg:block absolute left-0 top-[38%] -translate-y-1/2 origin-center whitespace-nowrap"
             style={{ fontFamily: 'Luxenta', fontWeight: 500, fontSize: 20, letterSpacing: '5.2px', color: '#152852', transform: 'rotate(-90deg) translateX(0)' }}
           >
-            HUB PAN 2026
+            HUB PAN
           </span>
           {/* Caixa da foto — proporção exata do Figma (695×845), alinhada na
               base. `data-animate` (entrada fade+slide via GSAP, useReveal)
@@ -92,14 +113,14 @@ export default function S2Manifesto() {
                   key={id}
                   className="absolute flex items-center justify-center"
                   style={{
-                    width: 115, height: 115, borderRadius: '50%', top, left,
+                    width: CIRCLE_SIZE, height: CIRCLE_SIZE, borderRadius: '50%', top, left,
                     backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
                     background: 'rgba(255,255,255,0.20)', border: '1px solid rgba(210,231,24,0.2)',
                   }}
                   data-animate
                 >
-                  <EIcon k={`s2.circulo.${id}.icone`} l={`Manifesto — ícone do círculo ${id.slice(1)}`} defaultSize={48} style={{ color: '#d2e718' }}>
-                    <Icon size={48} color="#d2e718" />
+                  <EIcon k={`s2.circulo.${id}.icone`} l={`Manifesto — ícone do círculo ${id.slice(1)}`} defaultSize={48} style={{ color: '#d2e718', width: CIRCLE_ICON_SIZE, height: CIRCLE_ICON_SIZE }}>
+                    <Icon size={CIRCLE_ICON_SIZE} color="#d2e718" />
                   </EIcon>
                 </div>
               ))}
@@ -119,7 +140,7 @@ export default function S2Manifesto() {
           <div className="mb-10 space-y-6" data-animate>
             <p style={pStyle}>
               <ERich k="s2.p1" l="Manifesto — parágrafo 1" baseW={503}>
-                O <strong className="font-semibold">HUB PAN</strong> não nasce para apresentar uma nova marca. Ele nasce para dar <strong className="font-semibold">escala, forma e percepção global</strong> a tudo que o ecossistema já construiu.
+                O <strong className="font-semibold">HUB PAN</strong> não nasce para apresentar uma nova marca. Ele nasce para dar <strong className="font-semibold">escala, forma e percepção global</strong> a tudo que já foi construído.
               </ERich>
             </p>
             <p style={pStyle}>

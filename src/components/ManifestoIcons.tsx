@@ -1,6 +1,8 @@
 interface IconProps {
   color?: string;
-  size?: number;
+  /** Aceita string (ex.: `clamp(20px,2.5vw,48px)`) além de número — os
+   * círculos do Manifesto precisam encolher junto com a foto, que é fluida. */
+  size?: number | string;
 }
 
 /** Globo/rede — círculo 1 (topo) */

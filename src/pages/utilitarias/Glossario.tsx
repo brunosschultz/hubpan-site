@@ -27,13 +27,13 @@ const TERMOS: { id: string; categoria: string; termo: string; p1: string; p2: st
     id: 'ods',
     categoria: 'Impacto Social', termo: 'ODS — Objetivos de Desenvolvimento Sustentável',
     p1: 'Os ODS são os 17 Objetivos de Desenvolvimento Sustentável da Agenda 2030 da ONU — uma agenda global aprovada em 2015 por 193 países para erradicar a pobreza, proteger o planeta e garantir prosperidade para todos até 2030. Cada objetivo tem metas específicas e indicadores mensuráveis.',
-    p2: 'O HUB PAN alinha suas plataformas diretamente a três ODS prioritários: ODS 4 (educação de qualidade, via PROINTER e Academy), ODS 10 (redução das desigualdades, via PROINTER e afroempreendedorismo) e ODS 17 (parcerias para os objetivos, via HUB PAN Alliance e cooperação internacional).',
+    p2: 'O HUB PAN alinha suas plataformas diretamente a três ODS prioritários: ODS 4 (educação de qualidade, via PROINTER e Academy), ODS 10 (redução das desigualdades, via PROINTER e afroempreendedorismo) e ODS 17 (parcerias para os objetivos, via HUB PAN Network e cooperação internacional).',
   },
   {
     id: 'govtech',
     categoria: 'Inteligência Artificial', termo: 'GovTech',
     p1: 'GovTech — abreviação de Government Technology — é o campo que reúne tecnologias, plataformas e soluções digitais aplicadas ao setor público. Inclui desde softwares de gestão administrativa até inteligência artificial, big data, automação de serviços ao cidadão e plataformas de transparência e participação.',
-    p2: 'O HUB PAN nasceu do nicho GovTech — mas expandiu sua narrativa para além dele. O GovIA é a plataforma que representa a evolução desse campo dentro do ecossistema, com foco específico em inteligência artificial para governos municipais e estaduais.',
+    p2: 'O HUB PAN nasceu do nicho GovTech — mas sua atuação foi muito além dele. O eGovIA é a plataforma que representa a evolução desse campo dentro da infraestrutura do HUB PAN, com foco específico em governança de inteligência artificial para governos municipais e estaduais.',
   },
   {
     id: 'esg',
@@ -63,13 +63,13 @@ const TERMOS: { id: string; categoria: string; termo: string; p1: string; p2: st
     id: 'ltv',
     categoria: 'Inovação', termo: 'LTV — Lifetime Value',
     p1: 'LTV — Lifetime Value ou Valor Vitalício — é um conceito de negócios que representa o valor total que um cliente gera para uma empresa ao longo de todo o seu relacionamento. Em plataformas de educação e assinatura, LTV é a métrica central: quanto mais tempo o aluno ou assinante permanece, maior o retorno sobre o investimento em aquisição.',
-    p2: 'O HUB PAN usa o PROINTER como instrumento de fidelização de LTV educacional: bolsistas são selecionados entre alunos dos programas do ecossistema, criando um incentivo real para permanecer e evoluir dentro da plataforma.',
+    p2: 'O HUB PAN usa o PROINTER como instrumento de fidelização de LTV educacional: bolsistas são selecionados entre alunos dos programas do HUB PAN, criando um incentivo real para permanecer e evoluir dentro da plataforma.',
   },
   {
     id: 'ict',
     categoria: 'Cooperação', termo: 'ICT — Instituição de Ciência e Tecnologia',
     p1: 'ICT é a sigla para Instituição de Ciência, Tecnologia e Inovação — categoria jurídica brasileira que inclui universidades, institutos de pesquisa, centros tecnológicos e organizações sem fins lucrativos com foco em pesquisa e desenvolvimento. ICTs têm acesso a incentivos fiscais específicos e podem celebrar contratos de transferência de tecnologia com empresas privadas.',
-    p2: 'A HUB PAN Alliance inclui ICTs como categoria de membros elegíveis — integrando o ecossistema de pesquisa e inovação ao network estratégico do HUB PAN.',
+    p2: 'A HUB PAN Network inclui ICTs como categoria de membros elegíveis — integrando o ecossistema de pesquisa e inovação ao network estratégico do HUB PAN.',
   },
 ];
 
@@ -87,7 +87,7 @@ export default function Glossario() {
         bgKey="gloss.hero"
         eyebrow={<ET k="gloss.hero.eyebrow" v="REFERÊNCIA CONCEITUAL · INOVAÇÃO · IA · IMPACTO · COOPERAÇÃO" l="Glossário — rótulo do hero" />}
         title={<ERich k="gloss.hero.titulo" l="Glossário — título do hero">Glossário HUB PAN</ERich>}
-        sub={<ERich k="gloss.hero.sub" l="Glossário — subtítulo do hero">Definições claras dos conceitos centrais do ecossistema — para que qualquer pessoa, independente do nível técnico, entenda o que o HUB PAN faz e por que faz.</ERich>}
+        sub={<ERich k="gloss.hero.sub" l="Glossário — subtítulo do hero">Definições claras dos conceitos centrais do HUB PAN — para que qualquer pessoa, independente do nível técnico, entenda o que o HUB PAN faz e por que faz.</ERich>}
       />
       <section ref={ref} id="gloss-lista" className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
         <div className="flex flex-wrap gap-3 mb-12" data-animate>

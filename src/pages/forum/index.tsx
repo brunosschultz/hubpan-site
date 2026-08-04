@@ -27,7 +27,7 @@ const PILARES: { sigla: string; titulo: string; desc: string; gera: string; colo
   { sigla: 'AU', titulo: 'Autoridade Temática', desc: 'O WAIF posiciona o HUB PAN como referência em governança de IA e inovação de impacto. Cada edição gera conteúdo, dados do Observatório, pesquisas e publicações que circulam com o WAIF como fonte.', gera: 'Gera: mídia espontânea · citações acadêmicas · convites institucionais', color: 'white' },
   { sigla: 'RE', titulo: 'Relacionamento Estratégico', desc: 'O Fórum coloca no mesmo ambiente: CEOs de empresas de IA, policy makers, reitores, representantes de governos, pesquisadores de Harvard e MIT, lideranças do MIPAD e investidores. Networking único no Brasil.', gera: 'Gera: parcerias · contratos · relações institucionais de longo prazo', color: 'blue' },
   { sigla: 'PA', titulo: 'Patrocínio e Negócios', desc: 'Para patrocinadores, o WAIF é a oportunidade de associar a marca ao ecossistema de IA mais estratégico das Américas — com visibilidade perante tomadores de decisão qualificados em Harvard Square, Cambridge.', gera: 'Gera: retorno de marca · acesso a decisores · presença em Cambridge', color: 'lime' },
-  { sigla: 'EC', titulo: 'Ecossistema HUB PAN', desc: 'O WAIF é o epicentro do ecossistema — conecta GovIA (dados do Observatório), PROINTER (bolsistas presentes), Academy (conteúdo gerado), Alliance (membros) e Insights (publicações). Cada plataforma converge para o Fórum.', gera: 'Gera: fortalecimento do ecossistema · cross-sell entre plataformas', color: 'navy' },
+  { sigla: 'EC', titulo: 'Convergência HUB PAN', desc: 'O WAIF é o ponto de convergência da infraestrutura — conecta eGovIA (dados do Observatório), PROINTER (bolsistas presentes), Academy (conteúdo gerado), Network (comunidades) e Insights (publicações). Cada plataforma converge para o Fórum.', gera: 'Gera: fortalecimento do HUB PAN · cross-sell entre plataformas', color: 'navy' },
 ];
 
 const PILAR_COLORS = {
@@ -47,9 +47,9 @@ const EDICAO_ITENS = [
 ];
 
 const CONTEXTO = [
-  { id: 'antecedente', tag: 'Antecedente', titulo: 'Expo Boston como trampolim', desc: 'A Expo Boston (maio 2026) é o antecedente direto do WAIF — mesma audiência, mesmo ecossistema, escala e ambição amplificadas para 2027.' },
+  { id: 'antecedente', tag: 'Antecedente', titulo: 'Expo Boston® como trampolim', desc: 'A Expo Boston® (maio 2026) é o antecedente direto do WAIF — mesma audiência, mesmo ecossistema, escala e ambição amplificadas para 2027.' },
   { id: 'estrategia', tag: 'Estratégia', titulo: 'Campanha de apoiadores no Brasil', desc: 'Após o lançamento do portal, campanha nacional com foco em captação de patrocinadores brasileiros. Oportunidade de entrada no nível fundador — menor custo e maior retorno.' },
-  { id: 'sinergia', tag: 'Sinergia', titulo: 'GovIA e Observatório no centro', desc: 'O Fórum é o principal momento de divulgação dos dados do Observatório de IA e apresentação do GovIA para policy makers e gestores internacionais.' },
+  { id: 'sinergia', tag: 'Sinergia', titulo: 'eGovIA e Observatório no centro', desc: 'O Fórum é o principal momento de divulgação dos dados do Observatório de IA e apresentação do eGovIA para policy makers e gestores internacionais.' },
 ];
 
 const NIVEIS = [
@@ -65,7 +65,7 @@ const NIVEIS = [
   },
   {
     id: 'ouro', nivel: 'Nível 03', nome: 'Ouro', desc: 'Parceria estratégica. Liderança editorial, acesso a decisores e posicionamento permanente no HUB PAN.',
-    inclui: ['Tudo do Prata', 'Keynote ou abertura do Fórum', '10 ingressos + convidados VIP', 'Co-branding em todas as comunicações', 'Acesso à rede MIPAD ONU', 'Presença permanente na HUB PAN Alliance'],
+    inclui: ['Tudo do Prata', 'Keynote ou abertura do Fórum', '10 ingressos + convidados VIP', 'Co-branding em todas as comunicações', 'Acesso à rede MIPAD ONU', 'Presença permanente na HUB PAN Network'],
     destaque: true, tagLabel: 'Maior retorno',
   },
 ];
@@ -75,9 +75,9 @@ const PARTICIPACAO = ['Participante', 'Palestrante', 'Mediador de painel', 'Repr
 const EXPERTISE = ['Governança e políticas públicas de IA', 'IA e educação', 'IA e saúde', 'IA e cidades inteligentes', 'IA e ESG / ODS', 'Pesquisa e desenvolvimento em IA', 'Negócios e mercado de IA'];
 
 const ECOSSISTEMA = [
-  { id: 'governos', tag: 'Governos', t: 'GovIA — IA e Observatório', to: '/govia', color: 'navy' as const },
+  { id: 'governos', tag: 'Governos', t: 'eGovIA — IA e Observatório', to: '/govia', color: 'navy' as const },
   { id: 'esg', tag: 'ESG', t: 'PROINTER — Impacto transgeracional', to: '/prointer', color: 'blue' as const },
-  { id: 'alliance', tag: 'Alliance', t: 'Rede estratégica de parceiros', to: '/o-hub-pan', color: 'lime' as const },
+  { id: 'alliance', tag: 'Network', t: 'Comunidades, fóruns e mentorias', to: '/o-hub-pan', color: 'lime' as const },
   { id: 'press', tag: 'Press', t: 'Imprensa e press kit', to: '/imprensa', color: 'blue' as const },
 ];
 
@@ -90,8 +90,8 @@ const ECO_COLORS = {
 const FAQ_RAW = [
   { id: 'o-que-e-waif', q: 'O que é o Fórum Mundial de Inteligência Artificial (WAIF)?', a: 'O Fórum Mundial de Inteligência Artificial — WAIF (World Artificial Intelligence Forum) — é um evento proprietário do HUB PAN que reúne grandes players globais de IA, policy makers, pesquisadores, governos e investidores em Cambridge, Massachusetts. A primeira edição está prevista para 2027, ancorada em Harvard Square, com perspectiva pan-americana e pan-africana — diferencial que nenhum outro fórum brasileiro oferece.' },
   { id: 'por-que-cambridge', q: 'Por que o WAIF acontece em Cambridge e não no Brasil?', a: 'Cambridge, Massachusetts, é o metro quadrado de inovação mais disputado das Américas — abriga Harvard, MIT e um ecossistema denso de empresas de tecnologia, startups e centros de pesquisa de referência mundial. O HUB PAN tem sua sede global em Harvard Square, o que torna Cambridge o local natural e estrategicamente mais poderoso para um fórum de IA com pretensões globais.' },
-  { id: 'retorno-patrocinador', q: 'Qual o retorno esperado para um patrocinador do WAIF?', a: 'Patrocinadores do WAIF ganham visibilidade perante um público qualificado de tomadores de decisão em IA, acesso a networking exclusivo em Harvard Square, co-branding em todas as comunicações do evento, acesso a dados inéditos do Observatório de IA HUB PAN e — nos níveis mais altos — ingresso permanente na HUB PAN Alliance e acesso à rede MIPAD ONU.' },
-  { id: 'relacao-govia', q: 'Como o WAIF se relaciona com o GovIA e o Observatório de IA?', a: 'O Fórum Mundial de IA é o principal momento de lançamento e divulgação dos dados do Observatório de IA HUB PAN — o primeiro mapeamento sistemático do uso de IA na administração pública brasileira. O WAIF também é a vitrine do GovIA para policy makers e gestores públicos internacionais, criando sinergia direta entre as plataformas do ecossistema.' },
+  { id: 'retorno-patrocinador', q: 'Qual o retorno esperado para um patrocinador do WAIF?', a: 'Patrocinadores do WAIF ganham visibilidade perante um público qualificado de tomadores de decisão em IA, acesso a networking exclusivo em Harvard Square, co-branding em todas as comunicações do evento, acesso a dados inéditos do Observatório de IA HUB PAN e — nos níveis mais altos — ingresso permanente na HUB PAN Network e acesso à rede MIPAD ONU.' },
+  { id: 'relacao-govia', q: 'Como o WAIF se relaciona com o eGovIA e o Observatório de IA?', a: 'O Fórum Mundial de IA é o principal momento de lançamento e divulgação dos dados do Observatório de IA HUB PAN — o primeiro mapeamento sistemático do uso de IA na administração pública brasileira. O WAIF também é a vitrine do eGovIA para policy makers e gestores públicos internacionais, criando sinergia direta entre as plataformas do HUB PAN.' },
   { id: 'propor-palestra', q: 'Posso propor uma palestra ou painel no WAIF 2027?', a: 'Sim. O WAIF aceita propostas de palestrantes e mediadores de painéis com expertise em governança de IA, IA e ODS, IA inclusiva, políticas públicas de IA, IA e educação, IA e saúde, e mercado de IA nas Américas e África. As propostas passam por processo de seleção e devem ser submetidas pelo formulário de manifestação de interesse nesta página.' },
 ];
 
@@ -263,7 +263,7 @@ function SecEdicao() {
             </ul>
             <p style={{ fontFamily: 'Inter', fontSize: 12.5, color: 'rgba(255,255,255,0.6)' }}>
               <ERich k="forum.edicao.rodape" l="Edição 2027 — nota de rodapé">
-                <b style={{ color: '#d2e718' }}>Parceria institucional</b> · MIPAD ONU + Expo Boston como preparatória do WAIF
+                <b style={{ color: '#d2e718' }}>Parceria institucional</b> · MIPAD ONU + Expo Boston® como preparatória do WAIF
               </ERich>
             </p>
           </div>
@@ -470,7 +470,7 @@ function SecEcossistema() {
   return (
     <section id="forum-ecossistema" className="py-16 gutter" {...bgProps} style={{ background: bg }}>
       <p className="mb-6" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12, letterSpacing: '1.6px', textTransform: 'uppercase', color: '#a7a4a4' }}>
-        <ET k="forum.ecossistema.eyebrow" v="TAMBÉM NO ECOSSISTEMA HUB PAN" l="Também no Ecossistema — selo" />
+        <ET k="forum.ecossistema.eyebrow" v="TAMBÉM NO HUB PAN" l="Também no Ecossistema — selo" />
       </p>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {ECOSSISTEMA.map((e) => {

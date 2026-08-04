@@ -3,6 +3,7 @@ import Home from '../pages/Home';
 import Institucional from '../pages/institucional';
 import Prointer from '../pages/prointer';
 import GovIA from '../pages/govia';
+import Expos from '../pages/expos';
 import ForumMundialIA from '../pages/forum';
 import Insights from '../pages/insights';
 import Contato from '../pages/contato';
@@ -20,7 +21,8 @@ export const PAGE_ROUTES: { slug: string; label: string; path: string; Component
   { slug: '', label: 'Home', path: '/', Component: Home },
   { slug: 'o-hub-pan', label: 'O HUB PAN', path: '/o-hub-pan', Component: Institucional },
   { slug: 'prointer', label: 'PROINTER', path: '/prointer', Component: Prointer },
-  { slug: 'govia', label: 'GovIA', path: '/govia', Component: GovIA },
+  { slug: 'govia', label: 'eGovIA', path: '/govia', Component: GovIA },
+  { slug: 'expos', label: 'EXPOs', path: '/expos', Component: Expos },
   { slug: 'forum-mundial-ia', label: 'Fórum Mundial de IA', path: '/forum-mundial-ia', Component: ForumMundialIA },
   { slug: 'insights', label: 'Insights', path: '/insights', Component: Insights },
   { slug: 'contato', label: 'Contato', path: '/contato', Component: Contato },

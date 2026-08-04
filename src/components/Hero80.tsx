@@ -96,12 +96,19 @@ export default function Hero80({ id, img, imgAlt = '', eyebrow, title, sub, badg
   const titleRef = useSplitTitle<HTMLHeadingElement>();
   return (
     <section ref={ref} id={id} className="relative w-full">
-      <div className="relative w-full h-[80vh] min-h-[560px] flex items-center overflow-hidden">
+      {/* Altura MÍNIMA de 80vh, não fixa: com altura travada (`h-[80vh]`) e
+          `items-center`, numa tela baixa (notebook 768px, tablet deitado) o
+          conteúdo ficava mais alto que a caixa e transbordava pros DOIS lados
+          — anulando o respiro do topo e fazendo o rótulo passar por baixo do logo
+          do menu (sobreposição real relatada pelo cliente). Como `min-height`,
+          a caixa cresce quando o conteúdo pede e o respiro do topo é sempre
+          respeitado; em tela alta continua exatamente 80vh, centralizado. */}
+      <div className="relative w-full min-h-[max(80vh,560px)] flex items-center overflow-hidden">
         <img src={img} alt={imgAlt} className="absolute inset-0 w-full h-full object-cover" style={imgPosition ? { objectPosition: imgPosition } : undefined} />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(6,9,25,0.93) 0%, rgba(6,9,25,0.72) 45%, rgba(6,9,25,0.35) 100%)' }} />
         <div className="absolute inset-x-0 bottom-0 h-40" style={{ background: 'linear-gradient(to top, rgba(6,9,25,0.9), transparent)' }} />
 
-        <div className="relative gutter w-full pt-[150px] lg:pt-[190px] pb-12">
+        <div className="relative gutter w-full pt-[190px] lg:pt-[230px] pb-12">
           {/* Rótulo no padrão do hero da home: Inter 500 13px, tracking 5.85px, branco 50% */}
           <p className="text-[13px] font-medium uppercase mb-6" style={{ fontFamily: 'Inter', letterSpacing: '5.85px', color: 'rgba(255,255,255,0.5)' }} data-animate>
             {eyebrow}

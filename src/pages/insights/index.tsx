@@ -41,16 +41,16 @@ const DESTAQUE = {
 
 const PUBLICACOES = [
   { id: 'ods', tipo: 'White Paper', data: 'Mai 2026', titulo: 'Pan-Americanismo e inovação de impacto: caminhos para os ODS', desc: 'Análise dos principais mecanismos de cooperação entre Américas e África no contexto da Agenda 2030.', meta: '8 min de leitura', img: 's9-insight-2' },
-  { id: 'municipios', tipo: 'Artigo', data: 'Mai 2026', titulo: 'IA para governos municipais: desafios de acesso e formação no Brasil', desc: 'Por que a maioria dos municípios brasileiros ainda não acessa soluções de IA — e como o GovIA resolve isso.', meta: '6 min de leitura', img: 's9-insight-3' },
-  { id: 'onu', tipo: 'Entrevista', data: 'Abr 2026', titulo: 'Inovação de impacto e os ODS: uma conversa com lideranças da ONU', desc: 'Como organismos internacionais enxergam o papel de ecossistemas como o HUB PAN na agenda global.', meta: '10 min de leitura', img: 'inst-nyc-onu' },
-  { id: 'forum-relatorio', tipo: 'Relatório', data: 'Abr 2026', titulo: 'Fórum Pan-Americano da Inovação: relatório de impacto 2025', desc: '15 edições, 4 cidades, centenas de projetos. Os números e histórias que definem o ecossistema.', meta: 'Baixar PDF', img: 's6-numero-1' },
+  { id: 'municipios', tipo: 'Artigo', data: 'Mai 2026', titulo: 'IA para governos municipais: desafios de acesso e formação no Brasil', desc: 'Por que a maioria dos municípios brasileiros ainda não acessa soluções de IA — e como o eGovIA resolve isso.', meta: '6 min de leitura', img: 's9-insight-3' },
+  { id: 'onu', tipo: 'Entrevista', data: 'Abr 2026', titulo: 'Inovação de impacto e os ODS: uma conversa com lideranças da ONU', desc: 'Como organismos internacionais enxergam o papel de infraestruturas como o HUB PAN na agenda global.', meta: '10 min de leitura', img: 'inst-nyc-onu' },
+  { id: 'forum-relatorio', tipo: 'Relatório', data: 'Abr 2026', titulo: 'Fórum Pan-Americano da Inovação: relatório de impacto 2025', desc: '15 edições, 4 cidades, centenas de projetos. Os números e histórias que definem essa trajetória.', meta: 'Baixar PDF', img: 's6-numero-1' },
   { id: 'educacao-inclusiva', tipo: 'Pesquisa', data: 'Mar 2026', titulo: 'Educação inclusiva e tecnologias assistivas: cenário após a nova legislação', desc: 'Levantamento do impacto da nova lei de educação inclusiva nos municípios brasileiros e oportunidades para o HUB PAN Academy.', meta: '14 min de leitura', img: 'insights-educacao-inclusiva' },
   { id: 'cambridge', tipo: 'Artigo', data: 'Mar 2026', titulo: 'O que Cambridge ensina sobre ecossistemas de inovação ao mundo', desc: 'Uma leitura do metro quadrado de inovação mais disputado das Américas e o que o HUB PAN aprendeu estando lá.', meta: '7 min de leitura', img: 'inst-boston-mit' },
 ];
 
 const OBSERVATORIOS = [
   { id: 'ia', status: 'Em andamento', nome: 'Observatório de IA', desc: 'Uso de IA na administração pública. Iniciando por Minas Gerais, com comparativo futuro com Boston area.', tags: [{ v: 'MG', l: 'Em campo' }, { v: 'BOS', l: 'Previsto 2027' }], ativo: true },
-  { id: 'esg', status: 'Em breve', nome: 'Observatório ESG', desc: 'Monitoramento de iniciativas ESG conectadas aos ODS em empresas e governos parceiros do ecossistema.', ativo: false },
+  { id: 'esg', status: 'Em breve', nome: 'Observatório ESG', desc: 'Monitoramento de iniciativas ESG conectadas aos ODS em empresas e governos parceiros do HUB PAN.', ativo: false },
   { id: 'inovacao-pan-americana', status: 'Em breve', nome: 'Observatório de Inovação Pan-Americana', desc: 'Mapeamento de ecossistemas de inovação nas Américas e África com foco em cooperação e transferência de conhecimento.', ativo: false },
 ];
 
@@ -247,7 +247,7 @@ export default function Insights() {
         imgAlt="Globo dourado na sede das Nações Unidas"
         eyebrow={<ET k="insights.hero.eyebrow" v="BLOG · OBSERVATÓRIOS · PESQUISAS · WHITE PAPERS" l="Insights — eyebrow do hero" />}
         title={<ERich k="insights.hero.titulo" l="Insights — título do hero">HUB PAN Insights</ERich>}
-        sub={<ERich k="insights.hero.sub" l="Insights — descrição do hero" baseW={660}>A plataforma de inteligência e conteúdo do ecossistema. Observatórios temáticos, pesquisas, artigos, entrevistas, relatórios e white papers sobre inovação, IA, governança, educação e cooperação internacional.</ERich>}
+        sub={<ERich k="insights.hero.sub" l="Insights — descrição do hero" baseW={660}>A plataforma de inteligência e conteúdo do HUB PAN. Observatórios temáticos, pesquisas, artigos, entrevistas, relatórios e white papers sobre inovação, IA, governança, educação e cooperação internacional.</ERich>}
         actions={<>
           <HubButton size="lg" variant="lime" onClick={() => ScrollSmoother.get()?.scrollTo('#insights-artigos', true)} iconKey="insights.hero.cta1.icone" iconLabel="Insights — botão do hero (principal), ícone" styleKey="insights.hero.cta1" styleLabel="Insights — botão do hero (principal)"><ET k="insights.hero.cta1" v="Ver todos os conteúdos" l="Insights — botão do hero (principal)" /></HubButton>
           <HubButton size="lg" variant="blue" iconKey="insights.hero.cta2.icone" iconLabel="Insights — botão do hero (secundário), ícone" to="/#newsletter" styleKey="insights.hero.cta2" styleLabel="Insights — botão do hero (secundário)"><ET k="insights.hero.cta2" v="Assinar newsletter" l="Insights — botão do hero (secundário)" /></HubButton>

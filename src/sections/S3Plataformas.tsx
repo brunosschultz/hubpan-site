@@ -30,13 +30,13 @@ const ACC: AccItem[] = [
   },
   {
     id: 'govia', icon: '/icons/s3-icon-gv.svg', iconSize: 68,
-    label: 'ASSINATURA · GOVERNOS', title: 'eGovIA',
+    label: 'ASSINATURA · GOVERNOS', title: 'eGovIA®',
     desc: 'Plataforma de assinatura de IA para municípios e consórcios públicos. Ferramentas, formação e Observatório de IA.',
-    image: '/images/s3-accordion-govia.webp', buttonText: 'Conheça a GovIA',
+    image: '/images/s3-accordion-govia.webp', buttonText: 'Conheça a eGovIA',
   },
 ];
 
-const ACC_NOMES: Record<string, string> = { prointer: 'PROINTER', forum: 'Fórum Mundial de IA', govia: 'GovIA' };
+const ACC_NOMES: Record<string, string> = { prointer: 'PROINTER', forum: 'Fórum Mundial de IA', govia: 'eGovIA' };
 const ACC_TO: Record<string, string> = { prointer: '/prointer', forum: '/forum-mundial-ia', govia: '/govia' };
 
 /* Largura fixa do texto — não recalcula/reflow ao abrir. Só o card e a foto crescem. */
@@ -49,8 +49,15 @@ function AccordionCard({ item, active, onHover }: { item: AccItem; active: boole
       style={{ borderRadius: 17, height: 454 }}
       data-animate
     >
-      {/* Conteúdo — largura fixa no desktop (nunca recalcula com a abertura do card); fluida no mobile */}
-      <div className="flex flex-col shrink-0 w-full lg:w-[331px]" style={{ padding: '36px 24px 26px 36px' }}>
+      {/* Conteúdo — a largura precisa caber no card FECHADO, senão o texto é
+          cortado pelo overflow-hidden. O card fechado mede ~(container−gaps)/4,
+          o que dá 202px em 1024, 255 em 1280 e 289 em 1440 — a largura fixa de
+          331px que existia aqui estourava em toda tela abaixo de ~1626px (bug
+          real relatado pelo cliente). `19vw` acompanha o card fechado sempre
+          um pouco por dentro, com teto de 331px nas telas grandes; como o valor
+          não muda entre fechado e aberto, o texto continua não refluindo ao
+          abrir — que era a intenção original da largura fixa. */}
+      <div className="flex flex-col shrink-0 w-full lg:w-[clamp(190px,19vw,331px)]" style={{ padding: '36px 24px 26px 36px' }}>
         <EIcon k={`s3.acc.${item.id}.icone`} l={`Plataformas — ${nome}, ícone`} defaultSize={item.iconSize} className="self-start" style={{ flexShrink: 0 }}>
           <img src={item.icon} alt="" style={{ width: item.iconSize, height: item.iconSize }} />
         </EIcon>
@@ -106,14 +113,14 @@ interface PlatCard {
 const PLAT: PlatCard[] = [
   {
     id: 'academy', icon: '/icons/s3-icon-academy.svg', iconSize: 54, label: 'ACADEMY', name: 'Academy', nameColor: '#2d4ebf',
-    desc: 'Formação, cursos, extensão, pós-graduação e comunidades educacionais.',
+    desc: 'Formação executiva, extensão, pós-graduação, certificações e produção de conhecimento aplicado.',
     bg: '#fff', labelColor: '#a7a4a4', hubColor: '#152852', descColor: '#797979',
     btnBg: '#d2e718', btnText: '#152852', btnCircle: 'rgba(0,0,0,0.1)', btnArrow: '#152852',
     img: '/images/s7-persona-1.webp',
   },
   {
-    id: 'alliance', icon: '/icons/s3-icon-alliance.svg', iconSize: 51, label: 'ALLIANCE', name: 'Alliance', nameColor: '#d2e718',
-    desc: 'Rede estratégica de empresas, startups, universidades, ICTs e governos.',
+    id: 'alliance', icon: '/icons/s3-icon-alliance.svg', iconSize: 51, label: 'NETWORK', name: 'Network', nameColor: '#d2e718',
+    desc: 'Comunidades temáticas, fóruns, mentorias e espaços colaborativos de interação internacional.',
     bg: '#2d4ebf', labelColor: 'rgba(255,255,255,0.7)', hubColor: '#fff', descColor: '#fff',
     btnBg: '#d2e718', btnText: '#2d4ebf', btnCircle: 'rgba(0,0,0,0.1)', btnArrow: '#2d4ebf',
     img: '/images/s7-persona-2.webp',
@@ -127,14 +134,14 @@ const PLAT: PlatCard[] = [
   },
   {
     id: 'digital', icon: '/icons/s3-icon-digital.svg', iconSize: 45, label: 'DIGITAL', name: 'Digital', nameColor: '#2d4ebf',
-    desc: 'Portal, app, AVA, área do aluno e infraestrutura de acesso ao ecossistema.',
+    desc: 'Portal, app, AVA, área do aluno e infraestrutura de acesso ao HUB PAN.',
     bg: '#d2e718', labelColor: 'rgba(21,40,82,0.5)', hubColor: '#152852', descColor: '#152852',
     btnBg: '#2d4ebf', btnText: '#fff', btnCircle: 'rgba(0,0,0,0.1)', btnArrow: '#fff',
     img: '/images/s7-persona-4.webp',
   },
 ];
 
-/* Só Insights tem página própria hoje — Academy/Alliance/Digital ainda não têm,
+/* Só Insights tem página própria hoje — Academy/Network/Digital ainda não têm,
  * então caem no fallback do WhatsApp (ver WHATSAPP_URL) até ganharem uma. */
 const PLAT_TO: Record<string, string | undefined> = { insights: '/insights' };
 
@@ -245,9 +252,17 @@ export default function S3Plataformas() {
       <p className="eyebrow text-muted mb-6" data-animate>
         <ET k="s3.eyebrow" v="PLATAFORMAS ESTRATÉGICAS" l="Plataformas — selo da seção" />
       </p>
-      <h2 className="mb-12" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', color: '#152852' }} data-animate>
-        <ERich k="s3.titulo" l="Plataformas — título da seção">Três carros-chefe. Uma narrativa global.</ERich>
+      <h2 className="mb-5" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', color: '#152852' }} data-animate>
+        <ERich k="s3.titulo" l="Plataformas — título da seção">Os instrumentos que operacionalizam a missão.</ERich>
       </h2>
+      {/* Contextualização institucional (revisão editorial do cliente): as
+          plataformas deixam de ser protagonistas e passam a ser os
+          instrumentos da missão do HUB PAN. Editável de fábrica. */}
+      <p className="mb-12" style={{ fontFamily: 'Inter', fontWeight: 400, fontSize: 18, lineHeight: '30px', color: '#797979' }} data-animate>
+        <ERich k="s3.sub" l="Plataformas — texto de apoio" baseW={720}>
+          O HUB PAN operacionaliza sua missão por meio de plataformas especializadas que conectam conhecimento, inovação, inteligência artificial e cooperação internacional.
+        </ERich>
+      </p>
 
       {/* Linha 1 — Accordion */}
       <div className="flex flex-col lg:flex-row gap-4 mb-5">

@@ -71,7 +71,7 @@ export default function S8Governanca() {
           <div aria-hidden style={{ height: 48 }} />
           <h2 className="mb-6" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(36px,4vw,60px)', lineHeight: 1, letterSpacing: '-1.2px' }} data-animate>
             <ERich k="s8.eco.titulo" l="Ecossistema Fundador — título">
-              <span style={{ color: '#ffffff' }}>Ecossistema</span><span style={{ color: '#d2e718' }}> Fundador</span>
+              <span style={{ color: '#ffffff' }}>Base</span><span style={{ color: '#d2e718' }}> Fundadora</span>
             </ERich>
           </h2>
           {/* Espaçador invisível — mesma altura do parágrafo da esquerda, pra alinhar linhas com os cards */}

@@ -16,7 +16,7 @@ const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 /* ═══════════ Dados — extraídos do wireframe oficial (page-contato) ═══════════ */
 
 const CAMINHOS: { sigla: string; titulo: string; desc: string; btn: string; to: string; Icon: typeof Landmark; color: 'navy' | 'lime' | 'blue' }[] = [
-  { sigla: 'GOV', titulo: 'Governos & Instituições', desc: 'Prefeituras, estados, consórcios interessados em GovIA.', btn: 'Solicitar Demo GovIA', to: '/govia', Icon: Landmark, color: 'navy' },
+  { sigla: 'GOV', titulo: 'Governos & Instituições', desc: 'Prefeituras, estados, consórcios interessados em eGovIA.', btn: 'Solicitar Demo eGovIA', to: '/govia', Icon: Landmark, color: 'navy' },
   { sigla: 'WAIF', titulo: 'Patrocinar o Fórum Mundial de IA', desc: 'Empresas que querem associar-se ao maior evento de IA das Américas.', btn: 'Solicitar Proposta', to: '/forum-mundial-ia', Icon: Sparkles, color: 'lime' },
   { sigla: 'PRO', titulo: 'Apoiar o PROINTER', desc: 'Pessoas físicas, empresas e fundações que querem financiar bolsas de impacto.', btn: 'Fazer uma Doação', to: '/prointer', Icon: HeartHandshake, color: 'blue' },
 ];
@@ -27,7 +27,7 @@ const CAMINHO_COLORS = {
   blue: { bg: '#2d4ebf', title: '#fff', desc: 'rgba(255,255,255,0.82)', sigla: '#d2e718', badgeBg: 'rgba(255,255,255,0.12)', badgeIcon: '#fff', btn: '#d2e718' },
 } as const;
 
-const ASSUNTOS = ['Parceria estratégica', 'Imprensa e mídia', 'HUB PAN Alliance', 'Outro assunto'];
+const ASSUNTOS = ['Parceria estratégica', 'Imprensa e mídia', 'HUB PAN Network', 'Outro assunto'];
 
 const ENDERECOS = [
   { id: 'harvard', Icon: MapPin, tag: 'Sede Global', linha1: 'Harvard Square, Cambridge, MA', linha2: 'Massachusetts, United States', lime: true },
@@ -227,7 +227,7 @@ export default function Contato() {
             <ERich k="contato.hero.titulo" l="Contato — título do hero">Vamos conversar.</ERich>
           </h1>
           <p style={{ fontFamily: 'Inter', fontSize: 17, lineHeight: '29px', color: '#d6d6d6', maxWidth: 560 }} data-animate>
-            <ERich k="contato.hero.sub" l="Contato — descrição do hero" baseW={443}>Seja qual for seu perfil — há um caminho específico para você entrar no ecossistema.</ERich>
+            <ERich k="contato.hero.sub" l="Contato — descrição do hero" baseW={443}>Seja qual for seu perfil — há um caminho específico para você se conectar ao HUB PAN.</ERich>
           </p>
         </div>
       </section>

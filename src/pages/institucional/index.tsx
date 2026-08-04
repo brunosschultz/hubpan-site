@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import {
   Landmark, GraduationCap, Building2, Scale, BrainCircuit, Globe2, ShieldCheck, HeartHandshake, FileCheck2, MapPin, Rocket, ArrowUpRight,
+  Users, CalendarDays, TrendingUp, MessagesSquare, BookOpen, Sparkles,
 } from 'lucide-react';
 import FAQAccordion from '../../components/FAQAccordion';
 import CTABanner from '../../components/CTABanner';
@@ -38,15 +39,15 @@ const FUNDADORAS = [
     id: 'premier-niveau',
     Icon: GraduationCap, tag: 'EDUCAÇÃO · EXCELÊNCIA', nome: 'Premier Niveau®',
     bg: '#ebebeb', text: '#152852', sub: '#797979', iconBg: '#f5f5f5', iconColor: '#2d4ebf', tagColor: '#a7a4a4',
-    desc: 'A frente educacional de alto padrão do ecossistema. Extensão universitária, pós-graduação lato sensu, educação executiva e formação com diferenciais acadêmicos reais.',
+    desc: 'A frente educacional de alto padrão do HUB PAN. Extensão universitária, pós-graduação lato sensu, educação executiva e formação com diferenciais acadêmicos reais.',
     bullets: ['Marca registrada no INPI', 'Programas de extensão e pós-graduação', 'Rede de formadores e especialistas', 'Base que originou o HUB PAN Academy'],
   },
   {
     id: 'egov-tecnologia',
     Icon: Building2, tag: 'GOVTECH · INOVAÇÃO PÚBLICA', nome: 'eGov Tecnologia®',
     bg: '#2d4ebf', text: '#fff', sub: 'rgba(255,255,255,0.8)', iconBg: 'rgba(255,255,255,0.12)', iconColor: '#d2e718', tagColor: 'rgba(255,255,255,0.6)',
-    desc: 'A origem em inovação governamental e transformação digital do setor público. O nicho que deu origem ao GovIA como produto escalável.',
-    bullets: ['Marca registrada no INPI', 'Experiência real com municípios e estados', 'Base técnica do GovIA', 'Conexão com o Fórum Pan-Americano'],
+    desc: 'A origem em inovação governamental e transformação digital do setor público. O nicho que deu origem ao eGovIA como produto escalável.',
+    bullets: ['Marca registrada no INPI', 'Experiência real com municípios e estados', 'Base técnica do eGovIA', 'Conexão com o Fórum Pan-Americano'],
   },
 ];
 
@@ -68,7 +69,7 @@ const TERRITORIOS: Tile[] = [
   },
   {
     id: 'belo-horizonte', kind: 'typo', color: 'navy', Icon: MapPin, img: 's6-numero-3', tag: 'ORIGEM · DESDE 2017', nome: 'Belo Horizonte',
-    desc: 'Marco zero do ecossistema. Primeira cidade brasileira a conectar ODS com Smart Cities em um fórum estruturado.',
+    desc: 'Marco zero da trajetória. Primeira cidade brasileira a conectar ODS com Smart Cities em um fórum estruturado.',
   },
   {
     id: 'sao-paulo', kind: 'typo', color: 'blue', Icon: Building2, img: 'inst-sao-paulo', tag: 'SEDE BRASIL · 2026', nome: 'São Paulo',
@@ -76,7 +77,7 @@ const TERRITORIOS: Tile[] = [
   },
   {
     id: 'boston', kind: 'typo', color: 'white', Icon: Rocket, img: 'inst-boston-mit', tag: 'INOVAÇÃO · TECH', nome: 'Boston',
-    desc: 'Sede da 1ª Expo Boston (maio 2026) e futuro host do Fórum Mundial de IA em 2027.',
+    desc: 'Sede da 1ª Expo Boston® (maio 2026) e futuro host do Fórum Mundial de IA em 2027.',
   },
   {
     id: 'nova-york', kind: 'typo', color: 'lime', Icon: Landmark, img: 'inst-nyc-onu', tag: 'DIPLOMACIA · ONU', nome: 'Nova York',
@@ -84,15 +85,21 @@ const TERRITORIOS: Tile[] = [
   },
 ];
 
+/* Linha do tempo — conteúdo integral fornecido pelo cliente na revisão
+   editorial. `quando` recebe o título da fase do ano (o cliente estruturou
+   o texto como "ANO | Título da fase"), que já era renderizado como rótulo
+   pequeno em caixa alta sob o ano gigante. ® aplicado só nas 4 marcas que
+   o cliente confirmou como registradas (ver item 11 da revisão). */
 const TIMELINE = [
-  { id: '2017-expo-bh', ano: '2017', quando: 'Dezembro', titulo: '1ª edição EXPO BH — Belo Horizonte', major: true, desc: 'Marco zero. Sem precedentes no Brasil de conexão entre ODS e Smart Cities em um fórum estruturado.' },
-  { id: '2018-expansao-forum', ano: '2018', quando: '2018–2019', titulo: 'Expansão do Fórum Pan-Americano', major: false, desc: 'Consolidação do modelo em Belo Horizonte. Crescimento de participantes, projetos abrigados e relações institucionais.' },
-  { id: '2020-extensao-pos', ano: '2020', quando: '2020–2022', titulo: 'Extensão universitária e pós-graduação', major: false, desc: 'Primeiro ciclo de LTV real. Programas de extensão e pós-graduação lato sensu. Construção da carteira educacional que sustenta o PROINTER.' },
-  { id: '2023-harvard-mit', ano: '2023', quando: '2023', titulo: 'Harvard Square e MIT — Cambridge, MA', major: false, desc: 'Chegada ao ecossistema de inovação de Cambridge. Ancoragem como sede global.' },
-  { id: '2024-onu', ano: '2024', quando: '2024', titulo: '1ª entrada nas Nações Unidas · Nova York', major: true, desc: 'Primeiro contato real com o ambiente interno da ONU — mapeamento, relações e Top 100 da ONU.' },
-  { id: '2026-expo-boston', ano: '2026', quando: 'Maio 2026', titulo: '1ª Expo Boston · Contrato do 4º andar da ONU', major: false, desc: 'Primeira edição fora do Brasil e de Nova York. Fechamento do contrato para ocupar o 4º andar inteiro das Nações Unidas.' },
-  { id: '2026-portal', ano: '2026', quando: 'Junho 2026', titulo: 'Lançamento do Portal HUB PAN', major: true, desc: 'O ecossistema se torna uma plataforma global. Portal, sede SP na Paulista, parceria MIPAD ONU e campanha do Fórum Mundial de IA.' },
-  { id: '2027-forum-ia', ano: '2027', quando: 'Próximo capítulo', titulo: 'Fórum Mundial de Inteligência Artificial', major: true, desc: 'Cambridge, Massachusetts. O maior ativo proprietário do HUB PAN — autoridade global em IA em escala internacional.' },
+  { id: '2017-origem', ano: '2017', quando: 'A origem de uma visão', titulo: 'Brasil Master® Group e EXPO BH®', major: true, desc: 'Fundação do Brasil Master® Group, em Uberlândia (MG), dando início à construção de um ecossistema voltado à inovação, educação, transformação institucional e desenvolvimento. No mesmo ano, é fundada, em Belo Horizonte (MG), a EXPO BH® | Fórum Pan-Americano da Inovação, marco inicial da atuação nacional do grupo e uma das primeiras iniciativas voltadas à conexão entre governos, empresas, universidades e sociedade.' },
+  { id: '2018-cooperacao', ano: '2018', quando: 'O início da cooperação internacional', titulo: 'Primeira missão internacional · Cidade do Panamá', major: false, desc: 'Realização da primeira missão internacional do grupo, na Cidade do Panamá, estabelecendo as bases para uma agenda permanente de cooperação, relacionamento institucional e desenvolvimento internacional.' },
+  { id: '2019-extensao-global', ano: '2019', quando: 'Conhecimento como plataforma de transformação', titulo: 'Programa de Extensão Global', major: false, desc: 'Fundação do Programa de Extensão Global, consolidando uma metodologia própria para formação executiva aplicada à Administração Pública e ao desenvolvimento institucional.' },
+  { id: '2020-egov', ano: '2020', quando: 'Tecnologia para transformar governos', titulo: 'Fundação da eGov Tecnologia®', major: false, desc: 'Fundação da eGov Tecnologia®, com atuação estratégica no apoio às Redes Municipais de Ensino durante a pandemia, acelerando processos de transformação digital, inovação e modernização da gestão pública.' },
+  { id: '2021-abgovtechs', ano: '2021', quando: 'Fortalecimento do ecossistema GovTech', titulo: 'Associação Brasileira de Govtechs', major: false, desc: 'Fundação da Associação Brasileira de Govtechs (Abgovtechs), ampliando a articulação entre governos, empresas, universidades e organizações voltadas à inovação pública.' },
+  { id: '2024-reconhecimento', ano: '2024', quando: 'Reconhecimento internacional', titulo: 'Pacto Global das Nações Unidas e MIPAD', major: true, desc: 'Ingresso no Pacto Global das Nações Unidas e reconhecimento entre as principais lideranças globais afrodescendentes pelo MIPAD, iniciativa apoiada pela ONU, durante programação oficial em Nova York.' },
+  { id: '2025-expansao', ano: '2025', quando: 'Consolidação da expansão nacional e internacional', titulo: 'Premier Niveau®, polo em São Paulo e EXPO NYC® na ONU', major: false, desc: 'Fundação da Premier Niveau® | Universidade Corporativa da Inovação, ampliando a atuação do grupo em educação executiva e desenvolvimento de lideranças. Início da operação permanente no Estado de São Paulo, com o primeiro polo estratégico em São José do Rio Preto. Assunção da Diretoria de Inovação da Câmara Pan-Americana do Comércio, na Cidade do Panamá. Lançamento dos MBAs Globais em parceria com Instituição de Ensino Superior. Realização da EXPO NYC® na sede das Nações Unidas, consolidando um novo patamar de projeção internacional.' },
+  { id: '2026-fundacao-hubpan', ano: '2026', quando: 'A fundação do HUB PAN', titulo: 'HUB PAN Latin America e HUB PAN Global', major: true, desc: 'Ano de convergência e expansão institucional do ecossistema. Fundação do HUB PAN Latin America, em São Paulo, e do HUB PAN Global, em Harvard Square, Cambridge (EUA). Fundação do Fórum Pan-Americano da Educação Inclusiva e lançamento do Programa Fronteiras do Saber Digital. Lançamento do eGovIA, plataforma especializada em Inteligência Artificial para Governos Inteligentes, e criação do Observatório da Inteligência Artificial. Fundação do PROINTER — Programa de Intercâmbio Global — e do World Artificial Intelligence Forum (WAIF). Realização da EXPO BOSTON®, conectando definitivamente o ecossistema brasileiro aos principais ambientes globais de inovação.' },
+  { id: '2027-waif', ano: '2027', quando: 'O próximo capítulo', titulo: '1ª edição do World Artificial Intelligence Forum', major: true, desc: 'Realização da primeira edição do World Artificial Intelligence Forum (WAIF), consolidando o HUB PAN como uma infraestrutura internacional de convergência capaz de conectar ecossistemas, organizações, governos e territórios para transformar inovação, inteligência artificial, educação e cooperação internacional em desenvolvimento econômico, social e institucional.' },
 ];
 
 const GOVERNANCA = [
@@ -104,14 +111,14 @@ const GOVERNANCA = [
   { id: 'impacto', Icon: HeartHandshake, titulo: 'Princípios de Impacto', desc: 'ODS da ONU como critério de avaliação. Diversidade, equidade e inclusão como valores não negociáveis.' },
 ];
 
-const MARCAS = ['Brasil Master® Group', 'Premier Niveau®', 'eGov Tecnologia®', 'EXPO BH®', 'EXPO NYC®'];
+const MARCAS = ['Brasil Master® Group', 'Premier Niveau®', 'eGov Tecnologia®', 'eGovIA®', 'EXPO BH®', 'EXPO NYC®', 'EXPO BOSTON®'];
 
 const FAQ_RAW = [
-  { id: 'empresa-ou-marca', q: 'O HUB PAN é uma nova empresa ou uma nova marca?', a: 'Nem um nem outro exclusivamente. O HUB PAN é a nova narrativa global de um ecossistema que já existe há quase dez anos. As marcas operacionais continuam ativas (Brasil Master, Premier Niveau, eGov), mas o HUB PAN é a identidade unificadora que comunica a dimensão real do conjunto — para o mercado global.' },
-  { id: 'academy-vs-digital', q: 'Qual é a diferença entre HUB PAN Academy e HUB PAN Digital?', a: 'Academy é o que você aprende — formação, cursos, trilhas, extensão, pós-graduação, comunidades educacionais e certificações. Digital é onde você acessa — portal, aplicativo, AVA, área do aluno, biblioteca e infraestrutura técnica do ecossistema. São complementares, não redundantes.' },
-  { id: 'historico-ou-construcao', q: 'O HUB PAN já tem histórico ou ainda está em construção?', a: 'O histórico é extenso e documentado: 15 edições do Fórum Pan-Americano da Inovação, 4 edições em Nova York, 1 edição em Boston, entrada na ONU, ancoragem em Harvard Square, centenas de projetos abrigados desde 2017. O HUB PAN é a nova narrativa desse histórico — não uma promessa vazia.' },
-  { id: 'como-conectar', q: 'Como se conectar ao ecossistema?', a: 'Depende do seu perfil. Governos entram pelo GovIA. Empresas e investidores pelo Fórum Mundial de IA ou pela HUB PAN Alliance. Educadores e profissionais pelo PROINTER ou pela Academy. Qualquer perfil pode começar pelo formulário de contato institucional.' },
-  { id: 'o-que-e-alliance', q: 'O que é a HUB PAN Alliance?', a: 'A Alliance é a rede estratégica de organizações do ecossistema — empresas, startups, universidades, ICTs e governos que fazem parte da comunidade HUB PAN com acesso a networking institucional, missões internacionais, visibilidade global e colaboração em projetos de impacto.' },
+  { id: 'empresa-ou-marca', q: 'O HUB PAN é uma nova empresa ou uma nova marca?', a: 'Nem um nem outro exclusivamente. O HUB PAN é a infraestrutura global de convergência que conecta um ecossistema construído ao longo de quase dez anos. As marcas operacionais continuam ativas (Brasil Master®, Premier Niveau®, eGov Tecnologia®), mas o HUB PAN é a camada institucional que conecta esse conjunto e o projeta no mercado global.' },
+  { id: 'academy-vs-digital', q: 'Qual é a diferença entre HUB PAN Academy e HUB PAN Digital?', a: 'Academy é o que você aprende — formação, cursos, trilhas, extensão, pós-graduação, comunidades educacionais e certificações. Digital é onde você acessa — portal, aplicativo, AVA, área do aluno, biblioteca e infraestrutura técnica do HUB PAN. São complementares, não redundantes.' },
+  { id: 'historico-ou-construcao', q: 'O HUB PAN já tem histórico ou ainda está em construção?', a: 'O histórico é extenso e documentado: 15 edições do Fórum Pan-Americano da Inovação, 4 edições em Nova York, 1 edição em Boston, entrada na ONU, ancoragem em Harvard Square, centenas de projetos abrigados desde 2017. O HUB PAN é a infraestrutura que conecta e dá escala a esse histórico — não uma promessa vazia.' },
+  { id: 'como-conectar', q: 'Como se conectar ao HUB PAN?', a: 'Depende do seu perfil. Governos entram pelo eGovIA. Empresas e investidores pelo Fórum Mundial de IA ou pela HUB PAN Network. Educadores e profissionais pelo PROINTER ou pela Academy. Qualquer perfil pode começar pelo formulário de contato institucional.' },
+  { id: 'o-que-e-alliance', q: 'O que é a HUB PAN Network?', a: 'A HUB PAN Network é a plataforma de comunidades do HUB PAN. Reúne empresas, startups, universidades, ICTs e governos em comunidades temáticas, fóruns, mentorias e espaços colaborativos — com networking qualificado, interação internacional e produção conjunta de conhecimento.' },
 ];
 
 const FAQ = FAQ_RAW.map((f) => ({
@@ -154,7 +161,9 @@ function HeroInst() {
   const [stripBg, stripBgProps] = useEditColor('inst.stats.bg', '#2d4ebf', 'Faixa de números — fundo');
   return (
     <section ref={ref} id="inst-hero" className="relative w-full">
-      <div className="relative w-full h-[80vh] min-h-[560px] flex items-center overflow-hidden">
+      {/* min-height em vez de altura travada — mesmo motivo documentado em
+          Hero80.tsx (em tela baixa o conteúdo transbordava por cima do menu). */}
+      <div className="relative w-full min-h-[max(80vh,560px)] flex items-center overflow-hidden">
         <img src={bgSrc} alt="Delegação do HUB PAN na sede da ONU em Nova York" className="absolute inset-0 w-full h-full object-cover" {...bgImgProps} />
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(90deg, rgba(6,9,25,0.93) 0%, rgba(6,9,25,0.72) 45%, rgba(6,9,25,0.35) 100%)' }} />
         <div className="absolute inset-x-0 bottom-0 h-40 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(6,9,25,0.9), transparent)' }} />
@@ -164,7 +173,7 @@ function HeroInst() {
           style={{ bottom: 24, right: 24 }}
         />
 
-        <div className="relative gutter w-full pt-[150px] lg:pt-[190px] pb-12">
+        <div className="relative gutter w-full pt-[190px] lg:pt-[230px] pb-12">
           {/* Rótulo no padrão do hero da home: Inter 500 13px, tracking 5.85px, branco 50% */}
           <p className="text-[13px] font-medium uppercase mb-6" style={{ fontFamily: 'Inter', letterSpacing: '5.85px', color: 'rgba(255,255,255,0.5)' }} data-animate>
             <ET k="inst.hero.eyebrow" v="QUEM SOMOS · LEGADO · PROPÓSITO · PRESENÇA GLOBAL" l="Hero institucional — selo" />
@@ -172,14 +181,14 @@ function HeroInst() {
           {/* Quebras manuais de melhor encaixe — padrão para os H1 das páginas internas */}
           <h1 ref={titleRef} className="mb-7 text-white" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px, 3vw + 18px, 62px)', lineHeight: 1, letterSpacing: '-1.2px' }} data-split-reveal>
             <ERich k="inst.hero.titulo" l="Hero institucional — título" baseW={729}>
-              Uma narrativa global<br />
+              Uma infraestrutura global<br />
               construída sobre uma<br />
               <span style={{ color: '#d2e718' }}>década de entregas reais.</span>
             </ERich>
           </h1>
           <p className="mb-9" style={{ fontFamily: 'Inter', fontSize: 17, lineHeight: '29px', color: '#d6d6d6', maxWidth: 660 }} data-animate>
             <ERich k="inst.hero.desc" l="Hero institucional — texto de apoio" baseW={559}>
-              O HUB PAN não nasce do zero. Nasce da convergência de tudo que o ecossistema Brasil Master, Premier Niveau e eGov Tecnologia construiu e validou em quase dez anos de trabalho real.
+              O HUB PAN não nasce do zero. Nasce da convergência de tudo que Brasil Master, Premier Niveau® e eGov Tecnologia construíram e validaram em quase dez anos de trabalho real.
             </ERich>
           </p>
           <div className="flex flex-wrap gap-4" data-animate>
@@ -238,7 +247,7 @@ function SecManifesto() {
               className="hidden lg:block absolute left-0 top-[42%] -translate-y-1/2 whitespace-nowrap"
               style={{ fontFamily: 'Luxenta', fontWeight: 500, fontSize: 20, letterSpacing: '5.2px', color: '#152852', transform: 'rotate(-90deg)' }}
             >
-              <ET k="inst.manifesto.selo" v="MANIFESTO · 2026" l="Manifesto — selo vertical" />
+              <ET k="inst.manifesto.selo" v="MANIFESTO FUNDACIONAL" l="Manifesto — selo vertical" />
             </span>
             <div className="relative self-end" style={{ height: '80%', aspectRatio: '695 / 845', maxWidth: '100%' }} data-animate>
               <EImg
@@ -260,13 +269,13 @@ function SecManifesto() {
             </h2>
             <p className="mb-8" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(19px,1.6vw,25px)', lineHeight: 1.5, color: '#152852' }} data-animate>
               <ERich k="inst.manifesto.destaque" l="Manifesto — texto em destaque">
-                Existe um problema de percepção que estamos aqui para resolver. Há um lastro real — mas ele ainda não está organizado em uma narrativa capaz de fazer o mercado perceber a <span style={{ color: '#2d4ebf' }}>verdadeira dimensão do ecossistema.</span>
+                Existe um problema de convergência que estamos aqui para resolver. Há um lastro real — mas ele ainda não está conectado em uma infraestrutura capaz de fazer o mercado global perceber a <span style={{ color: '#2d4ebf' }}>verdadeira dimensão do que já foi construído.</span>
               </ERich>
             </p>
             <div className="space-y-4 mb-10" data-animate>
               <p style={{ fontFamily: 'Inter', fontSize: 15.5, lineHeight: '27px', color: '#5a5a5a' }}>
                 <ERich k="inst.manifesto.par1" l="Manifesto — parágrafo 1">
-                  O HUB PAN não nasce para apresentar uma nova marca. Ele nasce para dar <strong style={{ color: '#152852' }}>escala, forma e percepção global</strong> a tudo que o ecossistema já construiu — experiências, programas, dados, comunidades e oportunidades reais.
+                  O HUB PAN não nasce para apresentar uma nova marca. Ele nasce para dar <strong style={{ color: '#152852' }}>escala, forma e percepção global</strong> a tudo que já foi construído — experiências, programas, dados, comunidades e oportunidades reais.
                 </ERich>
               </p>
               <p style={{ fontFamily: 'Inter', fontSize: 15.5, lineHeight: '27px', color: '#5a5a5a' }}>
@@ -312,7 +321,7 @@ function SecFundador() {
   return (
     <section ref={ref} id="inst-fundador" className="lg:min-h-screen flex flex-col justify-center py-24 lg:py-32 gutter bg-white">
       <div className="mb-14 max-w-[640px]">
-        <p className="eyebrow text-muted mb-6" data-animate><ET k="inst.fundador.eyebrow" v="ECOSSISTEMA FUNDADOR" l="Ecossistema Fundador — selo da seção" /></p>
+        <p className="eyebrow text-muted mb-6" data-animate><ET k="inst.fundador.eyebrow" v="BASE FUNDADORA" l="Ecossistema Fundador — selo da seção" /></p>
         <h2 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1, color: '#152852' }} data-animate>
           <ERich k="inst.fundador.titulo" l="Ecossistema Fundador — título">De onde viemos define para onde vamos.</ERich>
         </h2>
@@ -372,10 +381,208 @@ function FundadorCta() {
       <div className="hidden lg:block w-px self-stretch" style={{ background: 'rgba(21,40,82,0.25)' }} />
       <p style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: '#152852' }}>
         <ERich k="inst.fundador.cta.desc" l="Ecossistema Fundador — bloco final, texto">
-          <strong>O guarda-chuva global</strong> que organiza, reposiciona e escala tudo que já foi construído. Narrativa global, capilaridade, expansão, negócios, comunidade e futuro compartilhado entre Américas e África.
+          <strong>A infraestrutura global</strong> que conecta, organiza e dá escala a tudo que já foi construído. Convergência, capilaridade, expansão, negócios, comunidade e futuro compartilhado entre Américas e África.
         </ERich>
       </p>
     </div>
+  );
+}
+
+/* ═══════════ Startups Afiliadas ═══════════ */
+
+/* ⚠️ DADOS DE EXEMPLO — PLACEHOLDER, SUBSTITUIR PELAS STARTUPS REAIS.
+   Nomes propositalmente autoexplicativos ("… Exemplo") pra ninguém confundir
+   com uma afiliação real enquanto o conteúdo definitivo não chega. As logos
+   reaproveitam os PNGs de parceiro que já existem em /public/images — nenhum
+   arquivo novo foi criado. Trocar nome/segmento/país aqui (ou pelo painel de
+   edição, chaves `inst.startups.*`) quando o cliente enviar a lista final. */
+const STARTUPS = [
+  { id: 'exemplo-1', img: 's10-logo-parceiro-1', nome: 'GovTech Exemplo', segmento: 'Inovação pública', pais: 'Brasil' },
+  { id: 'exemplo-2', img: 's10-logo-parceiro-2', nome: 'EdTech Exemplo', segmento: 'Educação', pais: 'Panamá' },
+  { id: 'exemplo-3', img: 's10-logo-parceiro-3', nome: 'HealthTech Exemplo', segmento: 'Saúde digital', pais: 'Estados Unidos' },
+  { id: 'exemplo-4', img: 's10-logo-parceiro-4', nome: 'AgTech Exemplo', segmento: 'Agronegócio', pais: 'Colômbia' },
+  { id: 'exemplo-5', img: 's10-logo-parceiro-5', nome: 'FinTech Exemplo', segmento: 'Serviços financeiros', pais: 'México' },
+  { id: 'exemplo-6', img: 's10-logo-parceiro-6', nome: 'CleanTech Exemplo', segmento: 'Energia e sustentabilidade', pais: 'Portugal' },
+  { id: 'exemplo-7', img: 's10-logo-parceiro-2', nome: 'DeepTech Exemplo', segmento: 'Inteligência artificial', pais: 'Brasil' },
+  { id: 'exemplo-8', img: 's10-logo-parceiro-4', nome: 'SmartCity Exemplo', segmento: 'Cidades inteligentes', pais: 'Panamá' },
+];
+
+const BENEFICIOS = [
+  { id: 'infraestrutura', Icon: Globe2, texto: 'Inserção em uma infraestrutura internacional de inovação' },
+  { id: 'networking', Icon: Users, texto: 'Networking qualificado com governos, empresas, universidades e organismos internacionais' },
+  { id: 'programas', Icon: CalendarDays, texto: 'Participação em programas, missões e eventos do HUB PAN' },
+  { id: 'negocios', Icon: TrendingUp, texto: 'Oportunidades de desenvolvimento institucional e geração de negócios' },
+  { id: 'comunidades', Icon: MessagesSquare, texto: 'Acesso a comunidades internacionais' },
+  { id: 'conhecimento', Icon: BookOpen, texto: 'Produção colaborativa de conhecimento' },
+  { id: 'posicionamento', Icon: Sparkles, texto: 'Fortalecimento do posicionamento institucional' },
+];
+
+function StartupCard({ s }: { s: (typeof STARTUPS)[number] }) {
+  const [bg, bgProps] = useEditColor(`inst.startups.${s.id}.bg`, '#ffffff', `Startups Afiliadas — fundo do card "${s.nome}"`);
+  return (
+    <div
+      className="shrink-0 rounded-[20px] px-7 py-8 flex flex-col items-center text-center"
+      style={{ width: 303, background: bg, border: '1px solid #ecedf0' }}
+      {...bgProps}
+    >
+      <EImg
+        k={`inst.startups.${s.id}.img`} v={`/images/${s.img}.png`}
+        l={`Startups Afiliadas — logo "${s.nome}"`}
+        spec={{ w: 606, h: 250, shape: 'paisagem', fit: 'contain', note: 'Logomarca da organização afiliada com fundo transparente (PNG ou SVG).' }}
+        alt={s.nome}
+        className="object-contain transition-transform duration-300 hover:scale-105"
+        style={{ width: '100%', height: 92 }}
+      />
+      <h3 className="mt-6 mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 20, lineHeight: 1.1, color: '#152852' }}>
+        <ET k={`inst.startups.${s.id}.nome`} v={s.nome} l={`Startups Afiliadas — nome "${s.nome}"`} />
+      </h3>
+      <p style={{ fontFamily: 'Inter', fontSize: 13.5, lineHeight: '21px', color: '#797979' }}>
+        <ET k={`inst.startups.${s.id}.segmento`} v={s.segmento} l={`Startups Afiliadas — segmento "${s.nome}"`} />
+      </p>
+      <span className="inline-flex items-center gap-2 mt-4 px-3 py-[6px] rounded-full" style={{ background: '#f5f5f5' }}>
+        <MapPin size={13} strokeWidth={2} color="#2d4ebf" />
+        <span style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 10.5, letterSpacing: '1.6px', textTransform: 'uppercase', color: '#152852' }}>
+          <ET k={`inst.startups.${s.id}.pais`} v={s.pais} l={`Startups Afiliadas — país "${s.nome}"`} />
+        </span>
+      </span>
+    </div>
+  );
+}
+
+/** Card de benefício — glass sobre o fundo escuro da seção, com tilt 3D pelo cursor
+    (mesmo hook dos cards de Governança). O primeiro item é o card em destaque:
+    ocupa 2 colunas, ganha o acento lima e tipografia display. */
+function BeneficioCard({ b, i, featured = false }: { b: (typeof BENEFICIOS)[number]; i: number; featured?: boolean }) {
+  const tiltRef = useTilt<HTMLDivElement>(6, 8);
+  const iconSize = featured ? 30 : 24;
+  return (
+    <div
+      ref={tiltRef}
+      className={`relative rounded-[20px] flex flex-col h-full cursor-default transition-colors duration-300 ${featured ? 'sm:col-span-2 p-8 lg:p-10' : 'p-7'}`}
+      style={{
+        backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+        background: featured ? 'rgba(210,231,24,0.10)' : 'rgba(255,255,255,0.07)',
+        border: featured ? '1px solid rgba(210,231,24,0.38)' : '1px solid rgba(255,255,255,0.12)',
+      }}
+      data-animate
+    >
+      <span
+        className="absolute top-6 right-7"
+        style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: featured ? 15 : 13, letterSpacing: '1px', color: featured ? 'rgba(210,231,24,0.75)' : 'rgba(255,255,255,0.28)' }}
+      >
+        {String(i + 1).padStart(2, '0')}
+      </span>
+      <span
+        className="flex items-center justify-center shrink-0 rounded-full mb-6"
+        style={{
+          width: featured ? 68 : 54, height: featured ? 68 : 54,
+          background: featured ? 'rgba(210,231,24,0.16)' : 'rgba(255,255,255,0.1)',
+          border: '1px solid rgba(210,231,24,0.4)',
+        }}
+      >
+        <EIcon k={`inst.startups.beneficio.${b.id}.icone`} l={`Benefícios das Afiliadas — ícone "${b.texto}"`} defaultSize={iconSize}>
+          <b.Icon size={iconSize} strokeWidth={2} color="#d2e718" />
+        </EIcon>
+      </span>
+      <p
+        className="mt-auto"
+        style={
+          featured
+            ? { fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(20px,1.7vw,26px)', lineHeight: 1.2, letterSpacing: '-0.4px', color: '#fff' }
+            : { fontFamily: 'Inter', fontSize: 15, lineHeight: '24px', color: 'rgba(255,255,255,0.88)' }
+        }
+      >
+        <ERich k={`inst.startups.beneficio.${b.id}.texto`} l={`Benefícios das Afiliadas — benefício "${b.texto}"`}>{b.texto}</ERich>
+      </p>
+    </div>
+  );
+}
+
+/** Benefícios da afiliação — seção própria, full-bleed sobre navy.
+    Composição 1+6: o item de destaque ocupa 2 colunas na 1ª fileira (destaque + 2
+    cards) e os 4 restantes fecham a 2ª fileira — 8 células em 4 colunas, sem
+    última linha órfã. */
+function SecBeneficios() {
+  const ref = useReveal<HTMLElement>();
+  const [bg, bgProps] = useEditColor('inst.startups.beneficios.bg', '#152852', 'Benefícios das Afiliadas — fundo da seção');
+  const [destaque, ...demais] = BENEFICIOS;
+  return (
+    <section ref={ref} id="inst-beneficios" className="relative w-full overflow-hidden" {...bgProps} style={{ background: bg }}>
+      {/* Brilho suave lima no canto — só atmosfera, sem interceptar clique */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: 'radial-gradient(900px 500px at 88% 8%, rgba(210,231,24,0.13), transparent 62%)' }}
+      />
+
+      <div className="relative gutter py-24 lg:py-32">
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-end mb-14">
+          <div className="lg:col-span-8">
+            <p className="eyebrow mb-6" style={{ color: 'rgba(255,255,255,0.69)' }} data-animate>
+              <ET k="inst.startups.beneficios.eyebrow" v="BENEFÍCIOS DA AFILIAÇÃO" l="Benefícios das Afiliadas — selo da seção" />
+            </p>
+            <h2 style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(28px,3.4vw,46px)', letterSpacing: '-0.7px', lineHeight: 1.05, color: '#fff' }} data-animate>
+              <ERich k="inst.startups.beneficios.titulo" l="Benefícios das Afiliadas — título">
+                Ao integrar o HUB PAN, organizações afiliadas passam a contar com:
+              </ERich>
+            </h2>
+          </div>
+          <div className="lg:col-span-4 lg:justify-self-end" data-animate>
+            <HubButton
+              size="lg" variant="lime" to="/contato"
+              iconKey="inst.startups.btn.icone" iconLabel="Benefícios das Afiliadas — botão, ícone"
+              styleKey="inst.startups.btn" styleLabel="Benefícios das Afiliadas — botão"
+            >
+              <ET k="inst.startups.btn" v="Candidate sua organização" l="Benefícios das Afiliadas — botão" />
+            </HubButton>
+          </div>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <BeneficioCard b={destaque} i={0} featured />
+          {demais.map((b, i) => (
+            <BeneficioCard key={b.id} b={b} i={i + 1} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SecStartups() {
+  const ref = useReveal<HTMLElement>();
+  const [bg, bgProps] = useEditColor('inst.startups.bg', '#f5f5f5', 'Fundo da seção Startups Afiliadas');
+  return (
+    <section ref={ref} id="inst-startups" className="w-full py-24 lg:py-32 overflow-hidden" {...bgProps} style={{ background: bg }}>
+      {/* Cabeçalho horizontal: o título ocupa a largura inteira da sanga (≈1185px
+          em 1440) em vez do bloco de 700px que o espremia em 4 linhas — nessa
+          largura ele fecha em 2 linhas mantendo o mesmo corpo das outras seções
+          (clamp 32–50px). A descrição vem abaixo, também horizontal (8 de 12
+          colunas ≈ 790px), em vez de empilhada num bloco estreito. */}
+      <div className="gutter mb-14">
+        <p className="eyebrow text-muted mb-6" data-animate><ET k="inst.startups.eyebrow" v="STARTUPS AFILIADAS HUB PAN" l="Startups Afiliadas — selo da seção" /></p>
+        <h2 className="mb-5 max-w-[1000px]" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', letterSpacing: '-0.5px', lineHeight: 1.05, color: '#152852' }} data-animate>
+          <ERich k="inst.startups.titulo" l="Startups Afiliadas — título">Organizações inovadoras que integram nossa infraestrutura institucional.</ERich>
+        </h2>
+        <div className="grid lg:grid-cols-12">
+          <p className="lg:col-span-8" style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: '#797979' }} data-animate>
+            <ERich k="inst.startups.desc" l="Startups Afiliadas — texto de apoio">
+              O HUB PAN também é feito pelas empresas que escolhem crescer dentro dele — startups e organizações afiliadas que somam tecnologia, mercado e território à infraestrutura.
+            </ERich>
+          </p>
+        </div>
+      </div>
+
+      {/* Carrossel — a lista é duplicada pro loop infinito; as duas cópias usam as
+          MESMAS chaves de edição, então trocar uma logo atualiza as duas (mesmo
+          padrão da seção de Parceiros da home, `S10Parceiros.tsx`). */}
+      <div className="marquee-mask overflow-hidden" data-animate>
+        <div className="marquee-track flex gap-5 w-max">
+          {[...STARTUPS, ...STARTUPS].map((s, i) => (
+            <StartupCard key={i} s={s} />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -624,7 +831,7 @@ function SecTimeline() {
         </h2>
         <p style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: '#797979' }} data-animate>
           <ERich k="inst.timeline.desc" l="Timeline — texto de apoio">
-            Um ecossistema que prometeu, entregou e fez isso múltiplas vezes — em contextos diferentes, para públicos diferentes, em cidades diferentes.
+            Uma trajetória que prometeu, entregou e fez isso múltiplas vezes — em contextos diferentes, para públicos diferentes, em cidades diferentes.
           </ERich>
         </p>
       </div>
@@ -671,7 +878,7 @@ function SecMipad() {
             </p>
             <p style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: '#d6d6d6' }}>
               <ERich k="inst.mipad.par2" l="MIPAD — parágrafo 2">
-                A parceria fundacional com o MIPAD posiciona o HUB PAN dentro de uma rede de influência genuinamente global — e valida o eixo pan-africano do ecossistema com a legitimidade de um organismo vinculado à ONU.
+                A parceria fundacional com o MIPAD posiciona o HUB PAN dentro de uma rede de influência genuinamente global — e valida o eixo pan-africano do HUB PAN com a legitimidade de um organismo vinculado à ONU.
               </ERich>
             </p>
           </div>
@@ -835,7 +1042,7 @@ function SecGovernanca() {
           </h3>
           <p className="mb-7" style={{ fontFamily: 'Inter', fontSize: 14, lineHeight: '24px', color: 'rgba(255,255,255,0.8)' }}>
             <ERich k="inst.governanca.pi.desc" l="Governança — descrição Propriedade Intelectual">
-              Todo o conteúdo, metodologias, programas, marcas e ativos digitais do ecossistema HUB PAN são protegidos por registro de propriedade intelectual e por políticas internas de uso e licenciamento. Parceiros e patrocinadores recebem autorização formal e documentada de uso.
+              Todo o conteúdo, metodologias, programas, marcas e ativos digitais do HUB PAN são protegidos por registro de propriedade intelectual e por políticas internas de uso e licenciamento. Parceiros e patrocinadores recebem autorização formal e documentada de uso.
             </ERich>
           </p>
           <HubButton size="sm" variant="lime" iconKey="inst.governanca.pi.btn.icone" iconLabel="Governança — botão Propriedade Intelectual, ícone" styleKey="inst.governanca.pi.btn" styleLabel="Governança — botão Propriedade Intelectual" as="a" href={WHATSAPP_URL}><ET k="inst.governanca.pi.btn" v="Ver política de governança" l="Governança — botão Propriedade Intelectual" /></HubButton>
@@ -882,6 +1089,10 @@ export default function Institucional() {
       <SecPresenca />
       <SecTimeline />
       <SecMipad />
+      {/* Startups Afiliadas vem logo depois do MIPAD — a seção cujo selo é
+          "PARCEIRO ESTRATÉGICO FUNDACIONAL" (posição pedida pelo Bruno) */}
+      <SecStartups />
+      <SecBeneficios />
       <SecGovernanca />
       <SecFAQ />
       <CTABanner

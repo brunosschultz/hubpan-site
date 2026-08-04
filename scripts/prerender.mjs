@@ -29,7 +29,7 @@ const DIST = join(ROOT, 'dist');
 // Rotas públicas — mesma lista usada no sitemap.xml. Ao criar uma página
 // nova em App.tsx, adicionar aqui também (não incluir /editar nem /preview).
 const ROUTES = [
-  '/', '/o-hub-pan', '/prointer', '/govia', '/forum-mundial-ia',
+  '/', '/o-hub-pan', '/prointer', '/govia', '/expos', '/forum-mundial-ia',
   '/insights', '/contato', '/glossario', '/imprensa', '/casos-de-uso',
 ];
 

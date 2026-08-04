@@ -35,7 +35,7 @@ export const LEAD_SOURCE_LABEL: Record<LeadSource, string> = {
   newsletter: 'Newsletter',
   prointer_apoio: 'PROINTER — Apoio',
   prointer_inscricao: 'PROINTER — Inscrição',
-  govia_demo: 'GovIA — Demonstração',
+  govia_demo: 'eGovIA — Demonstração',
   forum_empresas: 'Fórum — Patrocínio',
   forum_participantes: 'Fórum — Participação',
 };

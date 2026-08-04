@@ -9,11 +9,11 @@ import { EIcon, EImg, ERich, ET, useEditColor } from '../../editor/fields';
 
 /* ═══════════ Dados — extraídos do wireframe oficial (page-casos) ═══════════ */
 
-const PLATAFORMAS = ['Todos', 'PROINTER', 'GovIA', 'Fórum Mundial de IA', 'Fórum Pan-Americano'];
+const PLATAFORMAS = ['Todos', 'PROINTER', 'eGovIA', 'Fórum Mundial de IA', 'Fórum Pan-Americano'];
 const PLATAFORMA_SLUGS: Record<string, string> = {
   Todos: 'todos',
   PROINTER: 'prointer',
-  GovIA: 'govia',
+  eGovIA: 'govia',
   'Fórum Mundial de IA': 'forum-ia',
   'Fórum Pan-Americano': 'forum-panamericano',
 };
@@ -23,15 +23,15 @@ const CASOS = [
     id: 'professora-mg',
     plataforma: 'PROINTER', img: 's7-persona-2', tag: 'PROINTER · Educação', selo: '2027', tipo: 'História de impacto',
     titulo: '"Quando voltei de Harvard, minha escola inteira mudou de perspectiva"',
-    desc: 'Professora de matemática da rede municipal de Minas Gerais, selecionada como bolsista PROINTER pela performance em programa de extensão Premier Niveau. Após a missão em Nova York, Boston e Cambridge, implementou projeto de inovação pedagógica reconhecido pela Secretaria de Educação do estado.',
+    desc: 'Professora de matemática da rede municipal de Minas Gerais, selecionada como bolsista PROINTER pela performance em programa de extensão Premier Niveau®. Após a missão em Nova York, Boston e Cambridge, implementou projeto de inovação pedagógica reconhecido pela Secretaria de Educação do estado.',
     stats: [{ v: '320', l: 'Alunos impactados' }, { v: '3', l: 'Projetos derivados' }, { v: 'ODS 4', l: 'Alinhamento' }],
     cta: 'Ler história completa',
   },
   {
     id: 'prefeitura-mg',
-    plataforma: 'GovIA', img: 's3-accordion-govia', tag: 'GOVIA', selo: 'Piloto MG · 2026', tipo: 'Caso de uso',
+    plataforma: 'eGovIA', img: 's3-accordion-govia', tag: 'eGovIA', selo: 'Piloto MG · 2026', tipo: 'Caso de uso',
     titulo: 'Prefeitura de município mineiro adota IA para comunicação e atendimento ao cidadão',
-    desc: 'Município com 45.000 habitantes no interior de Minas Gerais assinou o plano Municipal do GovIA e capacitou 18 servidores em 6 semanas. Resultado: redução de 40% no tempo de produção de comunicados oficiais e implementação de chatbot de atendimento para dúvidas sobre IPTU.',
+    desc: 'Município com 45.000 habitantes no interior de Minas Gerais assinou o plano Municipal do eGovIA e capacitou 18 servidores em 6 semanas. Resultado: redução de 40% no tempo de produção de comunicados oficiais e implementação de chatbot de atendimento para dúvidas sobre IPTU.',
     stats: [{ v: '18', l: 'Servidores capacitados' }, { v: '40%', l: 'Redução de tempo' }, { v: '6 sem', l: 'Para implementar' }],
     cta: 'Ver caso completo',
   },
@@ -54,7 +54,7 @@ const CASOS = [
 ];
 
 const PERFIS: { id: string; sigla: string; Icon: typeof Landmark; titulo: string; desc: string; btn: string; to: string; color: 'navy' | 'blue' | 'lime' }[] = [
-  { id: 'governo', sigla: 'GOV', Icon: Landmark, titulo: 'Sou governo', desc: 'Ver como o GovIA funciona na prática para municípios e estados.', btn: 'Conhecer o GovIA', to: '/govia', color: 'navy' },
+  { id: 'governo', sigla: 'GOV', Icon: Landmark, titulo: 'Sou governo', desc: 'Ver como o eGovIA funciona na prática para municípios e estados.', btn: 'Conhecer o eGovIA', to: '/govia', color: 'navy' },
   { id: 'educador', sigla: 'EDU', Icon: GraduationCap, titulo: 'Sou educador', desc: 'Me candidatar ao PROINTER e acessar Harvard, MIT e a ONU.', btn: 'Candidatar-se ao PROINTER', to: '/prointer', color: 'blue' },
   { id: 'empresa', sigla: 'EMP', Icon: Briefcase, titulo: 'Sou empresa', desc: 'Apoiar o PROINTER ou patrocinar o Fórum Mundial de IA.', btn: 'Falar com nossa equipe', to: '/contato', color: 'lime' },
 ];
@@ -161,14 +161,14 @@ export default function CasosDeUso() {
         bgKey="casos.hero"
         eyebrow={<ET k="casos.hero.eyebrow" v="CASOS DE USO · HISTÓRIAS DE IMPACTO · RESULTADOS REAIS" l="Casos de Uso — rótulo do hero" />}
         title={<ERich k="casos.hero.titulo" l="Casos de Uso — título do hero">O que o HUB PAN entrega na prática.</ERich>}
-        sub={<ERich k="casos.hero.sub" l="Casos de Uso — subtítulo do hero">Não basta dizer que o ecossistema funciona. Aqui estão os dados, as histórias e os resultados documentados de quem já viveu o que o HUB PAN propõe.</ERich>}
+        sub={<ERich k="casos.hero.sub" l="Casos de Uso — subtítulo do hero">Não basta dizer que o HUB PAN funciona. Aqui estão os dados, as histórias e os resultados documentados de quem já viveu o que o HUB PAN propõe.</ERich>}
       />
 
       <section ref={ref} id="casos-area" className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
         <div className="mb-10">
           <p className="eyebrow text-muted mb-6" data-animate><ET k="casos.secao.eyebrow" v="POR PLATAFORMA" l="Casos de Uso — selo da seção de filtros" /></p>
           <h2 className="mb-8" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(28px,3vw,38px)', letterSpacing: '-0.5px', lineHeight: 1.1, color: '#152852' }} data-animate>
-            <ERich k="casos.secao.titulo" l="Casos de Uso — título da seção de filtros">Casos de uso por área do ecossistema.</ERich>
+            <ERich k="casos.secao.titulo" l="Casos de Uso — título da seção de filtros">Casos de uso por área de atuação.</ERich>
           </h2>
           <div className="flex flex-wrap gap-3" data-animate>
             {PLATAFORMAS.map((p) => (

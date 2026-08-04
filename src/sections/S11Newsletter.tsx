@@ -35,7 +35,7 @@ export default function S11Newsletter() {
             <ET k="s11.eyebrow" v="HUB PAN INSIGHTS · NEWSLETTER" l="Newsletter — selo da seção" />
           </p>
           <h2 className="mb-4" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,4vw,50px)', lineHeight: 1, color: '#152852' }} data-animate>
-            <ERich k="s11.titulo" l="Newsletter — título">Fique conectado ao ecossistema.</ERich>
+            <ERich k="s11.titulo" l="Newsletter — título">Fique conectado ao HUB PAN.</ERich>
           </h2>
           <p style={{ fontFamily: 'Inter', fontSize: 16, color: '#152852' }} data-animate>
             <ERich k="s11.desc" l="Newsletter — texto de apoio" baseW={527}>

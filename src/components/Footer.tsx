@@ -20,8 +20,13 @@ const COLUMNS: { id: string; title: string; links: { label: string; to: string }
     links: [
       { label: 'PROINTER', to: '/prointer' },
       { label: 'Fórum Mundial de IA', to: '/forum-mundial-ia' },
-      { label: 'GovIA', to: '/govia' },
+      { label: 'eGovIA', to: '/govia' },
       { label: 'Insights', to: '/insights' },
+      /* EXPOs entra no FIM da lista de propósito: a chave de editor de cada
+       * link é o ÍNDICE (`f.col.plataformas.link.<j>`) — inserir no meio
+       * deslocaria todas as chaves seguintes e faria um override salvo
+       * aparecer no link errado. Acrescentar no fim é seguro. */
+      { label: 'EXPOs', to: '/expos' },
     ],
   },
   {
@@ -86,7 +91,7 @@ export default function Footer() {
             <ET k="f.copyright" v="© 2026 HUB PAN. Todos os direitos reservados." l="Rodapé — copyright" />
           </p>
           <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#a7a4a4' }}>
-            <ET k="f.marcas" v="Brasil Master® Premier Niveau® eGov Tecnologia® EXPO BH® EXPO NYC®" l="Rodapé — marcas" />
+            <ET k="f.marcas" v="Brasil Master® Premier Niveau® eGov Tecnologia® eGovIA® EXPO BH® EXPO NYC® EXPO BOSTON®" l="Rodapé — marcas" />
           </p>
         </div>
       </div>
