@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
 import { MapPin, Play, Flag, Check, Building2 } from 'lucide-react';
 import PageHero from '../../components/PageHero';
@@ -201,11 +202,13 @@ const FOTO_RADIUS = 12;
  * saírem quadradas. 150 × ~227px de largura = retângulo ~3:2. */
 const FOTO_H = 150;
 
-/** Progressão de cor dos cards de marco — pedido do Bruno pra dar dinamismo.
- * Não é decoração aleatória: é a paleta da marca em ordem, do lime ao
- * navy900, então a sequência de marcos "esquenta e escurece" conforme
- * avança, reforçando a leitura de evolução no tempo. `escuro` diz se o
- * texto por cima é branco (o contraste muda no meio da sequência). */
+/** Progressão de cor dos cards de marco. Não é decoração aleatória: é a
+ * paleta da marca em ordem, do lime ao navy900, então a sequência "esquenta
+ * e escurece" conforme avança, reforçando a leitura de evolução no tempo.
+ *
+ * A cor NÃO é o estado padrão — o card nasce branco e só ganha cor no hover
+ * (pedido do Bruno: fica mais clean, e a cor vira recompensa da interação).
+ * `escuro` diz se, colorido, o texto por cima precisa ser branco. */
 const MARCO_CORES = [
   { bg: '#d2e718', escuro: false },
   { bg: '#00e4ff', escuro: false },
@@ -213,6 +216,19 @@ const MARCO_CORES = [
   { bg: '#152852', escuro: true },
   { bg: '#060919', escuro: true },
 ];
+
+/** Cor do círculo do ícone e do próprio check, em cada estado.
+ *
+ * O círculo é lime por padrão (card branco) e continua lime quando o card
+ * fica ESCURO no hover — lime sobre azul/navy é a combinação de maior
+ * contraste da marca. O caso que quebra é o card CLARO (lime, ciano): lime
+ * sobre lime desapareceria, então ali o círculo vira navy translúcido. */
+function coresDoIcone(colorido: boolean, escuro: boolean) {
+  if (!colorido) return { circulo: '#d2e718', check: '#152852' };
+  return escuro
+    ? { circulo: '#d2e718', check: '#152852' }
+    : { circulo: 'rgba(21,40,82,0.14)', check: '#152852' };
+}
 
 /** Selo neutro de estado — "Em atualização" / "Em produção", exatamente o
  * que o cliente escreveu no documento. Não é um placeholder nosso: é o
@@ -330,31 +346,41 @@ function ExpoDestaque({ expo }: { expo: Expo }) {
 function MarcoCard({ expo, m, i }: { expo: Expo; m: Marco; i: number }) {
   const tilt = useTilt<HTMLDivElement>(3, 5);
   const c = MARCO_CORES[i % MARCO_CORES.length];
-  const [bg, bgProps] = useEditColor(`expos.${expo.id}.marco.${m.id}.bg`, c.bg, `${expo.marca} — cor do marco ${i + 1}`);
-  const texto = c.escuro ? '#fff' : '#152852';
+  const [cor, corProps] = useEditColor(`expos.${expo.id}.marco.${m.id}.bg`, c.bg, `${expo.marca} — cor do marco ${i + 1} (aparece no hover)`);
+  /* Estado em JS, não `group-hover:` do Tailwind: as cores aqui são inline
+   * (vêm do editor e mudam por card), e CSS inline sempre vence classe —
+   * mesmo motivo já documentado nos cards de Plataformas da Home. */
+  const [hover, setHover] = useState(false);
+  const texto = hover ? (c.escuro ? '#fff' : '#152852') : '#152852';
+  const ic = coresDoIcone(hover, c.escuro);
   return (
     <div
       ref={tilt}
-      className="flex flex-col justify-between rounded-[20px] p-7 min-h-[190px] transition-shadow duration-300 hover:shadow-[0_18px_40px_rgba(21,40,82,0.22)]"
-      {...bgProps}
-      style={{ background: bg }}
+      className="flex flex-col justify-between rounded-[20px] p-7 min-h-[190px] transition-[background-color,box-shadow,border-color] duration-300 ease-out hover:shadow-[0_18px_40px_rgba(21,40,82,0.18)]"
+      {...corProps}
+      style={{ background: hover ? cor : '#ffffff', border: `1px solid ${hover ? 'transparent' : '#ecedf0'}` }}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
       data-animate
     >
       <div className="flex items-center justify-between mb-6">
         <span
-          className="flex items-center justify-center rounded-full shrink-0"
-          style={{ width: 38, height: 38, background: c.escuro ? 'rgba(255,255,255,0.14)' : 'rgba(21,40,82,0.10)' }}
+          className="flex items-center justify-center rounded-full shrink-0 transition-colors duration-300"
+          style={{ width: 38, height: 38, background: ic.circulo }}
         >
           <EIcon k={`expos.${expo.id}.marco.${m.id}.icone`} l={`EXPOs — ícone do marco ${i + 1} (${expo.marca})`} defaultSize={17}>
-            <Check size={17} strokeWidth={2.6} color={texto} />
+            <Check size={17} strokeWidth={2.6} color={ic.check} />
           </EIcon>
         </span>
-        {/* Número do marco — dá ordem de leitura à sequência de cores */}
-        <span style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 30, lineHeight: 1, color: texto, opacity: 0.28 }}>
+        {/* Número do marco — dá ordem de leitura à sequência */}
+        <span
+          className="transition-colors duration-300"
+          style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 30, lineHeight: 1, color: texto, opacity: hover ? 0.32 : 0.22 }}
+        >
           {String(i + 1).padStart(2, '0')}
         </span>
       </div>
-      <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 16, lineHeight: '25px', color: texto }}>
+      <p className="transition-colors duration-300" style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 16, lineHeight: '25px', color: texto }}>
         <ERich k={`expos.${expo.id}.marco.${m.id}.titulo`} l={`EXPOs — marco ${i + 1} (${expo.marca})`}>{m.titulo}</ERich>
       </p>
     </div>
@@ -493,7 +519,9 @@ function ResumoCard({ c }: { c: (typeof RESUMO_CARDS)[number] }) {
     <div
       ref={tilt}
       className="group overflow-hidden bg-white transition-shadow duration-300 hover:shadow-[0_18px_40px_rgba(21,40,82,0.10)]"
-      style={{ borderRadius: FOTO_RADIUS, border: '1px solid #ecedf0' }}
+      /* Sem borda: estes cards vivem sobre o azul da seção, e a borda clara
+         que os outros cards do site usam lia como um contorno branco. */
+      style={{ borderRadius: FOTO_RADIUS }}
       data-animate
     >
       <div className="overflow-hidden" style={{ height: 200 }}>
@@ -539,19 +567,21 @@ function SecIntro() {
         </h2>
       </div>
 
-      <div className="grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-10 lg:gap-16 mb-14 items-start">
-        {/* Fotografia da abertura — `lg:sticky` deixa a imagem acompanhar a
-            leitura dos parágrafos ao lado em vez de sumir no primeiro scroll;
-            é o recurso que dá o ar editorial das referências que o Bruno
-            usa, sem depender de animação nenhuma. */}
-        <figure className="group relative overflow-hidden lg:sticky lg:top-28" style={{ borderRadius: FOTO_RADIUS }} data-animate>
+      {/* Coluna esquerda = foto + 1º parágrafo; direita = o restante do texto.
+          Antes a foto ficava sozinha à esquerda e TODO o texto à direita, então
+          a coluna da imagem terminava muito antes da outra e o bloco ficava
+          desencaixado. Descer o primeiro parágrafo pra baixo da foto reequilibra
+          as duas alturas sem cortar conteúdo. */}
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-10 lg:gap-14 mb-14 items-start">
+        <div className="space-y-5">
+        <figure className="group relative overflow-hidden" style={{ borderRadius: FOTO_RADIUS }} data-animate>
           <EImg
             k="expos.intro.img" v="/images/forum-onu-flags.webp"
             l="EXPOs — fotografia da seção de abertura"
             spec={{ w: 1600, h: 1400, shape: 'retrato', note: 'Imagem de apoio da abertura. Provisória — trocar pelo registro real das EXPOs.' }}
             alt=""
             className="block w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-            style={{ height: 'clamp(320px, 42vw, 560px)' }}
+            style={{ height: 'clamp(300px, 33vw, 428px)' }}
           />
           {/* Legenda sobre a foto, com degradê próprio — evita um bloco de
               texto extra embaixo e mantém a imagem "cheia". */}
@@ -567,37 +597,72 @@ function SecIntro() {
           </figcaption>
         </figure>
 
+          {/* Box navy com o 1º parágrafo — fecha a coluna esquerda e faz o
+              conjunto (foto + box) bater a altura do texto ao lado. Largura
+              não é declarada: os dois são blocos na MESMA coluna do grid,
+              então nascem exatamente com a mesma largura, e continuam
+              iguais em qualquer tela. */}
+          <div className="rounded-[12px] p-7 lg:p-8" style={{ background: '#152852' }} data-animate>
+            <p style={{ fontFamily: 'Inter', fontSize: 16, lineHeight: '27px', color: 'rgba(255,255,255,0.88)' }}>
+              <ERich k="expos.intro.p1" l="EXPOs — abertura, parágrafo 1 (box azul)" baseW={520}>
+                O Fórum Pan-Americano da Inovação é uma plataforma internacional de inovação, cooperação e desenvolvimento institucional, fundada pelo <strong className="font-semibold" style={{ color: '#d2e718' }}>Brasil Master® Group</strong> com o propósito de conectar governos, universidades, empresas, centros de pesquisa, investidores e organismos internacionais na construção de soluções para os grandes desafios das Américas.
+              </ERich>
+            </p>
+          </div>
+        </div>
+
         <div className="space-y-5">
-          <p style={{ fontFamily: 'Inter', fontSize: 16.5, lineHeight: '28px', color: '#152852' }} data-animate>
-            <ERich k="expos.intro.p1" l="EXPOs — abertura, parágrafo 1" baseW={720}>
-              O Fórum Pan-Americano da Inovação é uma plataforma internacional de inovação, cooperação e desenvolvimento institucional, fundada pelo <strong className="font-semibold">Brasil Master® Group</strong> com o propósito de conectar governos, universidades, empresas, centros de pesquisa, investidores e organismos internacionais na construção de soluções para os grandes desafios das Américas.
-            </ERich>
-          </p>
           <p style={{ fontFamily: 'Inter', fontSize: 15.5, lineHeight: '27px', color: '#797979' }} data-animate>
-            <ERich k="expos.intro.p2" l="EXPOs — abertura, parágrafo 2" baseW={720}>
+            <ERich k="expos.intro.p2" l="EXPOs — abertura, parágrafo 2" baseW={620}>
               Criado em 2017, apenas dois anos após a adoção da Agenda 2030 para o Desenvolvimento Sustentável pela Organização das Nações Unidas (ONU), o Fórum iniciou, de forma pioneira, um movimento para integrar inovação, cidades inteligentes, empreendedorismo e os Objetivos de Desenvolvimento Sustentável (ODS) em um ecossistema privado dedicado à inovação, à transformação governamental e ao desenvolvimento de impacto.
             </ERich>
           </p>
           <p style={{ fontFamily: 'Inter', fontSize: 15.5, lineHeight: '27px', color: '#797979' }} data-animate>
-            <ERich k="expos.intro.p3" l="EXPOs — abertura, parágrafo 3" baseW={720}>
+            <ERich k="expos.intro.p3" l="EXPOs — abertura, parágrafo 3" baseW={620}>
               Sua atuação acontece por meio das EXPOs, plataformas territoriais realizadas em diferentes cidades das Américas, que aproximam ecossistemas estratégicos e promovem conexões entre conhecimento, inovação, investimentos, empreendedorismo e cooperação internacional.
             </ERich>
           </p>
           <p style={{ fontFamily: 'Inter', fontSize: 15.5, lineHeight: '27px', color: '#797979' }} data-animate>
-            <ERich k="expos.intro.p4" l="EXPOs — abertura, parágrafo 4" baseW={720}>
+            <ERich k="expos.intro.p4" l="EXPOs — abertura, parágrafo 4" baseW={620}>
               Juntas, EXPO BH®, EXPO BOSTON® e EXPO NYC® constituem o Fórum Pan-Americano da Inovação, formando a primeira plataforma pan-americana de inovação de impacto construída para conectar as Américas.
             </ERich>
           </p>
           <p style={{ fontFamily: 'Inter', fontSize: 15.5, lineHeight: '27px', color: '#797979' }} data-animate>
-            <ERich k="expos.intro.p5" l="EXPOs — abertura, parágrafo 5" baseW={720}>
+            <ERich k="expos.intro.p5" l="EXPOs — abertura, parágrafo 5" baseW={620}>
               Com a fundação do HUB PAN, o Fórum inicia uma nova etapa de sua trajetória. O HUB PAN passa a exercer sua coordenação estratégica, articulação internacional e expansão institucional, fortalecendo sua presença nas Américas e ampliando sua atuação para novos ecossistemas globais.
             </ERich>
           </p>
           <p style={{ fontFamily: 'Inter', fontSize: 15.5, lineHeight: '27px', color: '#797979' }} data-animate>
-            <ERich k="expos.intro.p6" l="EXPOs — abertura, parágrafo 6" baseW={720}>
+            <ERich k="expos.intro.p6" l="EXPOs — abertura, parágrafo 6" baseW={620}>
               Essa evolução culmina na criação do Fórum Mundial de Inteligência Artificial (WAIF), iniciativa que amplia o alcance internacional da plataforma e inaugura uma nova agenda global dedicada ao desenvolvimento dos Governos Inteligentes.
             </ERich>
           </p>
+        </div>
+      </div>
+
+    </section>
+  );
+}
+
+/** As três EXPOs em seção PRÓPRIA, com fundo azul claro. Antes eram só três
+ * cards no rodapé da abertura e passavam despercebidos; separar em faixa de
+ * cor own destaca os cards brancos por contraste e dá a eles o peso de
+ * "entrada" para as três seções detalhadas que vêm logo abaixo. */
+function SecMarcas() {
+  const ref = useReveal<HTMLElement>();
+  const [bg, bgProps] = useEditColor('expos.marcas.bg', '#2d4ebf', 'As três EXPOs — fundo da seção');
+  return (
+    <section ref={ref} id="expos-marcas" className="py-20 lg:py-24 gutter" {...bgProps} style={{ background: bg }}>
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
+        <div>
+          {/* Rótulo e título invertem pra claro: o fundo agora é o azul do
+              botão do hero (#2d4ebf), e o navy original sumiria nele. */}
+          <p className="eyebrow mb-4" style={{ color: 'rgba(255,255,255,0.62)' }} data-animate>
+            <ET k="expos.marcas.eyebrow" v="TRÊS MARCAS, UMA MESMA TRAJETÓRIA" l="EXPOs — selo da seção das três marcas" />
+          </p>
+          <h2 style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(28px,3vw,40px)', letterSpacing: '-0.6px', lineHeight: 1.05, color: '#ffffff' }} data-animate>
+            <ERich k="expos.marcas.titulo" l="EXPOs — título da seção das três marcas">De Belo Horizonte a Nova York.</ERich>
+          </h2>
         </div>
       </div>
 
@@ -632,25 +697,25 @@ function SecForum() {
       {/* Texto à esquerda, fotografia à direita — espelho da seção anterior
           (que tem a foto à esquerda), pra a página alternar o ritmo em vez de
           repetir a mesma composição duas vezes seguidas. */}
-      <div className="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10 lg:gap-16 items-start">
+      <div className="grid lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.85fr)] gap-10 lg:gap-12 items-start">
       <div className="space-y-5">
         <p style={{ fontFamily: 'Inter', fontSize: 15.5, lineHeight: '27px', color: '#797979' }} data-animate>
-          <ERich k="expos.forum.p1" l="EXPOs — Fórum, parágrafo 1" baseW={520}>
+          <ERich k="expos.forum.p1" l="EXPOs — Fórum, parágrafo 1" baseW={680}>
             Fundado em 2017, o Fórum Pan-Americano da Inovação nasceu da compreensão de que os grandes desafios do continente exigem soluções construídas por meio da cooperação entre governos, universidades, empresas, centros de pesquisa e organismos internacionais.
           </ERich>
         </p>
         <p style={{ fontFamily: 'Inter', fontSize: 15.5, lineHeight: '27px', color: '#797979' }} data-animate>
-          <ERich k="expos.forum.p2" l="EXPOs — Fórum, parágrafo 2" baseW={520}>
+          <ERich k="expos.forum.p2" l="EXPOs — Fórum, parágrafo 2" baseW={680}>
             Muito antes de a inovação se consolidar como prioridade nas agendas públicas, a plataforma iniciou um movimento pioneiro de aproximação entre inovação, cidades inteligentes, empreendedorismo e os Objetivos de Desenvolvimento Sustentável (ODS), contribuindo para fortalecer uma nova cultura de colaboração entre diferentes setores da sociedade.
           </ERich>
         </p>
         <p style={{ fontFamily: 'Inter', fontSize: 15.5, lineHeight: '27px', color: '#797979' }} data-animate>
-          <ERich k="expos.forum.p3" l="EXPOs — Fórum, parágrafo 3" baseW={520}>
+          <ERich k="expos.forum.p3" l="EXPOs — Fórum, parágrafo 3" baseW={680}>
             Ao longo dessa trajetória, consolidou uma ampla rede de relacionamento institucional e expandiu sua atuação para os Estados Unidos, aproximando o ecossistema brasileiro de alguns dos mais relevantes ambientes globais de ciência, tecnologia, educação e empreendedorismo.
           </ERich>
         </p>
         <p style={{ fontFamily: 'Inter', fontSize: 15.5, lineHeight: '27px', color: '#797979' }} data-animate>
-          <ERich k="expos.forum.p4" l="EXPOs — Fórum, parágrafo 4" baseW={520}>
+          <ERich k="expos.forum.p4" l="EXPOs — Fórum, parágrafo 4" baseW={680}>
             Hoje, o Fórum Pan-Americano da Inovação representa a base institucional sobre a qual se desenvolvem as iniciativas internacionais do ecossistema HUB PAN, conectando uma história construída nas Américas a uma nova agenda global voltada à inovação, à cooperação internacional e ao desenvolvimento dos Governos Inteligentes.
           </ERich>
         </p>
@@ -832,6 +897,7 @@ export default function Expos() {
       />
 
       <SecIntro />
+      <SecMarcas />
       <SecForum />
       {EXPOS.map((e) => <ExpoSection key={e.id} expo={e} />)}
       <SecEvolucao />

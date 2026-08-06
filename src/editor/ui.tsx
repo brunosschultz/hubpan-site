@@ -90,6 +90,7 @@ const PAGE_SECTIONS: Record<string, { id: string; label: string }[]> = {
   '/expos': [
     { id: 'expos-hero', label: 'Hero' },
     { id: 'expos-intro', label: 'As EXPOs (abertura)' },
+    { id: 'expos-marcas', label: 'As três EXPOs (cards)' },
     { id: 'expos-forum', label: 'Fórum Pan-Americano da Inovação' },
     { id: 'expos-bh', label: 'EXPO BH®' },
     { id: 'expos-boston', label: 'EXPO BOSTON®' },
