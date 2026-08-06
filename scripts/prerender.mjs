@@ -33,7 +33,7 @@ const ROUTES = [
   '/insights', '/contato', '/glossario', '/imprensa', '/casos-de-uso',
 ];
 
-const SITE_URL = 'https://hubpan-site.vercel.app';
+const SITE_URL = 'https://hubpan.org';
 
 function writeSitemap() {
   const today = new Date().toISOString().slice(0, 10);
