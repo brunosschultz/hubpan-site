@@ -1,5 +1,5 @@
 import { ScrollSmoother } from 'gsap/ScrollSmoother';
-import { MapPin, Play, Flag, Check, Images, Building2 } from 'lucide-react';
+import { MapPin, Play, Flag, Check, Building2 } from 'lucide-react';
 import PageHero from '../../components/PageHero';
 import CTABanner from '../../components/CTABanner';
 import HubButton from '../../components/HubButton';
@@ -29,16 +29,18 @@ import { BgEditChip, EIcon, EImg, ERich, ET, useEditColor, useEditImage } from '
      documento novo não os traz, então foram removidos em vez de mantidos
      por conta própria.
 
-   GALERIA E VÍDEO: o documento diz literalmente "Em atualização" e "Em
-   produção" — é esse o estado exibido, sem fotos ou capas de exemplo. Ao
-   receber o material real, trocar o bloco vazio pela grade de fotos e ligar
-   o player.
+   GALERIA E VÍDEO: o documento diz "Em atualização" e "Em produção". A
+   grade de 6 fotos está montada com imagens PROVISÓRIAS (as legendas dizem
+   isso) e o card de vídeo mantém o selo "Em produção" — quando o material
+   real chegar, é só trocar os arquivos e ligar o player, sem mexer no
+   layout.
 
-   IMAGENS: todas reaproveitadas de `public/images/` (nenhuma inventada), só
-   como imagem de abertura de cada EXPO.
+   IMAGENS: todas reaproveitadas de `public/images/` (nenhuma inventada) —
+   abertura de cada EXPO, galeria e as fotos das seções de apresentação.
    ═══════════════════════════════════════════════════════════════════════ */
 
 type Marco = { id: string; titulo: string };
+type Foto = { id: string; img: string; legenda: string };
 
 interface Expo {
   id: string;
@@ -56,6 +58,10 @@ interface Expo {
   dado1: { rotulo: string; valor: string };
   dado2: { rotulo: string; valor: string };
   marcos: Marco[];
+  /** 6 fotografias da galeria. Todas provisórias — o cliente informou que a
+   * galeria está "em atualização"; por isso o selo de estado continua na
+   * seção, mesmo com a grade já montada. */
+  fotos: Foto[];
   /** Imagem de abertura da seção. */
   destaque: string;
   bg: string;
@@ -82,6 +88,14 @@ const EXPOS: Expo[] = [
       { id: 'm4', titulo: 'Fortalecimento do ecossistema govtech brasileiro.' },
       { id: 'm5', titulo: 'Origem da internacionalização do ecossistema.' },
     ],
+    fotos: [
+      { id: 'f1', img: 'insights-educacao-inclusiva', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+      { id: 'f2', img: 'inst-sao-paulo', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+      { id: 'f3', img: 'forum-onu-flags', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+      { id: 'f4', img: 'prointer-hero-cambridge', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+      { id: 'f5', img: 'inst-cambridge-harvard', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+      { id: 'f6', img: 'inst-nyc-onu', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+    ],
     destaque: 'inst-sao-paulo',
     bg: '#ffffff',
     accent: '#2d4ebf',
@@ -107,6 +121,14 @@ const EXPOS: Expo[] = [
       { id: 'm4', titulo: 'Lançamento internacional do Fórum Mundial de Inteligência Artificial.' },
       { id: 'm5', titulo: 'Construção da agenda Cambridge 2027.' },
     ],
+    fotos: [
+      { id: 'f1', img: 'inst-boston-mit', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+      { id: 'f2', img: 'prointer-harvard-t', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+      { id: 'f3', img: 'inst-cambridge-harvard', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+      { id: 'f4', img: 'prointer-hero-cambridge', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+      { id: 'f5', img: 'forum-hero-mit', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+      { id: 'f6', img: 'insights-hero-globo', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+    ],
     destaque: 'forum-hero-mit',
     bg: '#f5f5f5',
     accent: '#2d4ebf',
@@ -129,6 +151,14 @@ const EXPOS: Expo[] = [
       { id: 'm3', titulo: 'Fortalecimento da cooperação internacional.' },
       { id: 'm4', titulo: 'Construção da agenda ONU.' },
       { id: 'm5', titulo: 'Preparação da EXPO NYC® ONU Edition.' },
+    ],
+    fotos: [
+      { id: 'f1', img: 'inst-nyc-onu', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+      { id: 'f2', img: 'forum-onu-flags', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+      { id: 'f3', img: 'inst-hero-onu', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+      { id: 'f4', img: 'insights-hero-globo', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+      { id: 'f5', img: 'inst-sao-paulo', legenda: 'Registro histórico — legenda a definir com o cliente.' },
+      { id: 'f6', img: 'insights-educacao-inclusiva', legenda: 'Registro histórico — legenda a definir com o cliente.' },
     ],
     destaque: 'inst-hero-onu',
     bg: '#ffffff',
@@ -164,6 +194,26 @@ const EVOLUCAO = [
  * como forma arredondada em vez de fotografia retangular. */
 const FOTO_RADIUS = 12;
 
+/** Altura da área de foto de cada card da galeria. É ela que define a altura
+ * da grade 3×2 — e o vídeo ao lado (`h-full`) estica pra essa mesma altura.
+ * Ancorar na FOTO (e não no vídeo) evita a circularidade de "a linha do grid
+ * mede o conteúdo que por sua vez mede a linha do grid", que já fez as fotos
+ * saírem quadradas. 150 × ~227px de largura = retângulo ~3:2. */
+const FOTO_H = 150;
+
+/** Progressão de cor dos cards de marco — pedido do Bruno pra dar dinamismo.
+ * Não é decoração aleatória: é a paleta da marca em ordem, do lime ao
+ * navy900, então a sequência de marcos "esquenta e escurece" conforme
+ * avança, reforçando a leitura de evolução no tempo. `escuro` diz se o
+ * texto por cima é branco (o contraste muda no meio da sequência). */
+const MARCO_CORES = [
+  { bg: '#d2e718', escuro: false },
+  { bg: '#00e4ff', escuro: false },
+  { bg: '#2d4ebf', escuro: true },
+  { bg: '#152852', escuro: true },
+  { bg: '#060919', escuro: true },
+];
+
 /** Selo neutro de estado — "Em atualização" / "Em produção", exatamente o
  * que o cliente escreveu no documento. Não é um placeholder nosso: é o
  * status oficial do material. */
@@ -178,10 +228,12 @@ function SeloEstado({ texto }: { texto: string }) {
   );
 }
 
-/** Bloco de registros de uma EXPO: galeria e vídeo, ambos ainda sem
- * material do cliente. Em vez de fotos de exemplo (que sugeriam registros
- * reais que não existem), cada um mostra o próprio estado declarado por
- * ele — "Em atualização" e "Em produção". */
+/** Bloco de registros de uma EXPO: grade de 6 fotografias à esquerda e o
+ * vídeo à direita — layout que já estava consolidado e que o Bruno pediu de
+ * volta. As fotos são provisórias (reaproveitadas do banco do site) e o
+ * vídeo ainda não existe: por isso o selo "Em produção" fica no card do
+ * vídeo, que é o único cujo conteúdo o cliente declarou como pendente de
+ * verdade — as legendas das fotos já avisam que serão definidas com ele. */
 function Registros({ expo }: { expo: Expo }) {
   /* Capa do vídeo via `useEditImage` (fundo CSS) e NÃO `EImg`: aqui o
    * fallback é VAZIO — ainda não existe vídeo, então não existe frame de
@@ -195,36 +247,26 @@ function Registros({ expo }: { expo: Expo }) {
   return (
     <div>
       <p className="mb-7" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 11, letterSpacing: '2.2px', textTransform: 'uppercase', color: '#a7a4a4' }} data-animate>
-        <ET k={`expos.${expo.id}.registros.titulo`} v="Galeria e vídeo institucional" l={`EXPOs — título dos registros (${expo.marca})`} />
+        <ET k={`expos.${expo.id}.registros.titulo`} v="Fotografias, registros históricos e vídeos" l={`EXPOs — título dos registros (${expo.marca})`} />
       </p>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Galeria — em atualização */}
-        <div
-          className="flex flex-col items-center justify-center text-center px-8 py-14"
-          style={{ borderRadius: FOTO_RADIUS, border: '1px dashed #dcdcdc', background: '#fafafa' }}
-          data-animate
-        >
-          <span className="flex items-center justify-center rounded-full mb-5" style={{ width: 64, height: 64, background: 'rgba(45,78,191,0.08)' }}>
-            <EIcon k={`expos.${expo.id}.galeria.icone`} l={`EXPOs — ícone da galeria (${expo.marca})`} defaultSize={26}>
-              <Images size={26} strokeWidth={1.8} color="#2d4ebf" />
-            </EIcon>
-          </span>
-          <p className="mb-2" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 15, color: '#152852' }}>
-            <ET k={`expos.${expo.id}.galeria.titulo`} v="Galeria" l={`EXPOs — título da galeria (${expo.marca})`} />
-          </p>
-          <p className="mb-4" style={{ fontFamily: 'Inter', fontSize: 13.5, lineHeight: '22px', color: '#797979', maxWidth: 320 }}>
-            <ERich k={`expos.${expo.id}.galeria.desc`} l={`EXPOs — descrição da galeria (${expo.marca})`}>
-              Fotografias e registros históricos da {expo.marca}.
-            </ERich>
-          </p>
-          <SeloEstado texto="Em atualização" />
+      {/* Grade 3×2 de fotos à esquerda + vídeo à direita.
+         `items-stretch` (default do grid, aqui explícito) + `h-full` nas duas
+         colunas: a linha do grid tem a altura do vídeo (o item mais alto) e a
+         grade de fotos estica pra exatamente essa altura — sem sobra embaixo
+         de um lado só. */}
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-4 items-stretch">
+        {/* 1 → 2 → 3 colunas: em cada faixa a célula fica mais larga que os
+           150px de altura da foto, então a imagem lê sempre como retângulo
+           deitado (nunca quadrada). */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {expo.fotos.map((f) => <FotoCard key={f.id} expo={expo} f={f} />)}
         </div>
 
         {/* Vídeo institucional — em produção. Mantém a moldura de thumb (capa
            + botão de play) porque é assim que o bloco vai ficar quando o
            vídeo chegar; a "capa" é a cor da marca, não uma foto — uma foto
            aqui sugeriria um frame real de um vídeo que ainda não existe. */}
-        <div className="group flex flex-col overflow-hidden" style={{ borderRadius: FOTO_RADIUS, border: '1px solid #ebebeb', background: '#fff' }} data-animate>
+        <div className="group h-full flex flex-col overflow-hidden" style={{ borderRadius: FOTO_RADIUS, border: '1px solid #ebebeb', background: '#fff' }} data-animate>
           <div className="relative w-full flex-1 flex items-center justify-center" style={{ background: '#152852', minHeight: 200 }}>
             {poster && (
               <div
@@ -285,24 +327,64 @@ function ExpoDestaque({ expo }: { expo: Expo }) {
 /** Card de marco. Os marcos do documento são frases únicas, sem ano e sem
  * descrição — por isso o card não tem mais selo de data (inventar uma
  * seria criar fato que o cliente não deu). */
-function MarcoCard({ expo, m }: { expo: Expo; m: Marco }) {
+function MarcoCard({ expo, m, i }: { expo: Expo; m: Marco; i: number }) {
   const tilt = useTilt<HTMLDivElement>(3, 5);
+  const c = MARCO_CORES[i % MARCO_CORES.length];
+  const [bg, bgProps] = useEditColor(`expos.${expo.id}.marco.${m.id}.bg`, c.bg, `${expo.marca} — cor do marco ${i + 1}`);
+  const texto = c.escuro ? '#fff' : '#152852';
   return (
     <div
       ref={tilt}
-      className="flex items-start gap-4 rounded-[20px] p-6 bg-white transition-shadow duration-300 hover:shadow-[0_14px_34px_rgba(21,40,82,0.10)]"
-      style={{ border: '1px solid #ecedf0' }}
+      className="flex flex-col justify-between rounded-[20px] p-7 min-h-[190px] transition-shadow duration-300 hover:shadow-[0_18px_40px_rgba(21,40,82,0.22)]"
+      {...bgProps}
+      style={{ background: bg }}
       data-animate
     >
-      <span className="flex items-center justify-center rounded-full shrink-0" style={{ width: 34, height: 34, background: 'rgba(45,78,191,0.08)' }}>
-        <EIcon k={`expos.${expo.id}.marco.${m.id}.icone`} l={`EXPOs — ícone do marco "${m.titulo.slice(0, 30)}…" (${expo.marca})`} defaultSize={16}>
-          <Check size={16} strokeWidth={2.4} color="#2d4ebf" />
-        </EIcon>
-      </span>
-      <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 15.5, lineHeight: '25px', color: '#152852' }}>
-        <ERich k={`expos.${expo.id}.marco.${m.id}.titulo`} l={`EXPOs — marco "${m.titulo.slice(0, 30)}…" (${expo.marca})`}>{m.titulo}</ERich>
+      <div className="flex items-center justify-between mb-6">
+        <span
+          className="flex items-center justify-center rounded-full shrink-0"
+          style={{ width: 38, height: 38, background: c.escuro ? 'rgba(255,255,255,0.14)' : 'rgba(21,40,82,0.10)' }}
+        >
+          <EIcon k={`expos.${expo.id}.marco.${m.id}.icone`} l={`EXPOs — ícone do marco ${i + 1} (${expo.marca})`} defaultSize={17}>
+            <Check size={17} strokeWidth={2.6} color={texto} />
+          </EIcon>
+        </span>
+        {/* Número do marco — dá ordem de leitura à sequência de cores */}
+        <span style={{ fontFamily: 'Luxenta', fontWeight: 600, fontSize: 30, lineHeight: 1, color: texto, opacity: 0.28 }}>
+          {String(i + 1).padStart(2, '0')}
+        </span>
+      </div>
+      <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 16, lineHeight: '25px', color: texto }}>
+        <ERich k={`expos.${expo.id}.marco.${m.id}.titulo`} l={`EXPOs — marco ${i + 1} (${expo.marca})`}>{m.titulo}</ERich>
       </p>
     </div>
+  );
+}
+
+/** Uma fotografia da galeria: foto retangular no topo (altura fixa `FOTO_H`,
+ * sem margem interna) + legenda embaixo, com zoom suave no hover. */
+function FotoCard({ expo, f }: { expo: Expo; f: Foto }) {
+  return (
+    <figure
+      className="group flex flex-col h-full overflow-hidden bg-white transition-shadow duration-300 hover:shadow-[0_14px_34px_rgba(21,40,82,0.10)]"
+      style={{ borderRadius: FOTO_RADIUS, border: '1px solid #ecedf0' }}
+      data-animate
+    >
+      <div className="shrink-0 overflow-hidden" style={{ height: FOTO_H }}>
+        <EImg
+          k={`expos.${expo.id}.foto.${f.id}.img`} v={`/images/${f.img}.webp`}
+          l={`EXPOs — fotografia ${f.id} de ${expo.marca}`}
+          spec={{ w: 800, h: 560, shape: 'paisagem' }}
+          alt=""
+          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+        />
+      </div>
+      <figcaption className="p-4 shrink-0">
+        <p style={{ fontFamily: 'Inter', fontSize: 12.5, lineHeight: '19px', color: '#797979' }}>
+          <ERich k={`expos.${expo.id}.foto.${f.id}.legenda`} l={`EXPOs — legenda da fotografia ${f.id} de ${expo.marca}`}>{f.legenda}</ERich>
+        </p>
+      </figcaption>
+    </figure>
   );
 }
 
@@ -391,8 +473,8 @@ function ExpoSection({ expo }: { expo: Expo }) {
         <p className="mb-7" style={{ fontFamily: 'Inter', fontWeight: 600, fontSize: 11, letterSpacing: '2.2px', textTransform: 'uppercase', color: '#a7a4a4' }} data-animate>
           <ET k={`expos.${expo.id}.marcos.titulo`} v="Principais marcos" l={`EXPOs — título da lista de marcos (${expo.marca})`} />
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {expo.marcos.map((m) => <MarcoCard key={m.id} expo={expo} m={m} />)}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {expo.marcos.map((m, i) => <MarcoCard key={m.id} expo={expo} m={m} i={i} />)}
         </div>
       </div>
 
@@ -444,15 +526,46 @@ function SecIntro() {
   const [bg, bgProps] = useEditColor('expos.intro.bg', '#f5f5f5', 'Abertura — fundo da seção');
   return (
     <section ref={ref} id="expos-intro" className="py-24 lg:py-32 gutter" {...bgProps} style={{ background: bg }}>
-      <div className="grid lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] gap-10 lg:gap-20 mb-14">
-        <div>
-          <p className="eyebrow text-muted mb-6" data-animate>
-            <ET k="expos.intro.eyebrow" v="AS EXPOS" l="EXPOs — selo da seção de abertura" />
-          </p>
-          <h2 style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(32px,3.4vw,46px)', letterSpacing: '-0.5px', lineHeight: 1.04, color: '#152852' }} data-animate>
-            <ERich k="expos.intro.titulo" l="EXPOs — título da seção de abertura">Plataformas territoriais das Américas.</ERich>
-          </h2>
-        </div>
+      {/* Título em largura cheia, não espremido numa coluna estreita ao lado
+          de um bloco de texto muito maior — era o desequilíbrio que o Bruno
+          apontou. Agora o título abre a seção como manchete e o texto vem
+          embaixo, dividindo espaço com uma fotografia. */}
+      <div className="max-w-[900px] mb-12 lg:mb-16">
+        <p className="eyebrow text-muted mb-6" data-animate>
+          <ET k="expos.intro.eyebrow" v="AS EXPOS" l="EXPOs — selo da seção de abertura" />
+        </p>
+        <h2 style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(34px,4.4vw,58px)', letterSpacing: '-1px', lineHeight: 1.02, color: '#152852' }} data-animate>
+          <ERich k="expos.intro.titulo" l="EXPOs — título da seção de abertura">Plataformas territoriais das Américas.</ERich>
+        </h2>
+      </div>
+
+      <div className="grid lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-10 lg:gap-16 mb-14 items-start">
+        {/* Fotografia da abertura — `lg:sticky` deixa a imagem acompanhar a
+            leitura dos parágrafos ao lado em vez de sumir no primeiro scroll;
+            é o recurso que dá o ar editorial das referências que o Bruno
+            usa, sem depender de animação nenhuma. */}
+        <figure className="group relative overflow-hidden lg:sticky lg:top-28" style={{ borderRadius: FOTO_RADIUS }} data-animate>
+          <EImg
+            k="expos.intro.img" v="/images/forum-onu-flags.webp"
+            l="EXPOs — fotografia da seção de abertura"
+            spec={{ w: 1600, h: 1400, shape: 'retrato', note: 'Imagem de apoio da abertura. Provisória — trocar pelo registro real das EXPOs.' }}
+            alt=""
+            className="block w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+            style={{ height: 'clamp(320px, 42vw, 560px)' }}
+          />
+          {/* Legenda sobre a foto, com degradê próprio — evita um bloco de
+              texto extra embaixo e mantém a imagem "cheia". */}
+          <figcaption
+            className="absolute inset-x-0 bottom-0 p-6"
+            style={{ background: 'linear-gradient(to top, rgba(6,9,25,0.78), transparent)' }}
+          >
+            <p style={{ fontFamily: 'Inter', fontWeight: 500, fontSize: 12.5, lineHeight: '20px', color: 'rgba(255,255,255,0.92)' }}>
+              <ERich k="expos.intro.img.legenda" l="EXPOs — legenda da fotografia de abertura">
+                Cooperação internacional: a agenda que atravessa as três EXPOs.
+              </ERich>
+            </p>
+          </figcaption>
+        </figure>
 
         <div className="space-y-5">
           <p style={{ fontFamily: 'Inter', fontSize: 16.5, lineHeight: '28px', color: '#152852' }} data-animate>
@@ -516,7 +629,11 @@ function SecForum() {
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-x-16 gap-y-5 max-w-[1100px]">
+      {/* Texto à esquerda, fotografia à direita — espelho da seção anterior
+          (que tem a foto à esquerda), pra a página alternar o ritmo em vez de
+          repetir a mesma composição duas vezes seguidas. */}
+      <div className="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10 lg:gap-16 items-start">
+      <div className="space-y-5">
         <p style={{ fontFamily: 'Inter', fontSize: 15.5, lineHeight: '27px', color: '#797979' }} data-animate>
           <ERich k="expos.forum.p1" l="EXPOs — Fórum, parágrafo 1" baseW={520}>
             Fundado em 2017, o Fórum Pan-Americano da Inovação nasceu da compreensão de que os grandes desafios do continente exigem soluções construídas por meio da cooperação entre governos, universidades, empresas, centros de pesquisa e organismos internacionais.
@@ -537,6 +654,37 @@ function SecForum() {
             Hoje, o Fórum Pan-Americano da Inovação representa a base institucional sobre a qual se desenvolvem as iniciativas internacionais do ecossistema HUB PAN, conectando uma história construída nas Américas a uma nova agenda global voltada à inovação, à cooperação internacional e ao desenvolvimento dos Governos Inteligentes.
           </ERich>
         </p>
+      </div>
+
+        {/* Fotografia com um card sobreposto na base — a sobreposição é o que
+            tira o bloco do retângulo óbvio e dá o acabamento das referências
+            que o Bruno usa. `pb-14` na figura reserva o espaço que o card
+            invade, senão ele encostaria no conteúdo de baixo. */}
+        <figure className="relative pb-14 lg:pb-16" data-animate>
+          <div className="group overflow-hidden" style={{ borderRadius: FOTO_RADIUS }}>
+            <EImg
+              k="expos.forum.img" v="/images/inst-cambridge-harvard.webp"
+              l="EXPOs — fotografia do Fórum Pan-Americano"
+              spec={{ w: 1400, h: 1050, shape: 'paisagem', note: 'Imagem de apoio da seção institucional. Provisória — trocar por registro real.' }}
+              alt=""
+              className="block w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+              style={{ height: 'clamp(300px, 36vw, 480px)' }}
+            />
+          </div>
+          <figcaption
+            className="absolute left-6 right-10 bottom-0 rounded-[20px] p-6 lg:p-7"
+            style={{ background: '#152852', boxShadow: '0 22px 48px rgba(6,9,25,0.20)' }}
+          >
+            <p className="mb-2" style={{ fontFamily: 'Luxenta', fontWeight: 400, fontSize: 'clamp(22px,2vw,30px)', lineHeight: 1.05, color: '#d2e718' }}>
+              <ERich k="expos.forum.selo.titulo" l="EXPOs — título do selo sobre a foto">Desde 2017</ERich>
+            </p>
+            <p style={{ fontFamily: 'Inter', fontSize: 13.5, lineHeight: '22px', color: 'rgba(255,255,255,0.78)' }}>
+              <ERich k="expos.forum.selo.desc" l="EXPOs — texto do selo sobre a foto">
+                Uma rede institucional construída das Américas a Cambridge.
+              </ERich>
+            </p>
+          </figcaption>
+        </figure>
       </div>
     </section>
   );
@@ -656,6 +804,11 @@ export default function Expos() {
       <PageHero
         id="expos-hero"
         bgKey="expos.hero"
+        /* Fundo fotográfico em vez do navy chapado. Provisória (banco de
+           imagens do site) — trocável pelo painel a qualquer momento. O
+           PageHero aplica um degradê escuro por cima quando há imagem, então
+           o texto branco continua legível. */
+        bgImageDefault="/images/insights-hero-globo.webp"
         eyebrow={<ET k="expos.hero.eyebrow" v="EXPO BH® · EXPO BOSTON® · EXPO NYC®" l="EXPOs — rótulo do hero" />}
         title={<ERich k="expos.hero.titulo" l="EXPOs — título do hero">Uma plataforma.<br />Três cidades.<br />Um movimento continental.</ERich>}
         sub={<ERich k="expos.hero.sub" l="EXPOs — subtítulo do hero" baseW={660}>O Fórum Pan-Americano da Inovação conecta governos, universidades, empresas, centros de pesquisa, investidores e organismos internacionais na construção de soluções para os grandes desafios das Américas.</ERich>}
