@@ -47,7 +47,9 @@ const JORNADA = [
 
 const PUBLICOS = [
   {
-    id: 'professores', img: 's7-persona-2', num: 'Perfil 01', titulo: 'Professores da Rede Pública',
+    /* Foto própria, mesmo motivo do card ao lado: `s7-persona-2` é usada em
+       mais 3 lugares (Home "Para Quem", cards de Plataformas, Casos de Uso). */
+    id: 'professores', img: 'prointer-professora', num: 'Perfil 01', titulo: 'Professores da Rede Pública',
     desc: 'Docentes de escolas municipais e estaduais que se destacam em projetos de inovação pedagógica, inclusão, tecnologia ou impacto social. Seleção a partir do HUB PAN e Premier Niveau®.',
     bullets: ['Passagem aérea internacional inclusa', 'Hospedagem curada em Nova York e Boston', 'Acesso a Harvard Square, MIT e a ONU', 'Certificação internacional e reconhecimento público'],
   },
