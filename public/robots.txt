@@ -3,4 +3,4 @@ Allow: /
 Disallow: /editar
 Disallow: /preview
 
-Sitemap: https://hubpan-site.vercel.app/sitemap.xml
+Sitemap: https://hubpan.org/sitemap.xml

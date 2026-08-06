@@ -47,12 +47,16 @@ const JORNADA = [
 
 const PUBLICOS = [
   {
-    id: 'professores', img: 's7-persona-2', num: 'Perfil 01', titulo: 'Professores da Rede Pública',
+    /* Foto própria, mesmo motivo do card ao lado: `s7-persona-2` é usada em
+       mais 3 lugares (Home "Para Quem", cards de Plataformas, Casos de Uso). */
+    id: 'professores', img: 'prointer-professora', num: 'Perfil 01', titulo: 'Professores da Rede Pública',
     desc: 'Docentes de escolas municipais e estaduais que se destacam em projetos de inovação pedagógica, inclusão, tecnologia ou impacto social. Seleção a partir do HUB PAN e Premier Niveau®.',
     bullets: ['Passagem aérea internacional inclusa', 'Hospedagem curada em Nova York e Boston', 'Acesso a Harvard Square, MIT e a ONU', 'Certificação internacional e reconhecimento público'],
   },
   {
-    id: 'afroempreendedores', img: 's7-persona-4', num: 'Perfil 02', titulo: 'Afroempreendedores',
+    /* Foto própria (não a `s7-persona-4`, que é compartilhada com a Home —
+       "Para Quem" e os cards de Plataformas — e mudaria nos três lugares). */
+    id: 'afroempreendedores', img: 'prointer-afroempreendedor', num: 'Perfil 02', titulo: 'Afroempreendedores',
     desc: 'Empreendedores negros com negócios ou projetos em andamento que buscam acesso a ecossistemas internacionais de inovação, redes de negócios e relações institucionais. Em parceria com o MIPAD ONU.',
     bullets: ['Acesso à rede MIPAD ONU', 'Networking em Boston e Cambridge', 'Pitch em ambiente internacional', 'Mentoria com investidores internacionais'],
   },

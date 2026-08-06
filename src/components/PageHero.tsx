@@ -21,6 +21,10 @@ interface PageHeroProps {
   actions?: ReactNode;
   /** Conteúdo opcional à direita (número gigante, imagem, card) — some no mobile */
   aside?: ReactNode;
+  /** Imagem de fundo PADRÃO da página (opcional). Sem isso o hero nasce só
+   * com a cor sólida e depende do Bruno subir uma pelo painel. Continua
+   * 100% editável: é só o fallback de `${bgKey}.bgImage`. */
+  bgImageDefault?: string;
 }
 
 /**
@@ -34,13 +38,13 @@ interface PageHeroProps {
  * precisar de UI extra pra "remover imagem". A malha quadriculada que
  * existia antes foi removida (pedido do Bruno — não fazia sentido existir).
  */
-export default function PageHero({ id, bgKey, eyebrow, title, sub, actions, aside }: PageHeroProps) {
+export default function PageHero({ id, bgKey, eyebrow, title, sub, actions, aside, bgImageDefault = '' }: PageHeroProps) {
   const ref = useReveal<HTMLElement>();
   const titleRef = useSplitTitle<HTMLHeadingElement>();
   const [bg, bgProps] = useEditColor(`${bgKey}.bg`, '#060919', 'Hero — fundo');
   const { editingDevice } = useEditorStore();
   const heroBgSpec = heroBgSpecForDevice(HERO_BG_SPEC, editingDevice);
-  const [bgImage] = useEditImage(`${bgKey}.bgImage`, '', 'Hero — imagem de fundo (opcional)', heroBgSpec);
+  const [bgImage] = useEditImage(`${bgKey}.bgImage`, bgImageDefault, 'Hero — imagem de fundo (opcional)', heroBgSpec);
 
   return (
     <section
@@ -58,7 +62,19 @@ export default function PageHero({ id, bgKey, eyebrow, title, sub, actions, asid
        * imagem, evita os dois `onClick` (cor e imagem) disputando o mesmo
        * elemento. Sempre visível em modo edição, não só quando já tem
        * imagem — é como o Bruno adiciona a primeira imagem. */}
-      <BgEditChip k={`${bgKey}.bgImage`} v="" l="Hero — imagem de fundo (opcional)" spec={heroBgSpec} style={{ bottom: 24, right: 24 }} />
+      <BgEditChip k={`${bgKey}.bgImage`} v={bgImageDefault} l="Hero — imagem de fundo (opcional)" spec={heroBgSpec} style={{ bottom: 24, right: 24 }} />
+
+      {/* Escurecimento — só existe quando há imagem. O texto do hero é branco;
+          sobre foto clara (céu, fachada) ele some sem essa camada. Mesmo
+          degradê do Hero80: mais denso à esquerda, onde o texto vive, e
+          aberto à direita pra a foto respirar. */}
+      {bgImage && (
+        <>
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(90deg, rgba(6,9,25,0.94) 0%, rgba(6,9,25,0.78) 45%, rgba(6,9,25,0.42) 100%)' }} />
+          <div className="absolute inset-x-0 bottom-0 h-40 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(6,9,25,0.9), transparent)' }} />
+        </>
+      )}
+
       <div className="relative gutter pt-[180px] lg:pt-[240px] pb-16 lg:pb-20">
         <div className="flex flex-col lg:flex-row lg:items-center gap-12">
           <div className="max-w-[820px]">

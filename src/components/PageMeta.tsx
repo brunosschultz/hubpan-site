@@ -13,10 +13,16 @@ import { seoKey } from '../admin/seo';
  * `content_overrides` (chaves `seo.<slug>.*`), ele vence. `slug` precisa
  * bater com o mesmo usado em `src/editor/pageRoutes.ts`.
  *
- * Trocar SITE_URL pelo domínio definitivo do cliente assim que for conectado
- * na Vercel (ver pendência em CLAUDE.md).
+ * SITE_URL é o endereço OFICIAL do site (canonical, og:image absoluta e
+ * sitemap) — desde 06/08/2026 é o domínio do cliente, `hubpan.org`, sem
+ * `www` (o www redireciona pra cá na Vercel). O endereço da Vercel
+ * (`hubpan-site.vercel.app`) continua respondendo, mas não é mais o
+ * oficial: se ele voltasse a ser o canonical, o Google indexaria os dois
+ * como sites diferentes e dividiria a autoridade entre eles.
+ * O MESMO valor está duplicado em `scripts/prerender.mjs` (gerador do
+ * sitemap) e em `public/robots.txt` — trocar nos três juntos.
  */
-export const SITE_URL = 'https://hubpan-site.vercel.app';
+export const SITE_URL = 'https://hubpan.org';
 const DEFAULT_IMAGE = `${SITE_URL}/images/s1-hero-bg.webp`;
 
 interface PageMetaProps {

@@ -107,8 +107,8 @@ function AppShell() {
               <PageMeta
                 slug="expos"
                 path="/expos"
-                title="EXPOs — EXPO BH, EXPO NYC e EXPO BOSTON | HUB PAN"
-                description="A história das EXPOs do Fórum Pan-Americano da Inovação: da fundação em Belo Horizonte, em 2017, à sede da ONU em Nova York e a Boston, até o HUB PAN."
+                title="EXPOs — EXPO BH®, EXPO BOSTON® e EXPO NYC® | HUB PAN"
+                description="As EXPOs do Fórum Pan-Americano da Inovação: plataformas territoriais em Belo Horizonte, Cambridge e Nova York que conectam os ecossistemas das Américas."
               />
               <Expos />
             </>} />
