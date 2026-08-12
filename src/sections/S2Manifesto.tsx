@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useReveal } from '../components/useReveal';
-import HubButton, { WHATSAPP_URL } from '../components/HubButton';
+import HubButton, { VIDEO_INSTITUCIONAL_URL } from '../components/HubButton';
+import VideoModal from '../components/VideoModal';
 import { Icon1, Icon2, Icon3, Icon4 } from '../components/ManifestoIcons';
 import { EIcon, EImg, ERich, ET, OffsetDragHandle, OrderEditChip, ScaleDragHandle, useEditColors, useEditOffset, useEditOrder, useEditScale } from '../editor/fields';
 
@@ -43,6 +45,7 @@ export default function S2Manifesto() {
   const { inverted } = useEditOrder('s2.layout.order', 'Manifesto — ordem imagem/conteúdo');
   const { dx, dy } = useEditOffset('s2.foto', 'Manifesto — posição da foto');
   const { scale } = useEditScale('s2.foto', 'Manifesto — tamanho da foto');
+  const [videoAberto, setVideoAberto] = useState(false);
 
   return (
     <section
@@ -150,7 +153,11 @@ export default function S2Manifesto() {
             </p>
           </div>
           <div className="flex flex-wrap gap-4" data-animate>
-            <HubButton size="lg" variant="blue" circleColor="#d2e718" icon={<span style={{ color: '#152852', fontSize: 12 }}>▶</span>} styleKey="s2.btn1" styleLabel="Manifesto — botão vídeo" as="a" href={WHATSAPP_URL}>
+            {/* Abre o vídeo num modal, dentro do próprio site — antes esse
+                botão caía no WhatsApp, que era o fallback usado enquanto não
+                havia vídeo nenhum. Continua com `styleKey`, então o Bruno
+                pode trocar o destino pelo painel se um dia quiser. */}
+            <HubButton size="lg" variant="blue" circleColor="#d2e718" icon={<span style={{ color: '#152852', fontSize: 12 }}>▶</span>} styleKey="s2.btn1" styleLabel="Manifesto — botão vídeo" onClick={() => setVideoAberto(true)}>
               <ET k="s2.btn1" v="Assistir Vídeo" l="Manifesto — botão vídeo" />
             </HubButton>
             <HubButton size="lg" variant="navy" circleColor="rgba(0,0,0,0.1)" arrowColor="#d2e718" iconKey="s2.btn2.icone" iconLabel="Manifesto — botão manifesto, ícone" styleKey="s2.btn2" styleLabel="Manifesto — botão manifesto" to="/o-hub-pan#inst-manifesto">
@@ -159,6 +166,13 @@ export default function S2Manifesto() {
           </div>
         </div>
       </div>
+
+      <VideoModal
+        aberto={videoAberto}
+        onFechar={() => setVideoAberto(false)}
+        url={VIDEO_INSTITUCIONAL_URL}
+        titulo="Vídeo institucional do HUB PAN"
+      />
     </section>
   );
 }

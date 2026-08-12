@@ -12,6 +12,15 @@ type Variant = 'blue' | 'lime' | 'navy' | 'cyan' | 'outline-light' | 'outline-da
  * Pode mudar mais pra frente; ele avisa quando isso acontecer. */
 export const WHATSAPP_URL = 'https://api.whatsapp.com/send/?phone=%2B5511914018533&text=Ol%C3%A1%21+Gostaria+de+receber+mais+informa%C3%A7%C3%B5es+sobre+o+HUB+PAN.&type=phone_number&app_absent=0';
 
+/** Vídeo institucional do HUB PAN no YouTube — "HUB PAN | Onde o Futuro se
+ * Conecta", canal @hubpan (link enviado pelo cliente em 06/08/2026).
+ * Centralizado aqui, como o WhatsApp: se o vídeo for trocado, muda num
+ * lugar só e vale pra todos os botões que apontam pra ele.
+ * ATENÇÃO: é o vídeo institucional do HUB PAN como um todo — NÃO é o vídeo
+ * de uma EXPO específica. Os cards de vídeo da página EXPOs seguem
+ * aguardando os vídeos próprios de cada edição. */
+export const VIDEO_INSTITUCIONAL_URL = 'https://www.youtube.com/watch?v=nepTzvtGtSo';
+
 interface HubButtonProps {
   children: ReactNode;
   size?: Size;
